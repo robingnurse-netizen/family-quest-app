@@ -16,6 +16,7 @@ import {
 } from "@/lib/calendar/dates";
 import { expandOccurrences, type CalendarOccurrence } from "@/lib/calendar/recurrence";
 import { useCalendarEvents } from "@/lib/hooks/use-calendar-events";
+import { ChevronLeft, ChevronRight } from "@/components/ui/icons";
 import { EventDialog, type DialogState } from "./event-dialog";
 import { calendarThemes, type CalendarVariant } from "./theme";
 
@@ -135,7 +136,7 @@ export function MonthCalendar({
             className={theme.navButton}
             aria-label="Previous month"
           >
-            ‹
+            <ChevronLeft />
           </button>
           <button
             type="button"
@@ -150,7 +151,7 @@ export function MonthCalendar({
             className={theme.navButton}
             aria-label="Next month"
           >
-            ›
+            <ChevronRight />
           </button>
         </nav>
       </header>

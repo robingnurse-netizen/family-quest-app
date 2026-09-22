@@ -126,11 +126,20 @@ export function addMonths(monthKey: string, months: number) {
  * trailing days of the previous month and leading days of the next.
  */
 export function monthGrid(monthKey: string) {
-  const first = `${monthKey}-01`;
-  const { year, month } = parseDayKey(first);
-  const weekday = new Date(Date.UTC(year, month - 1, 1)).getUTCDay(); // 0 = Sun
-  const start = addDays(first, -((weekday + 6) % 7));
+  const start = weekStartOf(`${monthKey}-01`);
   return Array.from({ length: 42 }, (_, i) => addDays(start, i));
+}
+
+/** Monday of the week containing `dayKey`. */
+export function weekStartOf(dayKey: string) {
+  const { year, month, day } = parseDayKey(dayKey);
+  const weekday = new Date(Date.UTC(year, month - 1, day)).getUTCDay(); // 0 = Sun
+  return addDays(dayKey, -((weekday + 6) % 7));
+}
+
+/** The 7 day keys (Mon–Sun) of the week starting on `weekStart`. */
+export function weekDays(weekStart: string) {
+  return Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 }
 
 /** UTC bounds [start, end) covering the whole visible grid for a month. */
@@ -206,4 +215,23 @@ export function formatEventWhen(
   return first === last
     ? `${formatDayLabel(first)} · ${start}–${end}`
     : `${formatDayLabel(first)} ${start} – ${formatDayLabel(last)} ${end}`;
+}
+
+/** "22–28 Sep 2026" or "29 Sep – 5 Oct 2026" for the week starting `weekStart`. */
+export function formatWeekLabel(weekStart: string) {
+  const end = addDays(weekStart, 6);
+  const a = parseDayKey(weekStart);
+  const b = parseDayKey(end);
+  if (a.month === b.month) return `${a.day}–${b.day} ${MONTH_SHORT[b.month - 1]} ${b.year}`;
+  const left =
+    a.year === b.year
+      ? `${a.day} ${MONTH_SHORT[a.month - 1]}`
+      : `${a.day} ${MONTH_SHORT[a.month - 1]} ${a.year}`;
+  return `${left} – ${b.day} ${MONTH_SHORT[b.month - 1]} ${b.year}`;
+}
+
+/** "Mon" for a day key. */
+export function formatWeekdayShort(dayKey: string) {
+  const { year, month, day } = parseDayKey(dayKey);
+  return WEEKDAY_SHORT[new Date(Date.UTC(year, month - 1, day)).getUTCDay()];
 }

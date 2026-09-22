@@ -15,7 +15,12 @@ PROJECT STATUS:
   read-only player view, Realtime on calendar_events, weekly recurrence
   stored as RRULE FREQ=WEEKLY;BYDAY=..;UNTIL=.. — edits/deletes act on the
   whole series; per-occurrence editing is a later improvement).
-- Later: kanban (weekly pools / task slots), RPG mechanics.
+- Flexible Backlog (weekly pools + task slots): COMPLETE. Parent pool
+  management at /parent/pools (live summary on /parent); player drag-and-drop
+  week board on /player (dnd-kit). DB triggers in migration
+  20260922000004_pool_integrity.sql cap slots at the pool's total_minutes,
+  keep slots inside the pool's Mon–Sun week, and set completed_at from status.
+- Later: RPG mechanics (bosses, applied_to_boss, pending_damage, sprites).
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at

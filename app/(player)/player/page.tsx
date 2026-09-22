@@ -3,19 +3,23 @@ import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
 import { loadCalendar } from "@/lib/calendar/queries";
 import { MonthCalendar } from "@/components/calendar/month-calendar";
+import { loadWeekBoard } from "@/lib/backlog/queries";
+import { WeekBoard } from "@/components/kanban/week-board";
+import { createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
 
 export default async function PlayerDashboard(props: PageProps<"/player">) {
   const profile = await requireRole("child");
   const supabase = await createClient();
-  const { month } = await props.searchParams;
+  const { month, week } = await props.searchParams;
 
-  const [{ data: stats }, calendar] = await Promise.all([
+  const [{ data: stats }, calendar, board] = await Promise.all([
     supabase
       .from("player_stats")
       .select("gold, xp, level, current_streak")
       .eq("child_id", profile.id)
       .maybeSingle(),
     loadCalendar(profile.family_id, month),
+    loadWeekBoard(profile, week),
   ]);
 
   const tiles = [
@@ -52,6 +56,18 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
         </section>
 
         <div className="mt-8">
+          <WeekBoard
+            familyId={board.familyId}
+            childId={profile.id}
+            initialWeek={board.week}
+            today={board.today}
+            initialPools={board.pools}
+            initialSlots={board.slots}
+            actions={{ createSlot, moveSlot, removeSlot, setSlotStatus }}
+          />
+        </div>
+
+        <div className="mt-8">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-amber-300">
             Quest log
           </h2>
@@ -68,7 +84,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
         </div>
 
         <p className="mt-8 rounded-2xl border border-dashed border-white/30 p-6 text-center text-indigo-200">
-          Your quest board, boss battles and companion are on their way.
+          Boss battles and your companion are on their way.
         </p>
       </div>
     </main>

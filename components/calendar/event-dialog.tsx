@@ -9,6 +9,7 @@ import {
   formatEventWhen,
   timeOf,
 } from "@/lib/calendar/dates";
+import { XIcon } from "@/components/ui/icons";
 import type { CalendarTheme } from "./theme";
 import type { CalendarActions } from "@/lib/calendar/types";
 import {
@@ -115,9 +116,9 @@ function DialogHeader({
         type="button"
         onClick={onClose}
         aria-label="Close"
-        className={`-mr-1 -mt-1 rounded-lg px-2 py-1 text-xl leading-none ${theme.muted} hover:opacity-80`}
+        className={`-mr-1 -mt-1 rounded-lg p-1.5 ${theme.muted} hover:opacity-80`}
       >
-        ×
+        <XIcon className="h-5 w-5" />
       </button>
     </div>
   );

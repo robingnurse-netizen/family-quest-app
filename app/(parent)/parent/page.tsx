@@ -2,18 +2,21 @@ import Link from "next/link";
 import { requireRole } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
+import { loadWeekBoard } from "@/lib/backlog/queries";
+import { PoolManager } from "@/components/kanban/pool-manager";
 
 export default async function ParentDashboard() {
   const profile = await requireRole("parent");
   const supabase = await createClient();
 
-  const [{ data: family }, { data: members }] = await Promise.all([
+  const [{ data: family }, { data: members }, board] = await Promise.all([
     supabase.from("families").select("*").eq("id", profile.family_id).single(),
     supabase
       .from("profiles")
       .select("id, display_name, role")
       .eq("family_id", profile.family_id)
       .order("created_at"),
+    loadWeekBoard(profile),
   ]);
 
   return (
@@ -72,8 +75,29 @@ export default async function ParentDashboard() {
         </span>
       </Link>
 
+      <section className="mt-8">
+        <div className="mb-3 flex items-baseline justify-between gap-2">
+          <h2 className="text-lg font-black text-slate-900">This week&apos;s pools</h2>
+          <Link
+            href="/parent/pools"
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+          >
+            Manage pools →
+          </Link>
+        </div>
+        {/* Read-only and live: completions on the player's board show up here. */}
+        <PoolManager
+          familyId={board.familyId}
+          initialWeek={board.week}
+          today={board.today}
+          initialPools={board.pools}
+          initialSlots={board.slots}
+          members={board.members}
+        />
+      </section>
+
       <p className="mt-8 rounded-2xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-        Weekly task pools and boss management arrive in later phases.
+        Boss management arrives in a later phase.
       </p>
     </main>
   );

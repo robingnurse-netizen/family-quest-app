@@ -36,7 +36,7 @@ export const calendarThemes: Record<CalendarVariant, CalendarTheme> = {
     shell: "rounded-2xl border border-slate-200 bg-white p-3 shadow-sm sm:p-5",
     title: "text-xl font-black text-slate-900",
     navButton:
-      "rounded-lg px-2.5 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-100",
+      "inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100",
     weekday: "text-slate-500",
     cell: "bg-white",
     cellOutside: "bg-slate-50 text-slate-400",
@@ -69,7 +69,7 @@ export const calendarThemes: Record<CalendarVariant, CalendarTheme> = {
     shell: "rounded-2xl border border-white/15 bg-white/5 p-3 sm:p-5",
     title: "text-xl font-black text-amber-300",
     navButton:
-      "rounded-lg px-2.5 py-1.5 text-sm font-semibold text-indigo-100 hover:bg-white/10",
+      "inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2.5 text-sm font-semibold text-indigo-100 hover:bg-white/10",
     weekday: "text-indigo-300",
     cell: "bg-indigo-950/60",
     cellOutside: "bg-indigo-950/20 text-indigo-400/60",
