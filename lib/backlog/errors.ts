@@ -1,5 +1,6 @@
-// Map database errors raised by the pool integrity triggers
-// (supabase/migrations/20260922000004_pool_integrity.sql) to friendly text.
+// Map database errors raised by the pool integrity and child-guard triggers
+// (supabase/migrations/20260922000004_pool_integrity.sql and
+// 20260922000005_child_slot_guard.sql) to friendly text.
 
 export function friendlyBacklogError(message: string | undefined, fallback: string) {
   if (!message) return fallback;
@@ -11,6 +12,9 @@ export function friendlyBacklogError(message: string | undefined, fallback: stri
   }
   if (message.startsWith("slot_outside_week")) {
     return "That day isn't in this pool's week.";
+  }
+  if (message.startsWith("slot_child_forbidden")) {
+    return "That change isn't allowed from the quest board.";
   }
   if (message.includes("weekly_pools_week_starts_monday")) {
     return "Weeks start on a Monday.";

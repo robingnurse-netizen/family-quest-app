@@ -85,7 +85,9 @@ export async function setSlotStatus(
     .in("status", ["scheduled", "completed"])
     .select()
     .maybeSingle();
-  if (error) return { ok: false, error: "Couldn't update that slot." };
+  if (error) {
+    return { ok: false, error: friendlyBacklogError(error.message, "Couldn't update that slot.") };
+  }
   if (!data) return { ok: false, error: "That slot can't be changed." };
   return { ok: true, data };
 }
