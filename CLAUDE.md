@@ -7,8 +7,15 @@ Stack: Next.js (App Router) + Tailwind, dnd-kit + Framer Motion, Supabase
 First: save this whole message as CLAUDE.md in the project root so you have
 persistent context in every future session.
 
-Then, for THIS session, only do Phase 1 — Auth & Data Foundation. Do not
-build calendar, kanban, or RPG UI yet.
+PROJECT STATUS:
+- Phase 1 — Auth & Data Foundation: COMPLETE, pushed as 947bcd8 on main
+  (scaffold, Tailwind, Supabase clients, schema + RLS migrations,
+  signup/login with profile creation, parent/player placeholder dashboards).
+- Phase 2 — Fixed Calendar: COMPLETE (month view, parent add/edit/delete,
+  read-only player view, Realtime on calendar_events, weekly recurrence
+  stored as RRULE FREQ=WEEKLY;BYDAY=..;UNTIL=.. — edits/deletes act on the
+  whole series; per-occurrence editing is a later improvement).
+- Later: kanban (weekly pools / task slots), RPG mechanics.
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at
@@ -49,7 +56,7 @@ FOLDER STRUCTURE:
 Chronosphinx, Abyssal Kraken, Shogun-Bot). Don't process these yet —
 just leave them in /assets for Phase 3.
 
-For Phase 1: scaffold the Next.js project with this folder structure,
+Original Phase 1 brief (done): scaffold the Next.js project with this folder structure,
 set up Tailwind, connect a Supabase client (I'll provide my project URL/
 anon key when you ask), write the schema above as Supabase migrations
 with RLS policies, and build a basic login/signup flow that creates a

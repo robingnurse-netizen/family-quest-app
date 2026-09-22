@@ -1,0 +1,260 @@
+"use client";
+
+import { useCallback, useMemo, useState } from "react";
+import type { CalendarEvent } from "@/lib/supabase/types";
+import type { CalendarActions, CalendarMember } from "@/lib/calendar/types";
+import {
+  addDays,
+  addMonths,
+  eventDaySpan,
+  formatDayLabel,
+  formatMonthLabel,
+  monthGrid,
+  monthKeyOf,
+  parseDayKey,
+  timeOf,
+} from "@/lib/calendar/dates";
+import { expandOccurrences, type CalendarOccurrence } from "@/lib/calendar/recurrence";
+import { useCalendarEvents } from "@/lib/hooks/use-calendar-events";
+import { EventDialog, type DialogState } from "./event-dialog";
+import { calendarThemes, type CalendarVariant } from "./theme";
+
+const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const MAX_CHIPS = 3;
+
+type Props = {
+  familyId: string;
+  timeZone: string;
+  initialMonth: string;
+  today: string;
+  initialEvents: CalendarEvent[];
+  members: CalendarMember[];
+  variant: CalendarVariant;
+  /** Provide to make the calendar editable (parents). Omit for read-only. */
+  actions?: CalendarActions;
+};
+
+/**
+ * Month-view family calendar shared by Parent HQ (editable) and the player
+ * dashboard (read-only). Same data, same layout; `variant` picks the skin and
+ * `actions` switches the edit controls on.
+ */
+export function MonthCalendar({
+  familyId,
+  timeZone,
+  initialMonth,
+  today,
+  initialEvents,
+  members,
+  variant,
+  actions,
+}: Props) {
+  const theme = calendarThemes[variant];
+  const editable = Boolean(actions);
+
+  const [month, setMonth] = useState(initialMonth);
+  const [dialog, setDialog] = useState<DialogState | null>(null);
+  const { events, loading, upsertLocal, removeLocal } = useCalendarEvents({
+    familyId,
+    timeZone,
+    month,
+    initialEvents,
+  });
+
+  const grid = useMemo(() => monthGrid(month), [month]);
+
+  // Expand recurring series, then bucket each occurrence onto every day it
+  // covers within the visible grid.
+  const byDay = useMemo(() => {
+    const map = new Map<string, CalendarOccurrence[]>();
+    const gridFirst = grid[0];
+    const gridLast = grid[grid.length - 1];
+    for (const event of events) {
+      for (const occ of expandOccurrences(event, gridFirst, gridLast, timeZone, today)) {
+        const span = eventDaySpan(occ, timeZone);
+        let day = span.first < gridFirst ? gridFirst : span.first;
+        const last = span.last > gridLast ? gridLast : span.last;
+        while (day <= last) {
+          const list = map.get(day);
+          if (list) list.push(occ);
+          else map.set(day, [occ]);
+          day = addDays(day, 1);
+        }
+      }
+    }
+    for (const list of map.values()) {
+      list.sort(
+        (a, b) =>
+          Number(b.all_day) - Number(a.all_day) ||
+          Date.parse(a.start_time) - Date.parse(b.start_time) ||
+          a.title.localeCompare(b.title),
+      );
+    }
+    return map;
+  }, [events, grid, timeZone, today]);
+
+  const seriesById = useMemo(() => new Map(events.map((e) => [e.id, e])), [events]);
+
+  const eventsForDay = useCallback((day: string) => byDay.get(day) ?? [], [byDay]);
+
+  const memberNames = useMemo(
+    () => Object.fromEntries(members.map((m) => [m.id, m.display_name])),
+    [members],
+  );
+
+  function goTo(target: string) {
+    setMonth(target);
+    // Keep the month in the URL so a refresh (or PWA relaunch) stays put.
+    const url = new URL(window.location.href);
+    url.searchParams.set("month", target);
+    window.history.replaceState(null, "", url);
+  }
+
+  // Parents edit the underlying row (for a series, that's every repeat);
+  // the read-only view shows the specific occurrence that was tapped.
+  const openOccurrence = useCallback(
+    (occ: CalendarOccurrence) => {
+      const series = seriesById.get(occ.id);
+      if (editable && series) setDialog({ kind: "edit", event: series });
+      else setDialog({ kind: "view", event: occ });
+    },
+    [editable, seriesById],
+  );
+
+  return (
+    <section className={theme.shell} aria-label="Family calendar">
+      <header className="mb-3 flex items-center justify-between gap-2">
+        <h2 className={theme.title}>
+          {formatMonthLabel(month)}
+          {loading && <span className="sr-only"> (loading)</span>}
+        </h2>
+        <nav className="flex items-center gap-1" aria-label="Change month">
+          <button
+            type="button"
+            onClick={() => goTo(addMonths(month, -1))}
+            className={theme.navButton}
+            aria-label="Previous month"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            onClick={() => goTo(monthKeyOf(today))}
+            className={theme.navButton}
+          >
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={() => goTo(addMonths(month, 1))}
+            className={theme.navButton}
+            aria-label="Next month"
+          >
+            ›
+          </button>
+        </nav>
+      </header>
+
+      <div
+        className={`grid grid-cols-7 gap-px overflow-hidden rounded-xl transition-opacity ${loading ? "opacity-60" : ""}`}
+      >
+        {WEEKDAYS.map((d) => (
+          <div
+            key={d}
+            className={`pb-1 text-center text-[11px] font-semibold uppercase tracking-wide ${theme.weekday}`}
+          >
+            {d}
+          </div>
+        ))}
+
+        {grid.map((day) => {
+          const inMonth = monthKeyOf(day) === month;
+          const dayEvents = eventsForDay(day);
+          const shown = dayEvents.slice(0, MAX_CHIPS);
+          const hidden = dayEvents.length - shown.length;
+          const isToday = day === today;
+
+          return (
+            <div
+              key={day}
+              onClick={editable ? () => setDialog({ kind: "create", day }) : undefined}
+              className={`flex min-h-[4.75rem] min-w-0 flex-col gap-0.5 p-1 sm:min-h-24 sm:p-1.5 ${
+                inMonth ? theme.cell : theme.cellOutside
+              } ${editable ? `cursor-pointer ${theme.cellHover}` : ""}`}
+            >
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDialog(editable ? { kind: "create", day } : { kind: "day", day });
+                }}
+                aria-label={
+                  editable
+                    ? `Add event on ${formatDayLabel(day)}`
+                    : `${formatDayLabel(day)}: ${dayEvents.length} event${dayEvents.length === 1 ? "" : "s"}`
+                }
+                className={`flex h-6 w-6 shrink-0 items-center justify-center self-start rounded-full text-xs font-bold ${
+                  isToday ? theme.today : inMonth ? theme.dayNumber : ""
+                }`}
+              >
+                {parseDayKey(day).day}
+              </button>
+
+              {shown.map((event) => {
+                const startsToday = eventDaySpan(event, timeZone).first === day;
+                return (
+                  <button
+                    key={event.occurrenceKey}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openOccurrence(event);
+                    }}
+                    title={event.title}
+                    className={`w-full truncate rounded px-1 py-0.5 text-left text-[10px] font-semibold leading-tight sm:text-xs ${
+                      event.all_day ? theme.chipAllDay : theme.chip
+                    }`}
+                  >
+                    {!event.all_day && startsToday && (
+                      <span className={`mr-1 hidden sm:inline ${theme.chipTime}`}>
+                        {timeOf(event.start_time, timeZone)}
+                      </span>
+                    )}
+                    {event.title}
+                  </button>
+                );
+              })}
+
+              {hidden > 0 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDialog({ kind: "day", day });
+                  }}
+                  className={`text-left text-[10px] font-semibold sm:text-xs ${theme.more}`}
+                >
+                  +{hidden} more
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <EventDialog
+        state={dialog}
+        onClose={() => setDialog(null)}
+        onOpen={setDialog}
+        onOpenOccurrence={openOccurrence}
+        theme={theme}
+        timeZone={timeZone}
+        actions={actions}
+        memberNames={memberNames}
+        eventsForDay={eventsForDay}
+        onSaved={upsertLocal}
+        onDeleted={removeLocal}
+      />
+    </section>
+  );
+}

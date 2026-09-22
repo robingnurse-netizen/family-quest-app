@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
@@ -56,8 +57,23 @@ export default async function ParentDashboard() {
         </div>
       </section>
 
+      <Link
+        href="/parent/calendar"
+        className="mt-4 flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-300 hover:shadow"
+      >
+        <div>
+          <h2 className="font-bold text-slate-900">Family calendar</h2>
+          <p className="text-sm text-slate-600">
+            Add and edit events. {members?.find((m) => m.role === "child")?.display_name ?? "Your player"} sees them live.
+          </p>
+        </div>
+        <span aria-hidden className="text-2xl text-indigo-600">
+          →
+        </span>
+      </Link>
+
       <p className="mt-8 rounded-2xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-        Calendar, weekly task pools and boss management arrive in later phases.
+        Weekly task pools and boss management arrive in later phases.
       </p>
     </main>
   );

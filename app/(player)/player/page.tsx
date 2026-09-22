@@ -1,16 +1,22 @@
 import { requireRole } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
+import { loadCalendar } from "@/lib/calendar/queries";
+import { MonthCalendar } from "@/components/calendar/month-calendar";
 
-export default async function PlayerDashboard() {
+export default async function PlayerDashboard(props: PageProps<"/player">) {
   const profile = await requireRole("child");
   const supabase = await createClient();
+  const { month } = await props.searchParams;
 
-  const { data: stats } = await supabase
-    .from("player_stats")
-    .select("gold, xp, level, current_streak")
-    .eq("child_id", profile.id)
-    .maybeSingle();
+  const [{ data: stats }, calendar] = await Promise.all([
+    supabase
+      .from("player_stats")
+      .select("gold, xp, level, current_streak")
+      .eq("child_id", profile.id)
+      .maybeSingle(),
+    loadCalendar(profile.family_id, month),
+  ]);
 
   const tiles = [
     { label: "Level", value: stats?.level ?? 1 },
@@ -44,6 +50,22 @@ export default async function PlayerDashboard() {
             </div>
           ))}
         </section>
+
+        <div className="mt-8">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-amber-300">
+            Quest log
+          </h2>
+          {/* Read-only: no `actions`, so no edit controls. */}
+          <MonthCalendar
+            variant="player"
+            familyId={calendar.familyId}
+            timeZone={calendar.timeZone}
+            initialMonth={calendar.month}
+            today={calendar.today}
+            initialEvents={calendar.events}
+            members={calendar.members}
+          />
+        </div>
 
         <p className="mt-8 rounded-2xl border border-dashed border-white/30 p-6 text-center text-indigo-200">
           Your quest board, boss battles and companion are on their way.
