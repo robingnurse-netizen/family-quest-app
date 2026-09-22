@@ -10,6 +10,10 @@
 --   * INSERT: status must be 'scheduled' and applied_to_boss false.
 --   * UPDATE: applied_to_boss can't change; status may only move between
 --     'scheduled' and 'completed' (never to or from 'missed').
+--   * DELETE: only slots that are still 'scheduled' and not applied_to_boss
+--     (so missed / completed / already-counted slots can't be erased).
+--
+-- Safe to re-run: the function is replaced and the trigger recreated.
 --
 -- Unaffected: parents, the service role (no auth.uid()), and direct SQL.
 -- Error prefix for the app: slot_child_forbidden
@@ -23,10 +27,23 @@ as $$
 begin
   -- Only child accounts are restricted. The service role and SQL sessions
   -- have no auth.uid(), so this lookup finds nothing for them.
+  -- (A BEFORE DELETE trigger must return OLD — returning NULL/NEW would
+  -- silently cancel the delete.)
   if not exists (
     select 1 from public.profiles where id = auth.uid() and role = 'child'
   ) then
+    if tg_op = 'DELETE' then
+      return old;
+    end if;
     return new;
+  end if;
+
+  if tg_op = 'DELETE' then
+    if old.status <> 'scheduled' or old.applied_to_boss then
+      raise exception 'slot_child_forbidden: only scheduled slots can be removed'
+        using errcode = 'insufficient_privilege';
+    end if;
+    return old;
   end if;
 
   if tg_op = 'INSERT' then
@@ -57,8 +74,9 @@ begin
 end;
 $$;
 
+drop trigger if exists task_slots_guard_child_writes on public.task_slots;
 create trigger task_slots_guard_child_writes
-  before insert or update
+  before insert or update or delete
   on public.task_slots
   for each row execute function public.guard_child_task_slot_writes();
 

@@ -53,7 +53,10 @@ export async function moveSlot(slotId: string, day: string): Promise<ActionResul
   return { ok: true, data };
 }
 
-/** Remove a slot, returning its minutes to the pool. Completed slots stay. */
+/**
+ * Remove a slot, returning its minutes to the pool. Only open slots — the
+ * child-guard trigger blocks deleting completed, missed or counted ones.
+ */
 export async function removeSlot(slotId: string): Promise<ActionResult<string>> {
   await requireRole("child");
   const supabase = await createClient();
@@ -61,8 +64,11 @@ export async function removeSlot(slotId: string): Promise<ActionResult<string>> 
     .from("task_slots")
     .delete({ count: "exact" })
     .eq("id", slotId)
-    .eq("status", "scheduled");
-  if (error) return { ok: false, error: "Couldn't remove that slot." };
+    .eq("status", "scheduled")
+    .eq("applied_to_boss", false);
+  if (error) {
+    return { ok: false, error: friendlyBacklogError(error.message, "Couldn't remove that slot.") };
+  }
   if (!count) return { ok: false, error: "Only slots that aren't done yet can be removed." };
   return { ok: true, data: slotId };
 }
