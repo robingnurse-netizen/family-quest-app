@@ -10,13 +10,8 @@
 
 import { useSyncExternalStore } from "react";
 import type { Howl } from "howler";
-import {
-  SOUNDS,
-  createMuteStore,
-  createNoRepeatPicker,
-  createSoundGate,
-  type SoundName,
-} from "./sound-rules";
+import { createNoRepeatPicker } from "@/lib/random";
+import { SOUNDS, createMuteStore, createSoundGate, type SoundName } from "./sound-rules";
 
 /** A sound whose file is still loading this long after it was asked for is
  *  dropped — a late effect is worse than none. */

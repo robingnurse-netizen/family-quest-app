@@ -1,8 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Boss } from "@/lib/supabase/types";
 import type { OverlayMoment } from "@/lib/rpg/battle-events";
+import { createNoRepeatPicker } from "@/lib/random";
+import {
+  HIT_TIERS,
+  STRIKE_VARIANTS,
+  hitTier,
+  strikeAnimation,
+  strikeMotion,
+  type HitTier,
+} from "@/lib/rpg/strike";
 import { SPRITES } from "@/components/rpg/sprites/manifests";
 import { AnchoredSprite, needsMirror } from "@/components/rpg/sprites/anchored-sprite";
 import { bossAnimations } from "@/components/rpg/sprites/boss-animations";
@@ -29,6 +38,11 @@ import {
 // It only listens to the battle event stream (useBattleEvents) and emits its
 // beats back into it as "moment" events (impact, combo, ko, victory, coin) for
 // sound effects. Positions come from ./stage-layout, same as the scene.
+//
+// Each hit varies (lib/rpg/strike.ts): the hero's swing is one of a few
+// attack variants cut from his attack frames (never the same twice running),
+// and the impact's weight — hit-stop, shake, burst, debris, flash — scales in
+// tiers with the quest's minutes. Neither moves the show's beats.
 
 /**
  * Every duration in the show, in ms — tune here. A normal hit runs
@@ -39,7 +53,9 @@ import {
 export const OVERLAY_TIMING = {
   /** First hit only: the party dashes in from the left. */
   dash: 280,
-  /** Hit-stop: everything freezes on the frame of impact. */
+  /** Hit-stop: everything freezes on the frame of impact. The medium tier's
+   *  pause; each hit's own freeze comes from its tier (HIT_TIERS), but the
+   *  beats after impact (and their sounds) are timed from this one. */
   hitStop: 150,
   /** Damage number on screen after the hit-stop, before flying back. More
    *  hits during hold + fly merge into the combo. */
@@ -71,6 +87,9 @@ type Show = {
   struck: boolean;
   /** Hit-stop: sprites hold their frame of impact. */
   frozen: boolean;
+  /** The current hit's swing (index into STRIKE_VARIANTS) and weight. */
+  variant: number;
+  tier: HitTier;
   phase: Phase;
   defeated: boolean;
   /** Reuben's share of the gold, once it arrives. */
@@ -89,6 +108,8 @@ export function HitOverlay({ childId }: { childId: string }) {
   const reduced = usePrefersReducedMotion();
   const [show, setShow] = useState<Show | null>(null);
   const layerRef = useRef<HTMLDivElement>(null);
+  // The hero's swing: random, never the same one twice running.
+  const [pickVariant] = useState(() => createNoRepeatPicker(STRIKE_VARIANTS.length));
 
   // Latest bosses for the event listener (which is stable).
   const bosses = useRef({ shown: stage.shown, active });
@@ -110,6 +131,7 @@ export function HitOverlay({ childId }: { childId: string }) {
         const { shown, active: act } = bosses.current;
         const boss = [shown, act].find((b) => b?.id === event.bossId) ?? shown ?? act;
         if (!boss) return;
+        const strike = { variant: pickVariant(), tier: hitTier(event.amount) };
         // Same batch as the scene's caption update, so it's muted in time.
         setOverlayActive(true);
         setShow((s) => {
@@ -122,6 +144,7 @@ export function HitOverlay({ childId }: { childId: string }) {
               impactKey: 1,
               struck: false,
               frozen: false,
+              ...strike,
               phase: "hit",
               defeated: isRecent(r.defeated, boss.id),
               gold: r.gold && isRecent(r.gold, boss.id) ? r.gold.amount : null,
@@ -129,7 +152,14 @@ export function HitOverlay({ childId }: { childId: string }) {
             };
           }
           if (s.phase !== "hit" && s.phase !== "fly") return s; // K.O. already showing
-          return { ...s, hits: s.hits + 1, total: s.total + event.amount, impactKey: s.impactKey + 1, phase: "hit" };
+          return {
+            ...s,
+            ...strike,
+            hits: s.hits + 1,
+            total: s.total + event.amount,
+            impactKey: s.impactKey + 1,
+            phase: "hit",
+          };
         });
         return;
       }
@@ -181,6 +211,7 @@ export function HitOverlay({ childId }: { childId: string }) {
   const impactKey = show?.impactKey ?? 0;
   const hits = show?.hits ?? 0;
   const total = show?.total ?? 0;
+  const tier = show?.tier ?? "medium";
   useEffect(() => {
     if (!phase) return;
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -194,6 +225,8 @@ export function HitOverlay({ childId }: { childId: string }) {
       case "hit": {
         // Only the first hit dashes in; combo hits land straight away.
         const delay = impactKey === 1 && !reduced ? T.dash : 0;
+        // The freeze is the tier's; the beats after it keep T.hitStop.
+        const freeze = reduced ? 0 : HIT_TIERS[tier].hitStopMs;
         const hitStop = reduced ? 0 : T.hitStop;
         at(delay, () => {
           // Contact: freeze on the frame of impact (sound goes here too).
@@ -201,10 +234,10 @@ export function HitOverlay({ childId }: { childId: string }) {
           moment("impact", counts);
           if (counts.hits > 1) moment("combo", counts);
         });
-        at(delay + hitStop, () => {
+        at(delay + freeze, () => {
           // Unfreeze: the burst, number and shake play out.
           setShow((s) => s && { ...s, frozen: false });
-          shake(counts.hits > 1 ? 12 : 9);
+          shake(HIT_TIERS[tier].shake + (counts.hits > 1 ? 3 : 0));
         });
         at(delay + hitStop + T.koDelay, () => setShow((s) => (s?.defeated ? { ...s, phase: "ko" } : s)));
         at(delay + hitStop + T.hold, () => setShow((s) => s && { ...s, phase: s.defeated ? "ko" : "fly" }));
@@ -231,7 +264,7 @@ export function HitOverlay({ childId }: { childId: string }) {
         break;
     }
     return () => timers.forEach(clearTimeout);
-  }, [phase, impactKey, hits, total, reduced, moment, shake, setOverlayActive]);
+  }, [phase, impactKey, hits, total, tier, reduced, moment, shake, setOverlayActive]);
 
   // Preload what the overlay draws, so the first hit doesn't stutter.
   useEffect(() => {
@@ -313,6 +346,14 @@ export function HitOverlay({ childId }: { childId: string }) {
             className={`overlay-vignette absolute inset-0 ${show.phase === "fly" ? "overlay-vignette-out" : ""}`}
             style={show.phase === "fly" ? { animationDuration: `${T.fly}ms` } : undefined}
           />
+          {/* A brief white flash on contact, for medium and heavy hits. */}
+          {!reduced && show.struck && show.phase === "hit" && HIT_TIERS[show.tier].flash > 0 && (
+            <div
+              key={`flash-${show.impactKey}`}
+              className="impact-flash absolute inset-0 bg-white"
+              style={{ "--flash": HIT_TIERS[show.tier].flash } as React.CSSProperties}
+            />
+          )}
           <div ref={layerRef} className="relative w-[min(calc(100vw-1rem),768px)] [container-type:inline-size]">
             {reduced ? <ReducedCard show={show} /> : <Theatre show={show} />}
           </div>
@@ -336,9 +377,9 @@ function Theatre({ show }: { show: Show }) {
 
 /** Hero and Rogue dash in and strike; the boss flinches; impact effects. */
 function Strike({ show }: { show: Show }) {
-  const { boss, struck, frozen, impactKey, phase } = show;
-  const hero = SPRITES.hero.animations;
+  const { boss, struck, frozen, impactKey, phase, tier } = show;
   const rogue = SPRITES.rogue.animations;
+  const weight = HIT_TIERS[tier];
   const anims = bossAnimations(boss.sprite_key);
   const bossAnim = anims ? (struck ? anims.hurt : anims.idle) : null;
   const impact = impactPoint(boss);
@@ -363,13 +404,13 @@ function Strike({ show }: { show: Show }) {
             />
           </FeetSpot>
           <FeetSpot x={STRIKE_X.hero}>
-            <AnchoredSprite
+            <HeroStrike
               key={`hero-${impactKey}`}
-              animation={hero.attack}
-              height={arenaHeight(HEIGHT.hero * (hero.attack.height / hero.idle.height))}
-              mirror={needsMirror(hero.attack.facing, "right")}
+              variant={show.variant}
+              // Same lead as the timeline: the dash for a first hit, none for a combo hit.
+              leadMs={impactKey === 1 ? T.dash : 0}
+              hitStopMs={weight.hitStopMs}
               frozen={frozen}
-              alt=""
             />
           </FeetSpot>
         </div>
@@ -392,9 +433,9 @@ function Strike({ show }: { show: Show }) {
             key={impactKey}
             className="absolute z-20 h-0 w-0"
             // The burst etc. hold their first frame through the hit-stop.
-            style={{ left: impact.x, bottom: arenaHeight(impact.y), "--hitstop": `${T.hitStop}ms` } as React.CSSProperties}
+            style={{ left: impact.x, bottom: arenaHeight(impact.y), "--hitstop": `${weight.hitStopMs}ms` } as React.CSSProperties}
           >
-            <Impact />
+            <Impact tier={tier} />
             <div className="absolute bottom-[calc(var(--arena)*0.22)] left-0 w-max -translate-x-1/2 text-center">
               {show.hits > 1 && (
                 <p className="combo-pop font-display text-2xl font-semibold uppercase text-parchment text-shadow-pixel sm:text-3xl">
@@ -413,15 +454,62 @@ function Strike({ show }: { show: Show }) {
   );
 }
 
-/** Starburst, slash streak and debris, centred on the impact point. */
-function Impact() {
+/**
+ * The hero's swing for one hit: a variant cut from his attack frames, timed
+ * so its contact frame is on screen at impact, plus its body motion (a lunge
+ * or a leap) on the first hit. Stands on his manifest anchor like any sprite.
+ */
+function HeroStrike({
+  variant,
+  leadMs,
+  hitStopMs,
+  frozen,
+}: {
+  variant: number;
+  leadMs: number;
+  hitStopMs: number;
+  frozen: boolean;
+}) {
+  const hero = SPRITES.hero.animations;
+  const v = STRIKE_VARIANTS[variant];
+  const animation = useMemo(() => strikeAnimation(hero.attack, v, leadMs), [hero.attack, v, leadMs]);
+  const ref = useRef<HTMLDivElement>(null);
+  // Mount only (the component is keyed per hit): the motion lands on contact.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const motion = el && strikeMotion(v.motion, leadMs, hitStopMs, el.offsetHeight);
+    if (!el || !motion) return;
+    const run = el.animate(motion.keyframes, { duration: motion.duration, fill: "none" });
+    return () => run.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return (
+    // Same box as the feet spot, so the sprite stands exactly where it would.
+    <div ref={ref} className="absolute inset-0">
+      <AnchoredSprite
+        animation={animation}
+        height={arenaHeight(HEIGHT.hero * (animation.height / hero.idle.height))}
+        mirror={needsMirror(animation.facing, "right")}
+        frozen={frozen}
+        alt=""
+      />
+    </div>
+  );
+}
+
+/** Starburst, slash streak and debris, centred on the impact point, sized by the hit's tier. */
+function Impact({ tier }: { tier: HitTier }) {
+  const { burstScale, debris, debrisSpread } = HIT_TIERS[tier];
   return (
     <>
-      <div className="absolute left-0 top-0 h-[calc(var(--arena)*0.55)] w-[calc(var(--arena)*0.55)] -translate-x-1/2 -translate-y-1/2">
+      <div
+        className="absolute left-0 top-0 h-[calc(var(--arena)*0.55)] w-[calc(var(--arena)*0.55)] -translate-x-1/2 -translate-y-1/2"
+        style={{ scale: burstScale }}
+      >
         <PixelBurst className="impact-burst h-full w-full" />
       </div>
       <div className="impact-slash absolute left-[calc(var(--arena)*-0.45)] top-[-4px] h-2 w-[calc(var(--arena)*0.9)] rounded-[2px]" />
-      {DEBRIS.map(([dx, dy, rot, size, color], i) => (
+      {DEBRIS.slice(0, debris).map(([dx, dy, rot, size, color], i) => (
         <span
           key={i}
           className="impact-debris absolute"
@@ -432,8 +520,8 @@ function Impact() {
               width: size,
               height: size,
               background: color,
-              "--dx": `${dx}cqw`,
-              "--dy": `${dy}cqw`,
+              "--dx": `${dx * debrisSpread}cqw`,
+              "--dy": `${dy * debrisSpread}cqw`,
               "--rot": `${rot}deg`,
             } as React.CSSProperties
           }

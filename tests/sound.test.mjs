@@ -1,5 +1,6 @@
 // Sound effect rules (lib/sound/sound-rules.ts): the mute setting, the
-// random attack pool, rate limiting, and that every listed file exists.
+// attack pool, rate limiting, and that every listed file exists. (The
+// no-repeat random pick is in random.test.mjs.)
 // Playback itself (Howler) isn't tested.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -76,36 +77,6 @@ test("the attack pool has all 8 files, mixed formats, and each one exists", () =
     for (const file of spec.files) assert.ok(existsSync(`${publicDir}${file}`), `${name}: ${file} missing`);
     assert.ok(spec.volume > 0 && spec.volume <= 1, `${name} volume`);
   }
-});
-
-test("the picker never plays the same attack twice in a row, and uses the whole pool", () => {
-  const pick = rules.createNoRepeatPicker(8);
-  const seen = new Set();
-  let last = -1;
-  for (let i = 0; i < 2000; i++) {
-    const n = pick();
-    assert.ok(Number.isInteger(n) && n >= 0 && n < 8, `in range: ${n}`);
-    assert.notEqual(n, last, `repeat at draw ${i}`);
-    seen.add(n);
-    last = n;
-  }
-  assert.equal(seen.size, 8, "every file gets played");
-});
-
-test("even a stuck random source can't repeat or overflow", () => {
-  for (const r of [0, 0.5, 0.999999, 1]) {
-    const pick = rules.createNoRepeatPicker(8, () => r);
-    const draws = Array.from({ length: 6 }, pick);
-    draws.forEach((n, i) => {
-      assert.ok(n >= 0 && n < 8, `r=${r}: ${n} in range`);
-      if (i > 0) assert.notEqual(n, draws[i - 1], `r=${r}: no repeat`);
-    });
-  }
-});
-
-test("a single-file sound always picks index 0", () => {
-  const pick = rules.createNoRepeatPicker(1);
-  assert.deepEqual([pick(), pick(), pick()], [0, 0, 0]);
 });
 
 // --- Rate limiting -------------------------------------------------------------------

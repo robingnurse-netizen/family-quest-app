@@ -416,6 +416,12 @@ body {
   to { opacity: 1; scale: 1; }
 }
 .combo-pop { animation: combo-pop 200ms ease-out var(--hitstop, 0ms) both; }
+/* Medium / heavy hits: one soft white flash on contact (--flash = peak opacity). */
+@keyframes impact-flash {
+  from { opacity: var(--flash, 0.2); }
+  to { opacity: 0; }
+}
+.impact-flash { animation: impact-flash 220ms ease-out both; }
 
 /* Everyone shrinks and flies back up toward the battle scene (duration set
    inline from OVERLAY_TIMING, as are the fades below). */

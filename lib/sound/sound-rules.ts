@@ -1,6 +1,6 @@
 // Sound effects: what plays, and the rules around it — no audio here.
-// lib/sound/sound-manager.ts does the playing (Howler); this module is kept
-// self-contained (no imports) so tests/sound.test.mjs can load it directly.
+// lib/sound/sound-manager.ts does the playing (Howler); this module stays
+// free of React / browser imports so tests/sound.test.mjs can load it.
 
 /** Every sound effect, by name. Files live in public/sounds/. */
 export type SoundName =
@@ -14,7 +14,8 @@ export type SoundName =
   | "dragDrop";
 
 export type SoundSpec = {
-  /** One file, or a pool picked at random (never the same twice running). */
+  /** One file, or a pool picked at random (never the same twice running;
+   *  createNoRepeatPicker in lib/random.ts). */
   files: string[];
   /** 0–1. The files aren't loudness-matched: tune by ear here. */
   volume: number;
@@ -52,23 +53,6 @@ export const SOUNDS: Record<SoundName, SoundSpec> = {
   itemPurchased: { files: ["/sounds/item-purchased.wav"], volume: 0.8, minGapMs: 300 },
   dragDrop: { files: ["/sounds/drag-drop.wav"], volume: 0.5, minGapMs: 90 },
 };
-
-/**
- * Picks an index in [0, count) at random, never the one it picked last
- * (when there's more than one). `random` is injectable for tests.
- */
-export function createNoRepeatPicker(count: number, random: () => number = Math.random) {
-  let last = -1;
-  // random() is in [0, 1); clamp anyway so a stray 1 can't overflow.
-  const below = (n: number) => Math.min(n - 1, Math.floor(random() * n));
-  return () => {
-    if (count <= 1) return (last = 0);
-    if (last < 0) return (last = below(count));
-    // One of the other count − 1 indices: pick, then skip over the last one.
-    const i = below(count - 1);
-    return (last = i >= last ? i + 1 : i);
-  };
-}
 
 /** Per-sound rate limit: `allow(name, now)` is false within its minGapMs. */
 export function createSoundGate(specs: Record<string, { minGapMs: number }> = SOUNDS) {

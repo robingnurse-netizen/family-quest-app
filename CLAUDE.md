@@ -197,7 +197,29 @@ PROJECT STATUS:
     stream for sounds. Reduced motion: fade-only card. Numbers in Nunito
     (Pixelify's 5 reads as S even at 60px). Dev console (next dev only):
     __fqBattle.hit(15) / combo(3, 10) / finalBlow() / otherHit(15) /
-    listen(fn).
+    listen(fn). (hit(10) / hit(30) / hit(60) show the three hit tiers.)
+  * Fight choreography: COMPLETE. lib/rpg/strike.ts (pure; tested in
+    tests/strike.test.mjs):
+    - Hit tiers by the hit's minutes (= damage amount, 1 min = 1 dmg, the
+      same duration_minutes as damage/XP): light ≤15, medium 16–44, heavy
+      45+ (his real quests are mostly 15 / 30 / 60 min — one per tier).
+      HIT_TIERS sets hit-stop (100/150/200ms), shake, burst scale, debris
+      count/spread and a faint white flash (none / 0.12 / 0.28). Only the
+      freeze varies: every later beat (K.O., hold, fly) and so every sound
+      is still timed from OVERLAY_TIMING.hitStop — tiers never slow the
+      show or shift sounds.
+    - Attack variants: the hero sheet has ONE attack row (jump/run have no
+      sword), so STRIKE_VARIANTS are cuts of the attack frames (indices into
+      the manifest's attack animation; same canvas + feet anchor): overhead
+      chop, lunging thrust, leaping chop. strikeAnimation() lines the
+      variant's contact frame up with the impact (after the 280ms dash; at
+      once for combo hits) — before this, the freeze landed on whichever
+      frame happened to be showing. Body motion (lunge / leap, Web
+      Animations on `translate`, px from the stage height) only on a first
+      hit; combo hits just swing (so chop and leap look alike in combos).
+      Picked with createNoRepeatPicker (lib/random.ts, shared with the
+      attack sound pool) — never the same swing twice running.
+    - Miss / boss-attack staging and sound timing unchanged.
   * No pinned/sticky strip: removed along with its pin logic; the scene
     stays in normal flow (see the FUTURE note under Phase B2).
 - Visual overhaul Stage 3 — Quest board (player): COMPLETE. Presentation only: drag-and-drop, slot rules and the
@@ -329,15 +351,18 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound (.test.mjs). This is the permanent suite — add new engine rules'
+    sound, random, strike (.test.mjs). tests/helpers/load-ts.mjs imports
+    app TypeScript and follows its "./" and "@/" imports (keep tested
+    modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
 - Sound effects (Howler): COMPLETE.
   * Files in public/sounds/ (attack/ is a pool of 8, mixed wav/mp3).
     lib/sound/sound-rules.ts (no imports; tested): SOUNDS — name → files,
     volume (tune by ear there; files aren't loudness-matched), minGapMs
     (the same sound again within it is dropped: 90–120ms for ticks/hits,
-    1.5s party damage, 4s boss defeated) — plus the no-repeat random
-    picker and the mute store (localStorage "fq:sound-muted").
+    1.5s party damage, 4s boss defeated) — plus the mute store
+    (localStorage "fq:sound-muted"). The attack pool's no-repeat pick is
+    createNoRepeatPicker in lib/random.ts.
   * lib/sound/sound-manager.ts is the ONLY Howler user: playSound(name),
     setSoundMuted / useSoundMuted, armSounds(). Howler + files load on the
     first pointer/key press (also the autoplay unlock), not while muted; a
