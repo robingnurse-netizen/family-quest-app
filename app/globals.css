@@ -1,16 +1,5 @@
 @import "tailwindcss";
 
-/* Narrow or short viewports, or inside a pinned bar ([data-pinned], the
-   player's boss HUD): panels that must stay small. */
-@custom-variant compact {
-  @media (width < 48rem), (height < 50rem) {
-    @slot;
-  }
-  [data-pinned] & {
-    @slot;
-  }
-}
-
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -132,21 +121,90 @@ body {
   0%, 60% { filter: drop-shadow(0 0 10px rgb(255 40 40)) brightness(1.5); }
   100% { filter: none; }
 }
+/* A missed quest: the boss lunges at the party while it attacks. */
+@keyframes boss-lunge {
+  0%, 100% { translate: 0 0; }
+  35% { translate: -8% 0; }
+}
+.boss-fx-attack { animation: boss-lunge 600ms ease-out; }
+
 @media (prefers-reduced-motion: reduce) {
   /* No movement; keep the colour cues so reactions stay visible. */
-  .boss-enter, .boss-fx-escaped { animation: none; }
+  .boss-enter, .boss-fx-escaped, .boss-fx-attack { animation: none; }
   .boss-fx-hurt { animation: boss-flash 450ms ease-out; }
 }
 
-/* Player boss HUD sliding up when it pins to the bottom (boss-hud.tsx). */
-@keyframes boss-hud-in {
-  from { translate: 0 100%; }
-  to { translate: 0 0; }
+/* ---------------------------------------------------------------------------
+   Battle scene (components/rpg/battle/battle-scene.tsx). CSS only — no
+   image downloads.
+   ------------------------------------------------------------------------- */
+.arena-sky {
+  background-color: var(--color-world-deep);
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 28% 42%, #fff9 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 47% 12%, #fffc 50%, transparent 51%),
+    radial-gradient(1px 1px at 63% 30%, #fff9 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 81% 16%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 92% 44%, #fff8 50%, transparent 51%),
+    radial-gradient(1px 1px at 6% 52%, #fff8 50%, transparent 51%),
+    linear-gradient(to bottom, #120e26, var(--color-world) 70%, #3b2a6e);
 }
-.boss-hud-in { animation: boss-hud-in 250ms ease-out; }
+/* Stepped silhouettes read as pixel hills. */
+.arena-hills-far {
+  background: #2b2058;
+  clip-path: polygon(0 60%, 8% 60%, 8% 45%, 16% 45%, 16% 30%, 26% 30%, 26% 45%, 34% 45%, 34% 58%, 44% 58%, 44% 40%, 52% 40%, 52% 22%, 62% 22%, 62% 38%, 72% 38%, 72% 52%, 82% 52%, 82% 34%, 92% 34%, 92% 50%, 100% 50%, 100% 100%, 0 100%);
+}
+.arena-hills-near {
+  background: #1d173f;
+  clip-path: polygon(0 45%, 10% 45%, 10% 62%, 22% 62%, 22% 40%, 30% 40%, 30% 55%, 42% 55%, 42% 70%, 58% 70%, 58% 50%, 68% 50%, 68% 36%, 78% 36%, 78% 58%, 90% 58%, 90% 44%, 100% 44%, 100% 100%, 0 100%);
+}
+
+/* Boss aura: a soft glow behind the boss, slowly pulsing. */
+@keyframes boss-aura {
+  0%, 100% { opacity: 0.55; scale: 0.94; }
+  50% { opacity: 0.9; scale: 1.04; }
+}
+.boss-aura {
+  background: radial-gradient(closest-side, rgb(224 49 49 / 0.7), rgb(224 49 49 / 0.25) 55%, transparent);
+  animation: boss-aura 2.6s ease-in-out infinite;
+}
+.boss-aura-epic {
+  background: radial-gradient(closest-side, rgb(252 196 25 / 0.65), rgb(224 49 49 / 0.4) 50%, transparent);
+}
+
+/* The party takes a hit: red flash and a jolt on the hero's side. */
+@keyframes hero-hit {
+  0% { filter: none; translate: 0 0; }
+  12% { filter: drop-shadow(0 0 8px rgb(255 40 40)) brightness(1.4) sepia(1) hue-rotate(-50deg) saturate(4); translate: -6px 0; }
+  30% { translate: 5px 0; }
+  50% { filter: drop-shadow(0 0 6px rgb(255 40 40)) brightness(1.2) sepia(1) hue-rotate(-50deg) saturate(3); translate: -3px 0; }
+  100% { filter: none; translate: 0 0; }
+}
+@keyframes hero-hit-flash {
+  0%, 50% { filter: drop-shadow(0 0 8px rgb(255 40 40)) brightness(1.4) sepia(1) hue-rotate(-50deg) saturate(4); }
+  100% { filter: none; }
+}
+.hero-hit { animation: hero-hit 700ms ease-out; }
+
+/* Event banner: drops in, stays, fades out (its element is re-keyed per event). */
+@keyframes event-banner {
+  0% { opacity: 0; translate: 0 -8px; }
+  8%, 85% { opacity: 1; translate: 0 0; }
+  100% { opacity: 0; translate: 0 0; }
+}
+@keyframes event-banner-fade {
+  0%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.event-banner { animation: event-banner 3.5s ease-out forwards; }
+
 @media (prefers-reduced-motion: reduce) {
-  .boss-hud-in { animation: none; }
+  .boss-aura { animation: none; opacity: 0.8; }
+  .hero-hit { animation: hero-hit-flash 700ms ease-out; }
+  .event-banner { animation: event-banner-fade 3.5s linear forwards; }
 }
+
 
 /* ---------------------------------------------------------------------------
    Player materials: bevelled panels and pressable buttons

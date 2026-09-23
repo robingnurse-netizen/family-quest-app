@@ -8,9 +8,14 @@
 //
 // Pure (no React) so the event sequences can be tested directly.
 
-import type { Boss, BossLog } from "@/lib/supabase/types";
+import type { Boss } from "@/lib/supabase/types";
+import type { BattleEvent } from "./battle-events";
 
-export type StageMode = "idle" | "hurt" | "defeated" | "escaped";
+/**
+ * What the boss on stage is doing: hurt (a quest struck it), attack (a missed
+ * quest — the boss hits the party), or playing out its defeat / escape.
+ */
+export type StageMode = "idle" | "hurt" | "attack" | "defeated" | "escaped";
 
 export type StageState = {
   /** The boss drawn on stage (drives sprite, name and HP bar). */
@@ -22,15 +27,17 @@ export type StageState = {
   mode: StageMode;
   /** Bumped whenever an animation must restart from frame 1. */
   playKey: number;
-  /** Plain-language line under the sprite describing the last event. */
+  /** Plain-language line describing the last event (the scene's banner). */
   caption: string | null;
 };
 
 export type StageAction =
+  /** The database's active boss (also refreshes HP). */
   | { type: "active"; boss: Boss | null }
-  | { type: "boss-row"; row: Boss }
-  | { type: "log"; row: BossLog }
+  | { type: "event"; event: BattleEvent }
+  /** The boss's one-shot hurt / attack animation finished. */
   | { type: "animation-end" }
+  /** The finished boss's defeat / escape has played out. */
   | { type: "swap" };
 
 export function initialStage(active: Boss | null): StageState {
@@ -80,32 +87,40 @@ export function stageReducer(state: StageState, action: StageAction): StageState
       return next;
     }
 
-    case "boss-row": {
-      const row = action.row;
-      const next = { ...state, rows: { ...state.rows, [row.id]: row } };
-      if (!state.shown || row.id !== state.shown.id) return next;
-      const withRow = { ...next, shown: row };
-      if ((row.status === "defeated" || row.status === "escaped") && !finishing(state.mode)) {
-        return finish(withRow, row.status);
+    case "event": {
+      const { event } = action;
+      if (event.type === "defeated" || event.type === "escaped") {
+        const row = event.boss;
+        const next = { ...state, rows: { ...state.rows, [row.id]: row } };
+        if (!state.shown || row.id !== state.shown.id) return next;
+        const withRow = { ...next, shown: row };
+        return finishing(state.mode) ? withRow : finish(withRow, event.type);
       }
-      return withRow;
-    }
-
-    case "log": {
-      const { row } = action;
-      if (!state.shown || row.boss_id !== state.shown.id || finishing(state.mode)) return state;
-      if (row.event_type === "damage") {
-        return { ...state, mode: "hurt", playKey: state.playKey + 1, caption: `${state.shown.name} takes ${row.amount} damage!` };
+      if (event.type === "damage" || event.type === "miss") {
+        if (!state.shown || event.bossId !== state.shown.id || finishing(state.mode)) return state;
+        return event.type === "damage"
+          ? {
+              ...state,
+              mode: "hurt",
+              playKey: state.playKey + 1,
+              caption: `${state.shown.name} takes ${event.amount} damage!`,
+            }
+          : {
+              ...state,
+              mode: "attack",
+              playKey: state.playKey + 1,
+              caption: `A missed quest — ${state.shown.name} hits the party for ${event.amount}!`,
+            };
       }
-      if (row.event_type === "miss_penalty") {
-        return { ...state, mode: "hurt", playKey: state.playKey + 1, caption: `A missed quest — the party takes ${row.amount} damage!` };
-      }
+      // "activated" arrives with the matching "active" action, which does the work.
       return state;
     }
 
     case "animation-end":
-      // Hurt returns to idle; defeat/escape wait for "swap" (after a hold).
-      return state.mode === "hurt" ? { ...state, mode: "idle", playKey: state.playKey + 1 } : state;
+      // Hurt / attack return to idle; defeat/escape wait for "swap" (after a hold).
+      return state.mode === "hurt" || state.mode === "attack"
+        ? { ...state, mode: "idle", playKey: state.playKey + 1 }
+        : state;
 
     case "swap": {
       if (!finishing(state.mode)) return state;

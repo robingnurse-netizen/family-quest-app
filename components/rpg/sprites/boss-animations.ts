@@ -1,13 +1,18 @@
 import { SPRITES } from "./manifests";
 import type { SpriteAnimation, SpriteManifest } from "./types";
 
+/** One of a boss's stage poses (each carries its own drawn `facing`). */
+export type BossPose = SpriteAnimation;
+
 /** The animations a boss needs on stage, resolved from its manifest. */
 export type BossAnimations = {
-  idle: SpriteAnimation;
-  hurt: SpriteAnimation;
-  death: SpriteAnimation;
+  idle: BossPose;
+  hurt: BossPose;
+  /** Played once when a missed quest lets the boss hit the party. */
+  attack: BossPose;
+  death: BossPose;
   /** Played (looping, while sliding off) when the boss escapes. */
-  escape: SpriteAnimation;
+  escape: BossPose;
 };
 
 // Epic sheets combine hurt and defeat in one strip ("HURT/DEFEATED"); its
@@ -26,6 +31,7 @@ export function bossAnimations(spriteKey: string): BossAnimations | null {
   const idle = a.idle;
   if (!idle) return null;
 
+  const pose = (anim: SpriteAnimation, loop: boolean): BossPose => ({ ...anim, loop });
   const oneShot = (anim: SpriteAnimation): SpriteAnimation => ({ ...anim, loop: false });
   const defeated = a.defeated;
   const hurt =
@@ -36,9 +42,10 @@ export function bossAnimations(spriteKey: string): BossAnimations | null {
   const death = a.death ?? defeated ?? hurt;
 
   return {
-    idle: { ...idle, loop: true },
-    hurt: oneShot(hurt),
-    death: oneShot(death),
-    escape: { ...(a.move ?? idle), loop: true },
+    idle: pose(idle, true),
+    hurt: pose(hurt, false),
+    attack: pose(a.attack ?? idle, false),
+    death: pose(death, false),
+    escape: pose(a.move ?? idle, true),
   };
 }

@@ -105,7 +105,6 @@ export default async function ParentDashboard() {
       <section className="mt-8">
         <h2 className="mb-3 text-lg font-black text-slate-900">Current boss</h2>
         <BossStatus
-          variant="parent"
           familyId={battle.familyId}
           initialBoss={battle.boss}
           initialParty={battle.party}

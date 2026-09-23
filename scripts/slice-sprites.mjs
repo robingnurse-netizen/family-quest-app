@@ -493,6 +493,25 @@ async function sliceAnimation(sheet, isBg, name, anim) {
 
 // ---------------------------------------------------------------------------
 
+// Which way every animation faces as drawn ("right" | "left" | "front"),
+// judged per animation by where the face/eyes point and which way attacks
+// and projectiles travel (sheets mix views, e.g. a front idle with side-on
+// moves). Written into the manifests; the battle scene mirrors side-facing
+// poses so the party faces right and bosses face left. Every sliced
+// animation must be listed here.
+const FACING = {
+  hero: { idle: "front", run: "right", jump: "right", attack: "right" },
+  rogue: { idle: "right", running: "right", pouncing: "right", barking: "right" },
+  trash_bag_slime: { idle: "front", attack: "right", hurt: "front", death: "front" },
+  alarm_clock_swarm: { idle: "front", move: "front", attack: "right", hurt: "front", death: "front" },
+  laundry_goblin: { idle: "right", move: "right", attack: "right", hurt: "right", death: "front" },
+  cable_spider: { idle: "front", move: "front", attack: "front", hurt: "front", death: "front" },
+  magma_behemoth: { idle: "right", move: "right", attack: "right", defeated: "right" },
+  chronosphinx: { idle: "front", move: "right", attack: "right", defeated: "right" },
+  abyssal_kraken: { idle: "front", move: "right", attack: "front", defeated: "front" },
+  shogun_bot: { idle: "right", move: "right", attack: "right", defeated: "right" },
+};
+
 const only = new Set(process.argv.slice(2));
 mkdirSync(OUT_MANIFESTS, { recursive: true });
 
@@ -508,6 +527,8 @@ for (const sheetCfg of SHEETS) {
     const manifest = { character, animations: {} };
 
     for (const [animName, anim] of Object.entries(sheetCfg.characters[character])) {
+      const facing = FACING[character]?.[animName];
+      if (!facing) throw new Error(`No FACING entry for ${character}/${animName}`);
       const { buffers, width, height, anchor } = await sliceAnimation(sheet, isBg, `${character}/${animName}`, anim);
       const dir = join(charDir, animName);
       mkdirSync(dir, { recursive: true });
@@ -527,6 +548,7 @@ for (const sheetCfg of SHEETS) {
         ...PLAYBACK[animName],
         ...(anim.fps ? { fps: anim.fps } : {}),
         ...(anim.loop !== undefined ? { loop: anim.loop } : {}),
+        facing,
       };
       console.log(`${character}/${animName}: ${paths.length} frames, ${width}x${height}`);
     }

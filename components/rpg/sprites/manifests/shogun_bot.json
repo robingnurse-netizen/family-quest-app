@@ -17,7 +17,8 @@
         "y": 264
       },
       "fps": 4,
-      "loop": true
+      "loop": true,
+      "facing": "right"
     },
     "move": {
       "frames": [
@@ -37,7 +38,8 @@
         "y": 274
       },
       "fps": 6,
-      "loop": true
+      "loop": true,
+      "facing": "right"
     },
     "attack": {
       "frames": [
@@ -57,7 +59,8 @@
         "y": 276
       },
       "fps": 10,
-      "loop": false
+      "loop": false,
+      "facing": "right"
     },
     "defeated": {
       "frames": [
@@ -77,7 +80,8 @@
         "y": 263
       },
       "fps": 8,
-      "loop": false
+      "loop": false,
+      "facing": "right"
     }
   }
 }

@@ -13,7 +13,8 @@
         "y": 224
       },
       "fps": 2,
-      "loop": true
+      "loop": true,
+      "facing": "right"
     },
     "move": {
       "frames": [
@@ -28,7 +29,8 @@
         "y": 224
       },
       "fps": 8,
-      "loop": true
+      "loop": true,
+      "facing": "right"
     },
     "attack": {
       "frames": [
@@ -42,7 +44,8 @@
         "y": 259
       },
       "fps": 4,
-      "loop": false
+      "loop": false,
+      "facing": "right"
     },
     "hurt": {
       "frames": [
@@ -56,7 +59,8 @@
         "y": 215
       },
       "fps": 4,
-      "loop": false
+      "loop": false,
+      "facing": "right"
     },
     "death": {
       "frames": [
@@ -69,7 +73,8 @@
         "y": 138
       },
       "fps": 6,
-      "loop": false
+      "loop": false,
+      "facing": "front"
     }
   }
 }

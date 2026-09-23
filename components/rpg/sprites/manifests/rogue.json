@@ -17,7 +17,8 @@
         "y": 293
       },
       "fps": 6,
-      "loop": true
+      "loop": true,
+      "facing": "right"
     },
     "running": {
       "frames": [
@@ -37,7 +38,8 @@
         "y": 282
       },
       "fps": 12,
-      "loop": true
+      "loop": true,
+      "facing": "right"
     },
     "pouncing": {
       "frames": [
@@ -53,7 +55,8 @@
         "y": 386
       },
       "fps": 8,
-      "loop": false
+      "loop": false,
+      "facing": "right"
     },
     "barking": {
       "frames": [
@@ -70,7 +73,8 @@
         "y": 350
       },
       "fps": 8,
-      "loop": false
+      "loop": false,
+      "facing": "right"
     }
   }
 }

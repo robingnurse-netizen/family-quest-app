@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
-import { SpriteAnimator } from "@/components/rpg/sprites/SpriteAnimator";
+import { AnchoredSprite, needsMirror } from "@/components/rpg/sprites/anchored-sprite";
 import { bossAnimations } from "@/components/rpg/sprites/boss-animations";
 import type { StageMode } from "@/lib/rpg/boss-stage";
 
@@ -11,12 +11,18 @@ const ESCAPE_MS = 1400; // matches the .boss-escape CSS animation
 /**
  * One boss on stage, reacting to the stage mode:
  *   idle     → idle loop
- *   hurt     → hurt animation once (+ shake/red flash), then onHurtDone
+ *   hurt     → hurt animation once (+ shake/red flash), then onReactionDone
+ *   attack   → attack animation once (a missed quest), then onReactionDone
  *   defeated → death animation once, hold, then onFinishDone
- *   escaped  → move loop while sliding off stage, then onFinishDone
- * Single-frame hurt/death strips just show their still frame; the CSS
- * flash/shake makes the reaction visible either way. `playKey` restarts the
- * animation (and the CSS effect) on every event.
+ *   escaped  → move loop while sliding off, then onFinishDone
+ * Single-frame strips just show their still frame; the CSS effect makes the
+ * reaction visible either way. `playKey` restarts the animation (and the CSS
+ * effect) on every event.
+ *
+ * `height` is the idle pose's display height as any CSS length; other poses
+ * scale with it so the boss doesn't resize between animations. `face` turns
+ * side-facing poses that way (escaping, it faces the way it runs: off to the
+ * right, away from the hero); omit it to show poses as drawn.
  */
 export function BossSprite({
   spriteKey,
@@ -24,21 +30,23 @@ export function BossSprite({
   mode,
   playKey,
   height,
-  onHurtDone,
+  face,
+  onReactionDone,
   onFinishDone,
 }: {
   spriteKey: string;
   name: string;
   mode: StageMode;
   playKey: number;
-  /** Display height of the idle pose, in CSS px. */
-  height: number;
-  onHurtDone: () => void;
+  height: number | string;
+  face?: "left" | "right";
+  onReactionDone: () => void;
   onFinishDone: () => void;
 }) {
   const anims = useMemo(() => bossAnimations(spriteKey), [spriteKey]);
   const holdTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(holdTimer.current), [playKey]);
+  const idleHeight = typeof height === "number" ? `${height}px` : height;
 
   // Escape has no natural end (it loops while sliding away): time it.
   useEffect(() => {
@@ -52,8 +60,8 @@ export function BossSprite({
     return (
       <div
         key={`${mode}-${playKey}`}
-        className={`flex items-center justify-center rounded-xl border-2 border-dashed border-current text-3xl font-black opacity-70 boss-fx-${mode}`}
-        style={{ width: height, height }}
+        className={`absolute bottom-0 left-1/2 flex aspect-square -translate-x-1/2 items-center justify-center rounded-xl border-2 border-dashed border-current text-3xl font-black opacity-70 boss-fx-${mode}`}
+        style={{ height: idleHeight }}
         title={`No sprite for "${spriteKey}"`}
       >
         ?
@@ -62,13 +70,20 @@ export function BossSprite({
   }
 
   const anim =
-    mode === "hurt" ? anims.hurt : mode === "defeated" ? anims.death : mode === "escaped" ? anims.escape : anims.idle;
-  // One scale per boss (from idle) so it doesn't resize between animations.
-  const scale = height / anims.idle.height;
+    mode === "hurt"
+      ? anims.hurt
+      : mode === "attack"
+        ? anims.attack
+        : mode === "defeated"
+          ? anims.death
+          : mode === "escaped"
+            ? anims.escape
+            : anims.idle;
+  const want = mode === "escaped" && face ? (face === "left" ? "right" : "left") : face;
 
   const onComplete =
-    mode === "hurt"
-      ? onHurtDone
+    mode === "hurt" || mode === "attack"
+      ? onReactionDone
       : mode === "defeated"
         ? () => {
             holdTimer.current = setTimeout(onFinishDone, DEFEAT_HOLD_MS);
@@ -76,16 +91,15 @@ export function BossSprite({
         : undefined;
 
   return (
-    // Feet on the stage's ground line, horizontally centred on the anchor.
-    <div
+    <AnchoredSprite
       key={`${mode}-${playKey}`}
-      className={`absolute bottom-0 boss-fx-${mode}`}
-      style={{
-        left: `calc(50% - ${anim.anchor.x * scale}px)`,
-        transform: `translateY(${(anim.height - 1 - anim.anchor.y) * scale}px)`,
-      }}
-    >
-      <SpriteAnimator animation={anim} scale={scale} alt={name} onComplete={onComplete} />
-    </div>
+      animation={anim}
+      // One scale per boss (from idle) so it doesn't resize between poses.
+      height={`calc(${idleHeight} * ${anim.height / anims.idle.height})`}
+      mirror={needsMirror(anim.facing, want)}
+      alt={name}
+      className={`boss-fx-${mode}`}
+      onComplete={onComplete}
+    />
   );
 }

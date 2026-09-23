@@ -79,27 +79,17 @@ PROJECT STATUS:
     ~33–66%, heavily damaged below ~33% — instead of one idle loop at
     every HP. Hero and Rogue get the same treatment from party HP (see
     "FUTURE — Battle feedback redesign" under Phase B2).
-- RPG Phase B2 — Boss Battle Rendering: COMPLETE. BossStatus (both
-  dashboards) shows the active boss's sprite reacting to Realtime events:
-  boss_log damage / miss_penalty → hurt once (epic bosses use the first 3
-  frames of `defeated`); status defeated → death once + hold; escaped →
-  move loop sliding off; then the next boss enters. State machine in
-  lib/rpg/boss-stage.ts (pure reducer); the on-stage boss (sprite, name, HP)
-  briefly lags the DB while a finished boss plays out. Animation mapping in
-  components/rpg/sprites/boss-animations.ts. Data-driven only — no manual
-  battle controls or floating damage numbers. On /player the boss panel
-  (BossHud) pins to the BOTTOM of the viewport once <90% of it is on screen,
-  so reactions stay visible while Reuben ticks quests. Not top: Chrome's
-  hiding toolbar (ChromeOS tablet mode) slides over top-pinned content.
-  The `compact` Tailwind variant (globals.css: width < 48rem, height < 50rem,
-  or inside [data-pinned]) makes it one row with a half-scale stage. The parent
-  dashboard's panel is unchanged.
-  BossHud decides pinned/unpinned in a layout effect before the hydrated
-  page paints, and slides in only on scroll-triggered pins (not on load).
-  ACCEPTED LIMITATION — don't reopen unless asked: before hydration the
-  server-rendered panel briefly sits in-flow (off-screen if scrolled past),
-  then appears pinned without animation. Pure CSS (sticky) can't pin in
-  both scroll directions, so this flash stays.
+- RPG Phase B2 — Boss Battle Rendering: COMPLETE (restyled for the player
+  in visual overhaul Stage 2, below). Boss sprites react to battle events:
+  damage → hurt once (epic bosses use the first 3 frames of `defeated`);
+  miss → the boss's attack once (it hits the party; it used to flinch);
+  defeated → death once + hold; escaped → move loop sliding off; then the
+  next boss enters. State machine in lib/rpg/boss-stage.ts (pure reducer);
+  the on-stage boss (sprite, name, HP) briefly lags the DB while a finished
+  boss plays out. Animation mapping in components/rpg/sprites/
+  boss-animations.ts. Data-driven only — no manual battle controls.
+  Parent HQ: BossStatus (components/rpg/boss/boss-status.tsx, parent-only).
+  Nothing on /player is sticky or pinned any more (see the FUTURE note).
   * FUTURE — Battle feedback redesign (design note, NOT to be built yet):
     - The battle scene (hero, Rogue and boss together, built in Stage 2)
       sits fixed at the top of Reuben's dashboard in normal page flow,
@@ -111,10 +101,11 @@ PROJECT STATUS:
     - Back in the scene, each character idles in a visibly damaged state
       by HP: the boss from boss HP, the hero and Rogue from party HP (ties
       in with the HP-based idle art note under Phase B1).
-    - Once the overlay exists, remove the sticky boss panel (BossHud) and
-      its compact variant; the overlay replaces the job they do.
-    - Until then, Stage 2 KEEPS the current sticky compact behaviour so
-      Reuben doesn't lose feedback when scrolled down.
+    - DONE: the sticky boss panel (BossHud), its compact variant and
+      Stage 2's temporary pinned strip have all been REMOVED, with their
+      pin logic. The scene sits fixed at the top in normal flow and never
+      moves; until the overlay lands, Reuben gets no battle feedback while
+      scrolled down past it. The overlay is being built next.
 - Rewards Store: COMPLETE, pushed as b2104a3. Tested live: reward creation, redeem with live
   gold deduction, approve → fulfil, deny with refund (both dashboards), and
   the gold-gated Redeem button with "how much more" messaging.
@@ -160,6 +151,38 @@ PROJECT STATUS:
     their full styling from the caller.
   * UI wording: weekly_pools are "weekly quests" on screen (code, table
     and routes still say pool).
+- Visual overhaul Stage 2 — Battle scene (player dashboard): COMPLETE.
+  * components/rpg/battle/: BattleScene replaces the hero box, stat tiles
+    and boss panel on /player — one stone-framed arena (CSS night sky,
+    pixel hills, ground) with hero + Rogue on the left facing the boss on
+    the right, a pulsing aura, event captions as a parchment banner,
+    segmented HudBars (damage trail; boss 10/15/20 chunks by tier, party
+    10) and the Level/XP/Gold/Streak strip. Sizes come from --arena (container
+    units), so 390px keeps both sides facing each other; boss height is
+    capped by its own aspect ratio. Level/XP/Streak aren't wired to game
+    logic yet — displayed as stored.
+  * ONE EVENT SOURCE: lib/rpg/battle-events.ts (typed BattleEvent: damage,
+    miss, defeated, escaped, activated + a tiny emitter). useBattle
+    translates Realtime rows into events; BattleProvider owns the emitter,
+    live boss/party and the stage machine (itself just a subscriber). Add
+    listeners (hit overlay, sounds) with useBattleEvents inside the
+    provider — /player wraps the whole dashboard in it. Dev-only
+    window.__fqBattle { emit, setBoss, setParty } drives it without the DB
+    (stripped from production builds).
+  * Sprites: every animation carries its own `facing` (right/left/front),
+    set per animation in scripts/slice-sprites.mjs FACING — judged by where
+    the face/eyes point and which way attacks/projectiles travel; the
+    slicer refuses an animation missing from FACING. AnchoredSprite plants
+    feet on the ground line with percentage offsets (any CSS height) and
+    mirrors side-facing poses: party faces right, bosses face left (a
+    fleeing boss faces right, the way it runs); front poses never mirror.
+  * Placement: components/rpg/battle/stage-layout.tsx holds the stage —
+    ground line, heights, boss width cap, and FEET_X (fixed feet positions:
+    hero, Rogue a dog-length behind him, boss). Characters stand there by
+    their manifest anchors (FeetSpot + AnchoredSprite), never by image
+    widths or gaps. The hit overlay must use the same module.
+  * No pinned/sticky strip: removed along with its pin logic; the scene
+    stays in normal flow (see the FUTURE note under Phase B2).
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at

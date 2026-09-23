@@ -9,6 +9,8 @@ type Props = {
   scale?: number;
   alt: string;
   className?: string;
+  /** Extra inline style for the <img> (e.g. a CSS height instead of `scale`). */
+  style?: React.CSSProperties;
   /** Pause on the current frame. */
   paused?: boolean;
   /** Called when a non-looping animation reaches its last frame. */
@@ -32,6 +34,7 @@ export function SpriteAnimator({
   scale = 1,
   alt,
   className = "",
+  style,
   paused = false,
   onComplete,
   replayDelayMs,
@@ -119,6 +122,7 @@ export function SpriteAnimator({
       width={Math.round(animation.width * scale)}
       height={Math.round(animation.height * scale)}
       draggable={false}
+      style={style}
       // Pixel art: scale with hard pixels, never smoothed (every sprite).
       className={`sprite-pixelated select-none ${className}`}
     />

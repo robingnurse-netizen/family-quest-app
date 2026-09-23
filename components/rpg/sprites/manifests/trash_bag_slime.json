@@ -14,7 +14,8 @@
         "y": 189
       },
       "fps": 3,
-      "loop": true
+      "loop": true,
+      "facing": "front"
     },
     "attack": {
       "frames": [
@@ -29,7 +30,8 @@
         "y": 190
       },
       "fps": 6,
-      "loop": false
+      "loop": false,
+      "facing": "right"
     },
     "hurt": {
       "frames": [
@@ -42,7 +44,8 @@
         "y": 71
       },
       "fps": 8,
-      "loop": false
+      "loop": false,
+      "facing": "front"
     },
     "death": {
       "frames": [
@@ -55,7 +58,8 @@
         "y": 168
       },
       "fps": 6,
-      "loop": false
+      "loop": false,
+      "facing": "front"
     }
   }
 }
