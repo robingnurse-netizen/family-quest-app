@@ -49,13 +49,14 @@ export function HudBar({
   return (
     <div className="min-w-0">
       <div className={`flex items-center justify-between gap-2 ${size === "md" ? "mb-1" : "mb-0.5"}`}>
-        <span className={`flex min-w-0 items-center gap-1.5 font-display text-sm font-semibold uppercase ${t.label}`}>
+        <span className={`flex min-w-0 items-center gap-1 font-display text-sm font-semibold uppercase sm:gap-1.5 ${t.label}`}>
           {icon}
           <span className="truncate">{label}</span>
         </span>
-        <span className={`shrink-0 font-extrabold tabular-nums text-white ${size === "md" ? "text-base" : "text-sm"}`}>
+        {/* Side by side on a phone: keep the numbers compact so the label fits. */}
+        <span className={`shrink-0 font-extrabold tabular-nums text-white ${size === "md" ? "text-sm sm:text-base" : "text-sm"}`}>
           {current}
-          <span className="text-stone-text"> / {max}</span>
+          <span className="text-stone-text">/{max}</span>
         </span>
       </div>
       <div

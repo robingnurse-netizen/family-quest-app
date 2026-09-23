@@ -104,6 +104,11 @@ export function useBattleContext() {
   return value;
 }
 
+/** The battle context, or null outside a <BattleProvider> (shared UI). */
+export function useOptionalBattleContext() {
+  return useContext(BattleContext);
+}
+
 /**
  * Subscribe to battle events (damage, miss, defeated, escaped, activated).
  * The listener can change between renders; the subscription doesn't.

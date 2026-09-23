@@ -633,7 +633,7 @@ body {
   background: #e9d6ae;
   border: 2px solid var(--color-parchment-edge);
   border-radius: 2px 6px 6px 2px;
-  rotate: 6deg;
+  rotate: 4deg;
   box-shadow: 2px 2px 0 rgb(0 0 0 / 0.35);
 }
 .price-tag::before {
@@ -649,16 +649,18 @@ body {
   background: #3d2614;
 }
 .price-tag::after {
-  /* the string, up to the shelf above */
+  /* the string: from the tag's hole, back across the gap to the slot's
+     top-right corner */
   content: "";
   position: absolute;
-  left: 1px;
-  bottom: 50%;
-  width: 2px;
-  height: 20px;
+  right: calc(100% - 3px);
+  top: calc(50% - 1px);
+  width: 17px;
+  height: 2px;
   background: #d9c9a3;
-  transform-origin: bottom;
-  rotate: -28deg;
+  transform-origin: right center;
+  rotate: 32deg;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.35);
 }
 
 /* A wrapped parcel: brown paper, twine tied across it, sealed with wax. */
@@ -687,4 +689,130 @@ body {
 .coin-fly { animation: coin-fly 750ms cubic-bezier(0.3, 0.1, 0.4, 1) both; }
 @media (prefers-reduced-motion: reduce) {
   .coin-fly { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+   Polish pass: tick button, slim stall awning, sky details.
+   ------------------------------------------------------------------------- */
+/* The tick: a chunky 44×44 pressable button (ticking can't be undone once
+   the damage lands). Presses down onto its ledge like a PixelButton. */
+.tick-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-bottom: 4px;
+  border: 3px solid var(--color-ink-soft);
+  border-radius: 4px;
+  background: #fffaf0;
+  color: var(--color-ink);
+  box-shadow: inset 2px 2px 0 #fff, 0 4px 0 var(--color-parchment-edge);
+  cursor: pointer;
+  transition: filter 120ms ease-out;
+}
+.tick-btn:hover:not(:disabled) { filter: brightness(1.05); }
+.tick-btn:active:not(:disabled) { translate: 0 4px; box-shadow: inset 2px 2px 0 #fff; }
+.tick-btn:focus-visible { outline: 3px solid var(--color-ink); outline-offset: 2px; }
+.tick-btn:disabled { cursor: default; }
+.tick-done {
+  border-color: #2b8a3e;
+  background: var(--color-party);
+  box-shadow: inset 2px 2px 0 rgb(255 255 255 / 0.35), 0 4px 0 #2b8a3e;
+}
+/* Locked (the hit has landed): pressed flat for good. */
+.tick-locked { translate: 0 4px; box-shadow: inset 2px 2px 0 rgb(255 255 255 / 0.35); }
+.tick-missed {
+  translate: 0 4px;
+  border-color: #868e96;
+  background: var(--color-parchment-dark);
+  color: #495057;
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tick-btn { transition: none; }
+}
+
+/* The dashboard stall's slimmer awning. */
+.shop-awning-slim { height: 20px; }
+.shop-awning-slim::after {
+  height: 9px;
+  background:
+    radial-gradient(circle at 14px 0, #c92a2a 10px, transparent 11px) 0 0 / 56px 9px repeat-x,
+    radial-gradient(circle at 42px 0, #f1e2c0 10px, transparent 11px) 0 0 / 56px 9px repeat-x;
+}
+
+/* Battle sky: stars that twinkle out of step. */
+.arena-stars-a {
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 24%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 38% 8%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 72% 22%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 88% 36%, #fff 50%, transparent 51%);
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+.arena-stars-b {
+  background-image:
+    radial-gradient(1px 1px at 8% 12%, #fff 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 55% 18%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 66% 40%, #fff 50%, transparent 51%),
+    radial-gradient(1px 1px at 95% 10%, #fff 50%, transparent 51%);
+  animation: twinkle 4.1s ease-in-out 1.3s infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+/* Pixel clouds: stepped silhouettes (layered blobs of crisp rectangles),
+   a little lighter than the sky, in two sizes. Each layer is a strip one
+   tile wider than the arena that slides left by exactly one tile (--tile),
+   so the loop is seamless at any width; two speeds give parallax. */
+.arena-clouds {
+  position: absolute;
+  left: 0;
+  width: calc(100% + var(--tile));
+  background-repeat: repeat-x;
+  background-size: var(--tile) 100%;
+  image-rendering: pixelated;
+  animation: clouds-drift linear infinite;
+}
+.arena-clouds-far {
+  --tile: 360px; /* 180×20 art at 2× */
+  height: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='20' shape-rendering='crispEdges'%3E%3Crect x='20' y='12' width='48' height='6' fill='%235b4da0'/%3E%3Crect x='18' y='14' width='2' height='3' fill='%235b4da0'/%3E%3Crect x='68' y='14' width='2' height='3' fill='%235b4da0'/%3E%3Crect x='24' y='8' width='16' height='4' fill='%235b4da0'/%3E%3Crect x='28' y='6' width='8' height='2' fill='%235b4da0'/%3E%3Crect x='38' y='5' width='18' height='7' fill='%235b4da0'/%3E%3Crect x='41' y='3' width='12' height='2' fill='%235b4da0'/%3E%3Crect x='54' y='9' width='10' height='3' fill='%235b4da0'/%3E%3Crect x='28' y='6' width='8' height='1' fill='%237d70c4'/%3E%3Crect x='41' y='3' width='12' height='1' fill='%237d70c4'/%3E%3Crect x='24' y='8' width='4' height='1' fill='%237d70c4'/%3E%3Crect x='56' y='9' width='6' height='1' fill='%237d70c4'/%3E%3Crect x='20' y='17' width='48' height='1' fill='%23463a85'/%3E%3Crect x='110' y='13' width='30' height='4' fill='%235b4da0'/%3E%3Crect x='108' y='14' width='2' height='2' fill='%235b4da0'/%3E%3Crect x='140' y='14' width='2' height='2' fill='%235b4da0'/%3E%3Crect x='116' y='9' width='12' height='4' fill='%235b4da0'/%3E%3Crect x='119' y='7' width='6' height='2' fill='%235b4da0'/%3E%3Crect x='119' y='7' width='6' height='1' fill='%237d70c4'/%3E%3Crect x='116' y='9' width='3' height='1' fill='%237d70c4'/%3E%3Crect x='110' y='16' width='30' height='1' fill='%23463a85'/%3E%3C/svg%3E");
+  animation-duration: 150s;
+}
+.arena-clouds-near {
+  --tile: 330px; /* 110×16 art at 3× */
+  height: 48px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='16' shape-rendering='crispEdges'%3E%3Crect x='10' y='10' width='36' height='5' fill='%237466b8'/%3E%3Crect x='8' y='11' width='2' height='3' fill='%237466b8'/%3E%3Crect x='46' y='11' width='2' height='3' fill='%237466b8'/%3E%3Crect x='14' y='6' width='12' height='4' fill='%237466b8'/%3E%3Crect x='17' y='4' width='6' height='2' fill='%237466b8'/%3E%3Crect x='26' y='5' width='14' height='5' fill='%237466b8'/%3E%3Crect x='29' y='3' width='8' height='2' fill='%237466b8'/%3E%3Crect x='17' y='4' width='6' height='1' fill='%239a8fd6'/%3E%3Crect x='29' y='3' width='8' height='1' fill='%239a8fd6'/%3E%3Crect x='14' y='6' width='3' height='1' fill='%239a8fd6'/%3E%3Crect x='10' y='14' width='36' height='1' fill='%235b4da0'/%3E%3C/svg%3E");
+  opacity: 0.9;
+  animation-duration: 85s;
+}
+@keyframes clouds-drift {
+  from { translate: 0 0; }
+  to { translate: calc(-1 * var(--tile)) 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arena-stars-a, .arena-stars-b { animation: none; opacity: 0.75; }
+  .arena-clouds-far, .arena-clouds-near { animation: none; }
+}
+
+/* Placed quests: the big tick row folds away once a quest is finished
+   (grid-rows 1fr → 0fr animates the height); the strip's stamp and small
+   check fade in. Instant under reduced motion. */
+.slot-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 320ms ease, opacity 220ms ease;
+}
+.slot-collapsed .slot-body {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+.slot-collapsed .slot-body > div { overflow: hidden; }
+.slot-mini { animation: overlay-fade-in 260ms ease-out both; }
+@media (prefers-reduced-motion: reduce) {
+  .slot-body { transition: none; }
+  .slot-mini { animation: none; }
 }

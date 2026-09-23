@@ -17,6 +17,7 @@ import type { CalendarOccurrence } from "@/lib/calendar/recurrence";
 import { occurrencesByDay } from "@/lib/calendar/by-day";
 import { useCalendarEvents } from "@/lib/hooks/use-calendar-events";
 import { ChevronLeft, ChevronRight } from "@/components/ui/icons";
+import { WaxSeal } from "@/components/ui/wax-seal";
 import { EventDialog, type DialogState } from "./event-dialog";
 import { calendarThemes, type CalendarVariant } from "./theme";
 
@@ -33,6 +34,10 @@ type Props = {
   variant: CalendarVariant;
   /** Provide to make the calendar editable (parents). Omit for read-only. */
   actions?: CalendarActions;
+  /** Extra content under a day's events (the Quest Log's quest chips). */
+  renderDayExtras?: (day: string) => React.ReactNode;
+  /** Told when the visible month changes (to load month-specific extras). */
+  onMonthChange?: (month: string) => void;
 };
 
 /**
@@ -49,6 +54,8 @@ export function MonthCalendar({
   members,
   variant,
   actions,
+  renderDayExtras,
+  onMonthChange,
 }: Props) {
   const theme = calendarThemes[variant];
   const editable = Boolean(actions);
@@ -82,6 +89,7 @@ export function MonthCalendar({
 
   function goTo(target: string) {
     setMonth(target);
+    onMonthChange?.(target);
     // Keep the month in the URL so a refresh (or PWA relaunch) stays put.
     const url = new URL(window.location.href);
     url.searchParams.set("month", target);
@@ -171,11 +179,19 @@ export function MonthCalendar({
                     ? `Add event on ${formatDayLabel(day)}`
                     : `${formatDayLabel(day)}: ${dayEvents.length} event${dayEvents.length === 1 ? "" : "s"}`
                 }
-                className={`flex h-6 w-6 shrink-0 items-center justify-center self-start ${theme.dayShape} ${
-                  isToday ? theme.today : inMonth ? theme.dayNumber : ""
-                }`}
+                className={
+                  isToday && theme.todaySeal
+                    ? "-ml-0.5 -mt-0.5 shrink-0 self-start"
+                    : `flex h-6 w-6 shrink-0 items-center justify-center self-start ${theme.dayShape} ${
+                        isToday ? theme.today : inMonth ? theme.dayNumber : ""
+                      }`
+                }
               >
-                {parseDayKey(day).day}
+                {isToday && theme.todaySeal ? (
+                  <WaxSeal size="sm">{parseDayKey(day).day}</WaxSeal>
+                ) : (
+                  parseDayKey(day).day
+                )}
               </button>
 
               {shown.map((event) => {
@@ -215,6 +231,7 @@ export function MonthCalendar({
                   +{hidden} more
                 </button>
               )}
+              {renderDayExtras?.(day)}
             </div>
           );
         })}

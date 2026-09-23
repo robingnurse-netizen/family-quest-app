@@ -199,12 +199,15 @@ function ShelfItem({
   const need = reward.gold_cost - gold;
   return (
     <li data-reward-id={reward.id} className="flex min-w-0 flex-col">
-      <div className="relative flex h-28 items-end justify-center">
-        <div className={`relative ${affordable ? "" : "opacity-55 saturate-50"}`}>
-          <RewardIcon value={reward.icon} variant="slot" size={44} />
-          {!affordable && <PadlockIcon className="absolute -bottom-1 -right-2 h-6 w-6" />}
+      {/* The item and its price tag, tied together by a string. */}
+      <div className="flex h-28 items-end justify-center">
+        <div className="flex items-start gap-3">
+          <div className={`relative ${affordable ? "" : "opacity-55 saturate-50"}`}>
+            <RewardIcon value={reward.icon} variant="slot" size={44} />
+            {!affordable && <PadlockIcon className="absolute -bottom-1 -right-2 h-6 w-6" />}
+          </div>
+          <PriceTag cost={reward.gold_cost} />
         </div>
-        <PriceTag cost={reward.gold_cost} />
       </div>
       <div aria-hidden className="shelf-plank h-3.5" />
       <div className="flex flex-1 flex-col items-center px-1.5 pt-2 text-center sm:px-2">
@@ -215,19 +218,19 @@ function ShelfItem({
         {requested > 0 && (
           <p className="mt-1 text-sm font-bold text-gold">Requested{requested > 1 ? ` ×${requested}` : ""}</p>
         )}
-        <div className="mt-auto w-full pt-2">
+        <div className="mt-auto flex w-full justify-center pt-2">
           {affordable ? (
             <PixelButton
               variant="gold"
               size="md"
               onClick={onBuy}
-              className="w-full"
+              className="min-w-24"
               aria-label={`Buy ${reward.title} for ${reward.gold_cost} gold`}
             >
               Buy
             </PixelButton>
           ) : (
-            <div className="space-y-1">
+            <div className="w-full space-y-1">
               <p className="text-sm font-extrabold text-parchment">
                 Need <span className="text-gold">{need}</span> more
               </p>
@@ -246,10 +249,10 @@ function ShelfItem({
   );
 }
 
-/** A parchment price tag hanging from the item on a string. */
+/** A parchment price tag, tied to the item slot beside it by a string. */
 function PriceTag({ cost }: { cost: number }) {
   return (
-    <span className="price-tag absolute right-1 top-1 flex items-center gap-1 px-2 py-0.5 text-base font-black tabular-nums text-ink sm:right-3">
+    <span className="price-tag relative mt-2 flex items-center gap-1 py-0.5 pl-2.5 pr-2 text-base font-black tabular-nums text-ink">
       <CoinIcon className="h-4 w-4" />
       {cost}
       <span className="sr-only"> gold</span>
@@ -277,7 +280,6 @@ function Parcel({
           <RewardIcon value={reward?.icon} size={20} />
           <span className="truncate">{reward?.title ?? "Reward"}</span>
         </p>
-        <p className="font-bold text-gold text-shadow-pixel">Waiting for a grown-up</p>
         <p className="text-sm">
           {r.gold_spent} gold · {formatRequestTime(r.redeemed_at, timeZone)}
         </p>

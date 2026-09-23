@@ -254,6 +254,47 @@ PROJECT STATUS:
     Level/XP/Gold/Streak strip to player_stats (Realtime), so gold updates
     after a victory without a reload; the shop's gold was already live
     (useRewardStore). WaxSeal is now shared (components/ui/wax-seal.tsx).
+- Player polish pass (design review): COMPLETE (reviewed in the browser,
+  including a real tick folding its card).
+  * No planning on past days. UI: past day columns are disabled drop
+    targets (no glow, no placeholder; empty past days collapse to a
+    "No quests" line). DB: migration 20260924000010_child_slot_no_past_days
+    replaces guard_child_task_slot_writes (same trigger name — ordering
+    with task_slots_strike_boss matters) so a CHILD can't INSERT a slot
+    before today, or UPDATE its date onto one, in the family's timezone
+    (error slot_past_day → friendly text). Ticking past slots and moving
+    them forward still work; parents / service role unaffected. Checked in
+    PGlite with all migrations loaded (scratch script, not in the repo).
+    APPLIED to Supabase (SQL editor).
+  * Quest cards: a separate 44×44 pressable tick button (.tick-btn) for
+    quests still to do; the card stays the drag handle. Completed+locked or
+    missed quests fold into a slim strip (title, minutes, HIT!/MISSED
+    stamp, small check/cross) — newly finished ones fold only after the
+    hit overlay ends (+0.7s grace; BattleProvider.overlayActive via
+    useOptionalBattleContext), grid-rows transition, instant with reduced
+    motion.
+  * Phone: in the current week the stacked list starts at today; past days
+    fold into one "Earlier this week" row (tap to expand). Desktop keeps
+    all seven columns.
+  * Dashboard order: battle scene → quest board → slimmer shop stall.
+    HUD: party and boss halves side by side (name + bar each), stats row
+    full width; the Gold stat links to the shop with an "N within reach"
+    badge. Sign out lives in a gear menu (components/layout/player-menu.tsx).
+  * "See whole month" is a stone button (gold = money/rewards only).
+    "+ Quests" divider only under FIXED items; the empty-day placeholder
+    sits at the top of the drop zone.
+  * Quest Log: today's wax seal (WaxSeal size "sm"; theme todaySeal) and
+    Reuben's quests as chips under each day's events (HIT! when counted,
+    missed faded) — components/calendar/quest-log.tsx +
+    lib/backlog/quest-log.ts (refetched on month change).
+  * Shop: price tags tied to the item slot by a string; Buy buttons
+    auto-width and centred; parcels no longer repeat "Waiting for a
+    grown-up".
+  * Battle sky: twinkling stars and two slow parallax layers of stepped
+    pixel-cloud silhouettes (inline SVG, crispEdges, 2×/3× scale; each
+    strip slides exactly one tile, --tile, for a seamless loop). Static
+    under reduced motion. The Gold stat's "N within reach" badge is a tab
+    on its top-right corner, with space above the stats row.
 
 PARKED — future items, NOT to be built until asked:
 - FUTURE — Evergreen play:

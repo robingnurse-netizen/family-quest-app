@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
-import { SignOutButton } from "@/components/layout/sign-out-button";
+import { PlayerMenu } from "@/components/layout/player-menu";
 import { loadCalendar } from "@/lib/calendar/queries";
 import { monthKeyOf } from "@/lib/calendar/dates";
 import { loadWeekBoard } from "@/lib/backlog/queries";
@@ -12,7 +12,6 @@ import { BattleScene } from "@/components/rpg/battle/battle-scene";
 import { HitOverlay } from "@/components/rpg/battle/hit-overlay";
 import { ShopBanner } from "@/components/rewards/shop-banner";
 import { loadRewardStore } from "@/lib/rewards/queries";
-import { pixelButtonClass } from "@/components/ui/pixel-button";
 import { GameHeading } from "@/components/ui/game-heading";
 
 export default async function PlayerDashboard(props: PageProps<"/player">) {
@@ -54,17 +53,21 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
             <GameHeading as="h1" size="lg">
               Welcome back, {profile.display_name}!
             </GameHeading>
-            <SignOutButton className={`${pixelButtonClass("stone", "sm")} shrink-0`} />
+            {/* Settings (sign out) tucked into a small gear menu. */}
+          <PlayerMenu />
           </header>
 
           {/* The battle scene: hero and Rogue facing the boss, HUD bars and
               stats. Fixed at the top in normal flow; it never moves. */}
-          <BattleScene heroName={profile.display_name} childId={profile.id} stats={playerStats} />
+          <BattleScene
+            heroName={profile.display_name}
+            childId={profile.id}
+            stats={playerStats}
+            rewards={store.rewards}
+          />
           {/* Centre-screen replay of Reuben's own hits, wherever he's scrolled. */}
           <HitOverlay childId={profile.id} />
 
-          {/* The merchant's stall: live gold and the next reward in reach. */}
-          <ShopBanner familyId={profile.family_id} childId={profile.id} initial={store} />
 
           <WeekBoard
             familyId={board.familyId}
@@ -77,6 +80,10 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
             initialEvents={calendar.events}
             actions={{ createSlot, moveSlot, removeSlot, setSlotStatus }}
           />
+
+          {/* The merchant's stall, after the quests: live gold and the next
+              reward in reach (the HUD's Gold stat links to the shop too). */}
+          <ShopBanner familyId={profile.family_id} childId={profile.id} initial={store} />
         </div>
       </BattleProvider>
     </main>

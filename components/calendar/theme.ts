@@ -18,6 +18,8 @@ export type CalendarTheme = {
   cellHover: string;
   dayNumber: string;
   today: string;
+  /** Mark today with the wax seal (as on the quest board) instead of `today`. */
+  todaySeal?: boolean;
   chip: string;
   chipAllDay: string;
   chipTime: string;
@@ -92,6 +94,7 @@ export const calendarThemes: Record<CalendarVariant, CalendarTheme> = {
     cellHover: "",
     dayNumber: "text-ink",
     today: "bg-danger text-white ring-2 ring-ink",
+    todaySeal: true,
     chip: "bg-stone text-white hover:bg-stone-hi",
     chipAllDay: "bg-gold text-ink hover:brightness-105",
     chipTime: "text-gold",

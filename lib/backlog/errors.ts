@@ -1,6 +1,7 @@
 // Map database errors raised by the pool integrity and child-guard triggers
-// (supabase/migrations/20260922000004_pool_integrity.sql and
-// 20260922000005_child_slot_guard.sql) to friendly text.
+// (supabase/migrations/20260922000004_pool_integrity.sql,
+// 20260922000005_child_slot_guard.sql and 20260924000010_child_slot_no_past_days.sql)
+// to friendly text.
 
 export function friendlyBacklogError(message: string | undefined, fallback: string) {
   if (!message) return fallback;
@@ -15,6 +16,9 @@ export function friendlyBacklogError(message: string | undefined, fallback: stri
   }
   if (message.startsWith("slot_locked")) {
     return "That quest's damage has already been dealt — it's locked in.";
+  }
+  if (message.startsWith("slot_past_day")) {
+    return "That day has already gone — pick today or later.";
   }
   if (message.startsWith("slot_child_forbidden")) {
     return "That change isn't allowed from the quest board.";

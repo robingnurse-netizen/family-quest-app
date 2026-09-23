@@ -29,43 +29,49 @@ export function ShopBanner({
   const p = shopProgress(store.rewards, gold);
 
   return (
+    // A slim stall: awning, then one row (sign, gold, goal, button).
     <section aria-label="Item shop" className="shop-stall">
-      <div aria-hidden className="shop-awning" />
-      <div className="panel panel-wood rounded-t-none px-4 pb-4 pt-5">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="carved-sign rounded-[3px] px-3 py-1">
-            <GameHeading as="h2" size="md">
+      <div aria-hidden className="shop-awning shop-awning-slim" />
+      <div className="panel panel-wood rounded-t-none px-3 pb-3 pt-4 sm:px-4">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+          <span className="carved-sign rounded-[3px] px-2.5 py-0.5">
+            <GameHeading as="h2" size="sm">
               Item Shop
             </GameHeading>
           </span>
-          <p className="flex items-center gap-1.5 text-xl font-black tabular-nums text-gold text-shadow-pixel">
-            <CoinIcon className="h-6 w-6" />
+          <p className="flex items-center gap-1.5 text-lg font-black tabular-nums text-gold text-shadow-pixel">
+            <CoinIcon className="h-5 w-5" />
             {gold}
             <span className="sr-only"> gold</span>
           </p>
-          <Link href="/player/store" className={`${pixelButtonClass("gold", "md")} ml-auto`}>
+          <div className="order-last min-w-0 basis-full sm:order-none sm:basis-auto sm:flex-1">
+            {p.total === 0 ? (
+              <p className="text-sm font-bold">The merchant is restocking — check back soon!</p>
+            ) : p.affordable > 0 ? (
+              <p className="font-extrabold text-gold text-shadow-pixel">
+                {p.affordable} reward{p.affordable === 1 ? "" : "s"} within reach!
+              </p>
+            ) : (
+              p.next && (
+                <div className="space-y-1">
+                  <p className="text-sm font-bold">
+                    <span className="font-black text-gold text-shadow-pixel">{p.needed} more gold</span> to{" "}
+                    {p.next.title}
+                  </p>
+                  <GoldBar
+                    size="sm"
+                    value={p.progress}
+                    label={`Gold toward ${p.next.title}`}
+                    current={gold}
+                    max={p.next.gold_cost}
+                  />
+                </div>
+              )
+            )}
+          </div>
+          <Link href="/player/store" className={`${pixelButtonClass("gold", "sm")} ml-auto`}>
             Browse wares
           </Link>
-        </div>
-
-        <div className="mt-3">
-          {p.total === 0 ? (
-            <p className="font-bold">The merchant is restocking — check back soon!</p>
-          ) : p.affordable > 0 ? (
-            <p className="font-extrabold text-gold text-shadow-pixel">
-              {p.affordable} reward{p.affordable === 1 ? "" : "s"} within reach!
-            </p>
-          ) : (
-            p.next && (
-              <>
-                <p className="mb-1.5 font-bold">
-                  <span className="font-black text-gold text-shadow-pixel">{p.needed} more gold</span> to{" "}
-                  {p.next.title}
-                </p>
-                <GoldBar value={p.progress} label={`Gold toward ${p.next.title}`} current={gold} max={p.next.gold_cost} />
-              </>
-            )
-          )}
         </div>
       </div>
     </section>

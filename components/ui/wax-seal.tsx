@@ -6,9 +6,11 @@
  * seal's width even for two digits) so it reads as an impression, not a
  * sticker.
  */
-export function WaxSeal({ children }: { children?: React.ReactNode }) {
+export function WaxSeal({ children, size = "md" }: { children?: React.ReactNode; size?: "md" | "sm" }) {
   return (
-    <span className="relative flex h-10 w-10 shrink-0 items-center justify-center">
+    <span
+      className={`relative flex shrink-0 items-center justify-center ${size === "md" ? "h-10 w-10" : "h-7 w-7"}`}
+    >
       <svg viewBox="0 0 40 40" className="absolute inset-0 h-full w-full" aria-hidden>
         {/* Poured wax: a lumpy edge with a darker rim. */}
         <path
@@ -28,7 +30,8 @@ export function WaxSeal({ children }: { children?: React.ReactNode }) {
       </svg>
       {/* 14px black digits: "23" is ~16px wide (40% of the seal), "5" ~8px.
           Nunito's digits sit a touch high in their line box; nudge down. */}
-      <span className="relative translate-y-px text-sm font-black leading-none tabular-nums text-[#fff5f5] [text-shadow:0_1px_0_#6e1111,0_-1px_0_rgb(255_255_255/0.2)]">
+      {/* sm (28px, calendar cells): 11px digits, "23" ≈ 13px ≈ 46%. */}
+      <span className={`relative translate-y-px font-black leading-none tabular-nums ${size === "md" ? "text-sm" : "text-[11px]"} text-[#fff5f5] [text-shadow:0_1px_0_#6e1111,0_-1px_0_rgb(255_255_255/0.2)]`}>
         {children}
       </span>
     </span>

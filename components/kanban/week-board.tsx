@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   DndContext,
@@ -32,11 +32,21 @@ import { occurrencesByDay } from "@/lib/calendar/by-day";
 import type { CalendarOccurrence } from "@/lib/calendar/recurrence";
 import { useWeekBoard } from "@/lib/hooks/use-week-board";
 import { useCalendarEvents } from "@/lib/hooks/use-calendar-events";
-import { CheckIcon, ClockIcon, HourglassIcon, PadlockIcon, PinIcon, ScrollIcon, XIcon } from "@/components/ui/icons";
+import {
+  CheckIcon,
+  ChevronRight,
+  ClockIcon,
+  HourglassIcon,
+  PadlockIcon,
+  PinIcon,
+  ScrollIcon,
+  XIcon,
+} from "@/components/ui/icons";
 import { Modal } from "@/components/ui/modal";
 import { GameHeading } from "@/components/ui/game-heading";
 import { WaxSeal } from "@/components/ui/wax-seal";
 import { pixelButtonClass } from "@/components/ui/pixel-button";
+import { useOptionalBattleContext } from "@/components/rpg/battle/battle-provider";
 import { WeekNav, syncWeekParam } from "./week-nav";
 
 type Props = {
@@ -81,6 +91,8 @@ export function WeekBoard({
   // The family calendar, live: its month grid always covers this week.
   const calendar = useCalendarEvents({ familyId, timeZone, month: monthKeyOf(week), initialEvents });
   const [activeId, setActiveId] = useState<string | null>(null);
+  // Phone only: past days of the current week fold into one row.
+  const [showEarlier, setShowEarlier] = useState(false);
   const [prompt, setPrompt] = useState<DropPrompt | null>(null);
   const [error, setError] = useState<string | null>(null);
   const errorTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -100,6 +112,8 @@ export function WeekBoard({
   );
 
   const days = useMemo(() => weekDays(week), [week]);
+  // Past days of a week that includes today (none for past or future weeks).
+  const earlierDays = days.includes(today) ? days.filter((d) => d < today) : [];
   // Fixed notices per day: recurring events expanded like the calendar does.
   const noticesByDay = useMemo(
     () => occurrencesByDay(calendar.events, days[0], days[6], timeZone, today),
@@ -240,7 +254,8 @@ export function WeekBoard({
           buttonClassName={`${pixelButtonClass("stone", "sm")} min-w-9`}
           title={<CarvedSign week={week} />}
           extra={
-            <Link href={`/player/quest-log?month=${monthKeyOf(week)}`} className={pixelButtonClass("gold", "sm")}>
+            // Stone, not gold: gold is kept for money and rewards.
+            <Link href={`/player/quest-log?month=${monthKeyOf(week)}`} className={pixelButtonClass("stone", "sm")}>
               See whole month
             </Link>
           }
@@ -270,11 +285,25 @@ export function WeekBoard({
             />
 
             <div className="mt-4 grid grid-cols-1 gap-2 md:grid-cols-7 md:gap-1.5">
+              {/* Phone: this week's past days fold into "Earlier this week"
+                  so the list starts at today (desktop keeps all seven). */}
+              {earlierDays.length > 0 && (
+                <EarlierThisWeek
+                  days={earlierDays}
+                  done={earlierDays.reduce(
+                    (n, d) => n + (slotsByDay.get(d) ?? []).filter((x) => x.status === "completed").length,
+                    0,
+                  )}
+                  open={showEarlier}
+                  onToggle={() => setShowEarlier((o) => !o)}
+                />
+              )}
               {days.map((day) => {
                 const daySlots = slotsByDay.get(day) ?? [];
                 return (
                   <DayColumn
                     key={day}
+                    className={earlierDays.includes(day) && !showEarlier ? "max-md:hidden" : ""}
                     day={day}
                     isToday={day === today}
                     isPast={day < today}
@@ -469,10 +498,13 @@ function PoolCard({
 /**
  * One day on the board, top to bottom: a plaque (day + date; a wax seal on
  * today), the day's fixed calendar events as locked notices (only if there
- * are any), a "+ Quests" divider, then the quest drop zone. The whole column
- * accepts drops. On a phone, a day with nothing on it collapses to one line.
+ * are any, then a "+ Quests" divider), then the quest drop zone. The whole
+ * column accepts drops — except past days, which take none (the database
+ * refuses them for a child too). On a phone, a day with no quests and
+ * nothing fixed, or any past day without quests, collapses to one line.
  */
 function DayColumn({
+  className = "",
   day,
   isToday,
   isPast,
@@ -482,6 +514,7 @@ function DayColumn({
   hasQuests,
   children,
 }: {
+  className?: string;
   day: string;
   isToday: boolean;
   isPast: boolean;
@@ -491,12 +524,12 @@ function DayColumn({
   hasQuests: boolean;
   children: React.ReactNode;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: `day:${day}` });
-  const compact = !hasQuests && notices.length === 0;
+  const { setNodeRef, isOver } = useDroppable({ id: `day:${day}`, disabled: isPast });
+  const compact = !hasQuests && (notices.length === 0 || isPast);
   return (
     <div
       ref={setNodeRef}
-      className={`day-slot relative flex min-w-0 flex-col gap-1.5 rounded-[3px] p-1.5 md:min-h-56 md:p-1 ${
+      className={`day-slot relative flex min-w-0 flex-col gap-1.5 rounded-[3px] p-1.5 md:min-h-56 md:p-1 ${className} ${
         isToday ? "day-today" : ""
       } ${isPast ? "day-past" : ""} ${compact ? "max-md:flex-row max-md:items-center max-md:gap-2" : ""}`}
     >
@@ -516,21 +549,65 @@ function DayColumn({
         </section>
       )}
 
-      <p className={`flex items-center gap-1.5 px-0.5 md:gap-1 ${compact ? "max-md:hidden" : ""}`} aria-hidden>
-        <span className="h-0.5 min-w-1 flex-1 bg-parchment/35" />
-        <span className="whitespace-nowrap font-display text-sm font-semibold leading-none text-parchment">+ Quests</span>
-        <span className="h-0.5 min-w-1 flex-1 bg-parchment/35" />
-      </p>
+      {/* Only needed to separate the quests from fixed items above them. */}
+      {notices.length > 0 && (
+        <p className={`flex items-center gap-1.5 px-0.5 md:gap-1 ${compact ? "max-md:hidden" : ""}`} aria-hidden>
+          <span className="h-0.5 min-w-1 flex-1 bg-parchment/35" />
+          <span className="whitespace-nowrap font-display text-sm font-semibold leading-none text-parchment">
+            + Quests
+          </span>
+          <span className="h-0.5 min-w-1 flex-1 bg-parchment/35" />
+        </p>
+      )}
 
       <div
         className={`flex min-w-0 flex-1 flex-col gap-1.5 rounded-[3px] ${
-          isOver ? "drop-over" : dragging ? "drop-ready" : ""
+          isPast ? "" : isOver ? "drop-over" : dragging ? "drop-ready" : ""
         }`}
       >
         {children}
-        {!hasQuests && <EmptyQuestSlot compact={compact} />}
+        {!hasQuests &&
+          (isPast ? (
+            <p className="px-1 text-sm font-bold text-parchment/70 md:text-center md:text-xs">No quests</p>
+          ) : (
+            <EmptyQuestSlot compact={compact} />
+          ))}
       </div>
     </div>
+  );
+}
+
+/** Phone only: the folded row for this week's past days (tap to expand). */
+function EarlierThisWeek({
+  days,
+  done,
+  open,
+  onToggle,
+}: {
+  days: string[];
+  done: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-expanded={open}
+      className="plaque flex w-full items-center gap-2 px-3 py-2 text-left md:hidden"
+    >
+      <ChevronRight className={`h-4 w-4 shrink-0 text-parchment transition-transform motion-reduce:transition-none ${open ? "rotate-90" : ""}`} />
+      <span className="shrink-0 whitespace-nowrap font-display text-sm font-semibold uppercase tracking-wide text-parchment">
+        Earlier this week
+      </span>
+      <span className="ml-auto min-w-0 truncate text-sm font-bold text-parchment/80">
+        <span className="sr-only">
+          {formatWeekdayShort(days[0])}
+          {days.length > 1 ? ` to ${formatWeekdayShort(days[days.length - 1])}` : ""},{" "}
+        </span>
+        {done} done
+      </span>
+    </button>
   );
 }
 
@@ -571,11 +648,14 @@ function Notice({ notice, timeZone }: { notice: CalendarOccurrence; timeZone: st
   );
 }
 
-/** Where a quest can go: a dotted slot with a faint scroll (one line on a phone). */
+/**
+ * Where a quest can go: a dotted slot with a faint scroll, anchored at the
+ * top of the drop zone (one line on a phone).
+ */
 function EmptyQuestSlot({ compact }: { compact: boolean }) {
   return (
     <div
-      className={`flex flex-1 items-center justify-center gap-2 rounded-[3px] border-2 border-dashed border-parchment/35 px-2 text-parchment/80 ${
+      className={`flex items-center justify-center gap-2 rounded-[3px] border-2 border-dashed border-parchment/35 px-2 text-parchment/80 ${
         compact ? "min-h-10 max-md:justify-start" : "min-h-14"
       } md:min-h-24 md:flex-col md:gap-1`}
     >
@@ -618,6 +698,17 @@ function SlotCard({
   );
 }
 
+/** Wait this long after a quest locks before folding it: the hit overlay's
+ *  damage event can arrive a moment after the slot update. */
+const COLLAPSE_GRACE_MS = 700;
+
+/**
+ * A placed quest. To do: title and minutes, then a big 44px tick button
+ * (ticking can't be undone once the damage lands). Once completed and
+ * locked — or missed — it folds into a slim strip (title, minutes, stamp,
+ * small check), waiting until the hit overlay has finished so the fold
+ * doesn't happen under it (instant with reduced motion, via CSS).
+ */
 function SlotCardView({
   slot,
   pool,
@@ -636,6 +727,23 @@ function SlotCardView({
   // Completing a slot strikes the boss instantly and locks it (no un-tick).
   const locked = slot.applied_to_boss;
   const color = poolColor(pool.color);
+  const overlayActive = useOptionalBattleContext()?.overlayActive ?? false;
+
+  // Folded strip: already-finished quests start folded; newly finished ones
+  // fold after the overlay (and a short grace) — see COLLAPSE_GRACE_MS.
+  const finished = (locked && !missed) || missed;
+  const [collapsed, setCollapsed] = useState(finished);
+  if (!finished && collapsed) setCollapsed(false);
+  useEffect(() => {
+    if (!finished || collapsed || overlayActive) return;
+    const t = setTimeout(() => setCollapsed(true), COLLAPSE_GRACE_MS);
+    return () => clearTimeout(t);
+  }, [finished, collapsed, overlayActive]);
+
+  const label = `${pool.title}, ${formatMinutes(slot.duration_minutes)}${
+    missed ? ", missed" : locked ? ", done. Damage dealt" : done ? ", done. Tap to undo" : ". Tap when done"
+  }`;
+
   return (
     <div
       // Full title on hover (and for long-press previews) when it's clamped.
@@ -646,73 +754,81 @@ function SlotCardView({
         done ? "bg-[#d3f9d8]" : missed ? "quest-missed bg-parchment-dark" : "bg-parchment"
       } ${overlay ? "note-lifted" : "shadow-[2px_2px_0_rgb(0_0_0/0.4)]"} ${
         isTemp(slot) ? "animate-pulse motion-reduce:animate-none" : ""
-      }`}
+      } ${collapsed ? "slot-collapsed" : ""}`}
     >
       <span aria-hidden className="w-1.5 shrink-0 md:w-1" style={{ backgroundColor: color }} />
-      {/* Title gets its own full-width line; status + duration (+ stamp, ×)
-          sit below it, so narrow 7-column days never squeeze the title. */}
-      <button
-        type="button"
-        onClick={onToggle}
-        disabled={!onToggle || missed || locked || isTemp(slot)}
-        aria-pressed={done}
-        aria-label={`${pool.title}, ${formatMinutes(slot.duration_minutes)}${
-          missed
-            ? ", missed"
-            : locked
-              ? ", done. Damage dealt"
-              : done
-                ? ", done. Tap to undo"
-                : ". Tap when done"
-        }`}
-        className="min-w-0 flex-1 px-2 py-1.5 text-left disabled:cursor-default md:px-1"
-      >
-        <span
-          // Up to two lines, wrapping at word boundaries (hyphenating a long
-          // single word rather than chopping it), then an ellipsis. Full body
-          // size in the single-column (phone) layout; seven desktop columns
-          // (~60px of text) only fit 12px bold without splitting words.
-          className="line-clamp-2 break-words hyphens-auto text-base font-extrabold leading-tight md:text-xs md:font-bold"
-        >
-          {pool.title}
-        </span>
-        {/* The stamp sits in this row and wraps to its own line on narrow
-            desktop columns rather than covering the minutes. */}
-        <span className={`mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 ${onRemove ? "pr-6" : ""}`}>
+      <div className="min-w-0 flex-1 px-2 py-1.5 md:px-1 md:py-1">
+        {/* Header: always shown. Folded, it's the whole strip: title,
+            minutes, stamp and a small check (wrapping to two short lines in
+            narrow desktop columns). */}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
           <span
-            aria-hidden
-            className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-[2px] border-2 ${
-              done ? "border-[#2b8a3e] bg-party text-ink" : "border-ink-soft bg-white/60"
+            className={`min-w-0 break-words hyphens-auto font-extrabold leading-tight md:text-xs md:font-bold ${
+              // Folded: one line on a phone; narrow desktop columns give the
+              // title its own line, with minutes + stamp + check below.
+              collapsed ? "flex-1 truncate text-sm md:basis-full" : "line-clamp-2 basis-full text-base"
             }`}
           >
-            {done && <CheckIcon className="h-2.5 w-2.5" />}
+            {pool.title}
           </span>
-          <span className="truncate text-sm font-bold text-ink-soft md:text-xs">
+          <span className="shrink-0 text-sm font-bold text-ink-soft md:text-xs">
             {formatMinutes(slot.duration_minutes)}
           </span>
-          {/* Ink stamps (the aria-label above already says it). */}
-          {locked && !missed && (
-            <span aria-hidden className="ink-stamp ink-stamp-hit">
-              Hit!
+          {collapsed && (
+            <span className="slot-mini ml-auto flex shrink-0 items-center gap-1">
+              {/* Ink stamps (the button's label already says it). */}
+              <span aria-hidden className={`ink-stamp ${missed ? "ink-stamp-missed" : "ink-stamp-hit"}`}>
+                {missed ? "Missed" : "Hit!"}
+              </span>
+              <span
+                role="img"
+                aria-label={label}
+                className={`flex h-5 w-5 items-center justify-center rounded-[2px] border-2 ${
+                  missed ? "border-[#868e96] text-[#495057]" : "border-[#2b8a3e] bg-party text-ink"
+                }`}
+              >
+                {missed ? <XIcon className="h-3 w-3" /> : <CheckIcon className="h-3 w-3" />}
+              </span>
             </span>
           )}
-          {missed && (
-            <span aria-hidden className="ink-stamp ink-stamp-missed">
-              Missed
-            </span>
+          {onRemove && (
+            <button
+              type="button"
+              onClick={onRemove}
+              aria-label={`Remove ${pool.title} slot`}
+              className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-[2px] text-ink-soft hover:bg-ink/10 hover:text-ink"
+            >
+              <XIcon className="h-4 w-4" />
+            </button>
           )}
-        </span>
-      </button>
-      {onRemove && (
-        <button
-          type="button"
-          onClick={onRemove}
-          aria-label={`Remove ${pool.title} slot`}
-          className="absolute bottom-0.5 right-0.5 flex h-6 w-6 items-center justify-center rounded-[2px] text-ink-soft hover:bg-ink/10 hover:text-ink"
-        >
-          <XIcon className="h-3.5 w-3.5" />
-        </button>
-      )}
+        </div>
+
+        {/* The big tick row: folds away once the quest is finished. */}
+        <div className="slot-body" aria-hidden={collapsed || undefined}>
+          <div className="min-h-0">
+            <div className="flex items-center gap-2 pt-1.5">
+              <button
+                type="button"
+                onClick={onToggle}
+                disabled={!onToggle || missed || locked || isTemp(slot)}
+                tabIndex={collapsed ? -1 : undefined}
+                aria-pressed={done}
+                aria-label={label}
+                className={`tick-btn ${done ? "tick-done" : ""} ${locked ? "tick-locked" : ""} ${missed ? "tick-missed" : ""}`}
+              >
+                {missed ? (
+                  <XIcon className="h-5 w-5" />
+                ) : (
+                  <CheckIcon className={`h-6 w-6 ${done ? "" : "opacity-20"}`} />
+                )}
+              </button>
+              {!done && !missed && (
+                <span className="text-sm font-bold text-ink-soft md:hidden">Done? Tap the tick</span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
