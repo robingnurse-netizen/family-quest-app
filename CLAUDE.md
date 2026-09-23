@@ -325,9 +325,12 @@ PROJECT STATUS:
     in localStorage) → components/rpg/battle/celebrations.tsx shows the
     cards after any hit sequence.
   * TESTS: `npm test` (node:test + PGlite, tests/). tests/helpers/db.mjs
-    loads every migration behind a minimal Supabase shim; files:
-    xp-level-streak.test.mjs, slot-guard.test.mjs. This is the start of
-    the permanent suite — add new engine rules' tests here.
+    loads every migration behind a minimal Supabase shim (with Supabase's
+    default grants, so asUser()/tryAsUser() run as `authenticated` and
+    RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
+    Files: xp-level-streak, slot-guard, boss-engine, rewards-store
+    (.test.mjs). This is the permanent suite — add new engine rules'
+    tests here.
 
 PARKED — future items, NOT to be built until asked:
 - FUTURE — Evergreen play:
@@ -339,10 +342,12 @@ PARKED — future items, NOT to be built until asked:
     Behemoth in a Santa hat) placed via the manifest anchor points, or
     seasonal bosses tied to calendar dates.
 - FUTURE — Test suite: STARTED (npm test; tests/, see "XP, Level &
-  Streak"). Covered so far: slot guard, XP, levels, streaks. Still to add
-  before production use: pool integrity (allocation / week bounds), the
-  boss engine + instant damage (strike, defeat, escape, gold split,
-  activation) and the rewards store triggers.
+  Streak"). Covered so far: slot guard, XP, levels, streaks, the boss
+  engine + instant damage (roster, activation order, strike, defeat, gold
+  split, escape, nightly reset, API access) and the rewards store (ledger
+  triggers + RLS). Still to add before production use: pool integrity
+  (allocation / week bounds). Not testable in PGlite: true concurrency
+  (row-lock serialization of redemptions / strikes).
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at

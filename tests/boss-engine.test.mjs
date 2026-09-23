@@ -1,0 +1,344 @@
+// The boss engine: roster + activation (…06), instant damage and
+// finish_boss (…08, …11), and the nightly reset's misses / escape / refill.
+import { test, before } from "node:test";
+import assert from "node:assert/strict";
+import {
+  freshDb, as, tryAsUser, makeFamily, makePool, makeSlot, stats, slot, activeBoss, londonToday, addDays, mondayOf, setBossHp,
+} from "./helpers/db.mjs";
+
+let db;
+before(async () => {
+  db = await freshDb();
+});
+
+const tick = (uid, id) => as(db, uid, "update public.task_slots set status = 'completed' where id = $1", [id]);
+const reset = async (familyId, today) =>
+  (await db.query("select public.run_daily_reset($1, $2) as r", [familyId, today])).rows[0].r;
+const finish = (bossId, outcome, today) =>
+  db.query("select public.finish_boss($1, $2, $3) as r", [bossId, outcome, today]);
+
+async function bossById(id) {
+  const { rows } = await db.query("select * from public.bosses where id = $1", [id]);
+  return rows[0];
+}
+async function party(familyId) {
+  const { rows } = await db.query("select current_hp, max_hp from public.party_health where family_id = $1", [familyId]);
+  return rows[0];
+}
+async function log(bossId, eventType) {
+  const { rows } = await db.query(
+    "select amount, child_id, source_task_slot_id from public.boss_log where boss_id = $1 and event_type = $2 order by created_at, id",
+    [bossId, eventType],
+  );
+  return rows;
+}
+/** A child's quest on `day`, in its own pool. */
+async function quest(familyId, childId, day, minutes) {
+  const pool = await makePool(db, { familyId, childId, day, minutes: Math.max(minutes, 600) });
+  return makeSlot(db, { poolId: pool, day, minutes });
+}
+
+// --- Roster & activation ------------------------------------------------------
+
+test("a new family gets the 8-boss roster, with Trash-Bag Slime active at full HP", async () => {
+  const { familyId } = await makeFamily(db);
+  const { rows } = await db.query(
+    "select name, tier, status from public.bosses where family_id = $1 order by tier desc, queue_position",
+    [familyId],
+  );
+  assert.equal(rows.length, 8);
+  assert.deepEqual(rows.map((r) => r.tier), ["low", "low", "low", "low", "epic", "epic", "epic", "epic"]);
+  assert.deepEqual(rows.filter((r) => r.status === "active").map((r) => r.name), ["Trash-Bag Slime"]);
+
+  const boss = await activeBoss(db, familyId);
+  assert.equal(boss.current_hp, boss.max_hp);
+  const today = await londonToday(db);
+  assert.equal(boss.week_start_date.toISOString().slice(0, 10), mondayOf(today));
+  assert.equal((await log(boss.id, "activated")).length, 1);
+});
+
+test("bosses activate low tier first, in queue order, then epic; then none", async () => {
+  const { familyId } = await makeFamily(db);
+  const today = await londonToday(db);
+  const order = [];
+  for (let i = 0; i < 8; i++) {
+    const boss = await activeBoss(db, familyId);
+    order.push(boss.name);
+    await finish(boss.id, i % 2 ? "escaped" : "defeated", today);
+  }
+  assert.deepEqual(order, [
+    "Trash-Bag Slime", "Alarm Clock Swarm", "Laundry Goblin", "Cable Spider",
+    "Magma Behemoth", "Chronosphinx", "Abyssal Kraken", "Shogun-Bot",
+  ]);
+  assert.equal(await activeBoss(db, familyId), null);
+  const { rows } = await db.query("select public.activate_next_boss($1, $2) as id", [familyId, today]);
+  assert.equal(rows[0].id, null, "nothing left to activate");
+});
+
+test("activation is a no-op while a boss is already active", async () => {
+  const { familyId } = await makeFamily(db);
+  const before = await activeBoss(db, familyId);
+  const { rows } = await db.query("select public.activate_next_boss($1, $2) as id", [familyId, await londonToday(db)]);
+  assert.equal(rows[0].id, null);
+  const { rows: active } = await db.query("select id from public.bosses where family_id = $1 and status = 'active'", [familyId]);
+  assert.deepEqual(active.map((r) => r.id), [before.id]);
+});
+
+test("finish_boss only finishes an active boss, once", async () => {
+  const { familyId } = await makeFamily(db);
+  const today = await londonToday(db);
+  const boss = await activeBoss(db, familyId);
+  const first = (await finish(boss.id, "defeated", today)).rows[0].r;
+  assert.equal(first.finished, true);
+  const again = (await finish(boss.id, "escaped", today)).rows[0].r;
+  assert.equal(again.finished, false);
+  assert.equal((await bossById(boss.id)).status, "defeated");
+  await assert.rejects(finish((await activeBoss(db, familyId)).id, "fled", today), /invalid outcome/);
+});
+
+// --- Instant damage -----------------------------------------------------------
+
+test("completing a quest strikes the active boss at once: 1 minute = 1 damage, logged", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  const today = await londonToday(db);
+  const boss = await activeBoss(db, familyId);
+  const s = await quest(familyId, kid, today, 15);
+
+  await tick(kid, s);
+
+  assert.equal((await bossById(boss.id)).current_hp, boss.max_hp - 15);
+  assert.deepEqual(await log(boss.id, "damage"), [{ amount: 15, child_id: kid, source_task_slot_id: s }]);
+  const after = await slot(db, s);
+  assert.equal(after.applied_to_boss, true);
+  assert.ok(after.completed_at, "completed_at set");
+});
+
+test("a parent or SQL completion strikes too, credited to the pool's child", async () => {
+  const { familyId, parentId, childIds: [kid] } = await makeFamily(db);
+  const today = await londonToday(db);
+  const boss = await activeBoss(db, familyId);
+  const s1 = await quest(familyId, kid, today, 10);
+  const s2 = await quest(familyId, kid, today, 5);
+  await tick(parentId, s1);
+  await tick(null, s2);
+  assert.equal((await bossById(boss.id)).current_hp, boss.max_hp - 15);
+  assert.deepEqual((await log(boss.id, "damage")).map((r) => r.child_id), [kid, kid]);
+});
+
+test("damage is dealt once: no strike for re-saving a completed slot or for other edits", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  const today = await londonToday(db);
+  const boss = await activeBoss(db, familyId);
+  const s = await quest(familyId, kid, today, 10);
+  await tick(kid, s);
+  await db.query("update public.task_slots set status = 'completed', sort_order = 3 where id = $1", [s]);
+  // Even un-ticked and re-ticked by SQL (bypassing the child guard).
+  await db.query("update public.task_slots set status = 'scheduled' where id = $1", [s]);
+  await db.query("update public.task_slots set status = 'completed' where id = $1", [s]);
+  assert.equal((await bossById(boss.id)).current_hp, boss.max_hp - 10);
+  assert.equal((await log(boss.id, "damage")).length, 1);
+});
+
+test("a quest ticked while no boss is active does no damage and stays unapplied", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  await db.query("update public.bosses set status = 'defeated' where family_id = $1", [familyId]);
+  const today = await londonToday(db);
+  const s = await quest(familyId, kid, today, 20);
+  await tick(kid, s);
+  assert.equal((await slot(db, s)).applied_to_boss, false);
+  const { rows } = await db.query(
+    "select count(*)::int as n from public.boss_log l join public.bosses b on b.id = l.boss_id where b.family_id = $1 and l.event_type = 'damage'",
+    [familyId],
+  );
+  assert.equal(rows[0].n, 0);
+});
+
+test("the final blow defeats the boss (overkill floors at 0), pays gold and brings on the next", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  const today = await londonToday(db);
+  const boss = await activeBoss(db, familyId);
+  await setBossHp(db, familyId, 20);
+  const s = await quest(familyId, kid, today, 45);
+
+  await tick(kid, s);
+
+  const done = await bossById(boss.id);
+  assert.equal(done.status, "defeated");
+  assert.equal(done.current_hp, 0);
+  assert.deepEqual((await log(boss.id, "defeated")).map((r) => r.amount), [25], "low tier: 25 gold");
+  assert.deepEqual(await log(boss.id, "gold_awarded"), [{ amount: 25, child_id: kid, source_task_slot_id: null }]);
+  assert.equal((await stats(db, kid)).gold, 25);
+
+  const next = await activeBoss(db, familyId);
+  assert.equal(next.name, "Alarm Clock Swarm");
+  assert.equal(next.current_hp, next.max_hp, "overkill doesn't carry over");
+});
+
+test("gold is split by damage share; the rounding remainder goes to the top damage dealer", async () => {
+  const { familyId, childIds: [a, b, c] } = await makeFamily(db, { children: 3 });
+  const today = await londonToday(db);
+  const boss = await activeBoss(db, familyId);
+  await setBossHp(db, familyId, 70);
+  // Damage 30 / 20 / 20 of 70 → 25 × share = 10.7 / 7.1 / 7.1 → 10 / 7 / 7, +1 to a.
+  await tick(a, await quest(familyId, a, today, 30));
+  await tick(b, await quest(familyId, b, today, 20));
+  await tick(c, await quest(familyId, c, today, 20));
+
+  assert.equal((await bossById(boss.id)).status, "defeated");
+  assert.deepEqual(
+    [(await stats(db, a)).gold, (await stats(db, b)).gold, (await stats(db, c)).gold],
+    [11, 7, 7],
+  );
+  const awarded = await log(boss.id, "gold_awarded");
+  assert.equal(awarded.reduce((n, r) => n + r.amount, 0), 25, "exactly the tier's gold, no more, no less");
+});
+
+test("epic bosses pay 100 gold", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  const today = await londonToday(db);
+  for (let i = 0; i < 4; i++) await finish((await activeBoss(db, familyId)).id, "escaped", today);
+  const epic = await activeBoss(db, familyId);
+  assert.equal(epic.tier, "epic");
+  await setBossHp(db, familyId, 10);
+  await tick(kid, await quest(familyId, kid, today, 10));
+  assert.deepEqual((await log(epic.id, "defeated")).map((r) => r.amount), [100]);
+  assert.equal((await stats(db, kid)).gold, 100);
+});
+
+// --- Nightly reset ------------------------------------------------------------
+// Days far in the future, driven through run_daily_reset(family, today).
+
+const D = "2031-03-05"; // a Wednesday
+
+test("the reset marks past open quests missed and hurts the party by their minutes", async () => {
+  const { familyId, childIds: [a, b] } = await makeFamily(db, { children: 2 });
+  const boss = await activeBoss(db, familyId);
+  const missA = await quest(familyId, a, D, 10);
+  const missB = await quest(familyId, b, D, 15);
+  const todays = await quest(familyId, a, addDays(D, 1), 20); // "today": not missed yet
+  const done = await quest(familyId, a, D, 5);
+  await db.query("update public.task_slots set status = 'completed' where id = $1", [done]);
+
+  const r = await reset(familyId, addDays(D, 1));
+
+  assert.equal((await slot(db, missA)).status, "missed");
+  assert.equal((await slot(db, missB)).status, "missed");
+  assert.equal((await slot(db, todays)).status, "scheduled");
+  assert.equal((await slot(db, done)).status, "completed");
+  assert.equal(r.missed_minutes, 25);
+  assert.equal(r.party_damage, 25);
+  assert.equal((await party(familyId)).current_hp, 75);
+  assert.deepEqual(
+    (await log(boss.id, "miss_penalty")).map((x) => [x.child_id, x.amount]).sort(),
+    [[a, 10], [b, 15]].sort(),
+  );
+  assert.equal((await bossById(boss.id)).status, "active", "party still standing: boss stays");
+});
+
+test("running the reset twice for the same day doesn't double the penalty", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  await quest(familyId, kid, D, 30);
+  await reset(familyId, addDays(D, 1));
+  const second = await reset(familyId, addDays(D, 1));
+  assert.equal(second.party_damage, 0);
+  assert.equal((await party(familyId)).current_hp, 70);
+});
+
+test("party at 0: the boss escapes with its HP logged, the next boss comes, the party refills", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  const boss = await activeBoss(db, familyId);
+  await db.query("update public.bosses set current_hp = 42 where id = $1", [boss.id]);
+  await quest(familyId, kid, D, 150); // more than the party's 100 HP
+
+  const r = await reset(familyId, addDays(D, 1));
+
+  assert.equal((await bossById(boss.id)).status, "escaped");
+  assert.equal(r.escaped, boss.id);
+  assert.deepEqual((await log(boss.id, "escaped")).map((x) => x.amount), [42]);
+  assert.equal((await log(boss.id, "gold_awarded")).length, 0, "no gold for an escape");
+  assert.equal((await stats(db, kid)).gold, 0);
+  const p = await party(familyId);
+  assert.equal(p.current_hp, p.max_hp);
+  const next = await activeBoss(db, familyId);
+  assert.equal(next.name, "Alarm Clock Swarm");
+  assert.equal(r.activated, next.id);
+  assert.equal(next.week_start_date.toISOString().slice(0, 10), mondayOf(addDays(D, 1)), "week of the reset day");
+});
+
+test("safety net: a boss left active at 0 HP is defeated by the reset, with its gold", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  const boss = await activeBoss(db, familyId);
+  await db.query(
+    "insert into public.boss_log (boss_id, event_type, amount, child_id) values ($1, 'damage', 60, $2)",
+    [boss.id, kid],
+  );
+  await db.query("update public.bosses set current_hp = 0 where id = $1", [boss.id]);
+
+  const r = await reset(familyId, addDays(D, 1));
+
+  assert.equal(r.defeated, boss.id);
+  assert.equal((await bossById(boss.id)).status, "defeated");
+  assert.equal((await stats(db, kid)).gold, 25);
+  assert.equal((await activeBoss(db, familyId)).name, "Alarm Clock Swarm");
+});
+
+test("with no boss left, misses are still marked but the party isn't hurt", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  await db.query("update public.bosses set status = 'defeated' where family_id = $1", [familyId]);
+  const s = await quest(familyId, kid, D, 30);
+  const r = await reset(familyId, addDays(D, 1));
+  assert.equal((await slot(db, s)).status, "missed");
+  assert.equal(r.party_damage, 0);
+  assert.equal((await party(familyId)).current_hp, 100);
+});
+
+test("the reset only touches its own family", async () => {
+  const one = await makeFamily(db);
+  const two = await makeFamily(db);
+  const s = await quest(two.familyId, two.childIds[0], D, 30);
+  await reset(one.familyId, addDays(D, 1));
+  assert.equal((await slot(db, s)).status, "scheduled");
+  assert.equal((await party(two.familyId))?.current_hp ?? 100, 100);
+});
+
+// --- Access -------------------------------------------------------------------
+
+test("engine functions can't be called through the API, except the reset by the service role", async () => {
+  const { familyId, parentId, childIds: [kid] } = await makeFamily(db);
+  const boss = await activeBoss(db, familyId);
+  for (const uid of [kid, parentId]) {
+    for (const [sql, params] of [
+      ["select public.run_daily_reset($1)", [familyId]],
+      ["select public.run_daily_reset_all()", []],
+      ["select public.finish_boss($1, 'defeated', current_date)", [boss.id]],
+      ["select public.activate_next_boss($1, current_date)", [familyId]],
+      ["select public.seed_family_bosses($1)", [familyId]],
+      ["select public.award_xp($1, 1000)", [kid]],
+    ]) {
+      assert.match((await tryAsUser(db, uid, sql, params)) ?? "", /permission denied/, sql);
+    }
+  }
+  const { rows } = await db.query(
+    "select has_function_privilege('service_role', 'public.run_daily_reset(uuid, date)', 'execute') as reset, has_function_privilege('service_role', 'public.run_daily_reset_all()', 'execute') as reset_all",
+  );
+  assert.deepEqual(rows[0], { reset: true, reset_all: true });
+  assert.equal((await bossById(boss.id)).status, "active");
+});
+
+test("a child can't write bosses, the boss log or the party's health directly", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  const boss = await activeBoss(db, familyId);
+  const hit = async (sql, params) => {
+    const err = await tryAsUser(db, kid, sql, params);
+    return err === null ? "ok" : err;
+  };
+  await hit("update public.bosses set current_hp = 0 where id = $1", [boss.id]);
+  await hit("update public.party_health set current_hp = 1 where family_id = $1", [familyId]);
+  assert.notEqual(
+    await hit("insert into public.boss_log (boss_id, event_type, amount, child_id) values ($1, 'damage', 999, $2)", [boss.id, kid]),
+    "ok",
+  );
+  // RLS silently filters the updates to zero rows; nothing changed.
+  assert.equal((await bossById(boss.id)).current_hp, boss.max_hp);
+  assert.equal((await party(familyId))?.current_hp ?? 100, 100);
+});

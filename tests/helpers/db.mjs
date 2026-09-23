@@ -27,6 +27,11 @@ const SHIM = `
     $$ select nullif(current_setting('app.uid', true), '')::uuid $$;
   create role anon; create role authenticated; create role service_role;
   create publication supabase_realtime;
+  -- Supabase's default privileges: the API roles get every table and
+  -- function in public; RLS and the migrations' revokes narrow that down.
+  grant usage on schema public to anon, authenticated, service_role;
+  alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+  alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
 `;
 
 export async function freshDb() {
@@ -47,6 +52,30 @@ export async function as(db, uid, sql, params = []) {
     return await db.query(sql, params);
   } finally {
     await db.exec("set app.uid = ''");
+  }
+}
+
+/**
+ * Run `sql` as a signed-in user through the API: the `authenticated` role,
+ * so RLS policies and grants apply (unlike `as`, which stays superuser and
+ * only sets auth.uid()).
+ */
+export async function asUser(db, uid, sql, params = []) {
+  await db.exec(`set app.uid = '${uid}'; set role authenticated`);
+  try {
+    return await db.query(sql, params);
+  } finally {
+    await db.exec("reset role; set app.uid = ''");
+  }
+}
+
+/** Like `asUser`, but returns the error message instead of throwing. */
+export async function tryAsUser(db, uid, sql, params = []) {
+  try {
+    await asUser(db, uid, sql, params);
+    return null;
+  } catch (e) {
+    return e.message;
   }
 }
 
