@@ -74,6 +74,10 @@ PROJECT STATUS:
     Clock Swarm idle/move/hurt/death; Slime hurt/death; Goblin death) are
     static; Chronosphinx attack frames 3–4 share an overlapping beam;
     Shogun-Bot idle drops sheet frames 5 and 7 (sword flash).
+  * Future art requirement (not built): when the sprite art is redone,
+    boss idle should reflect current_hp — pristine above ~66%, worn at
+    ~33–66%, heavily damaged below ~33% — instead of one idle loop at
+    every HP.
 - RPG Phase B2 — Boss Battle Rendering: COMPLETE. BossStatus (both
   dashboards) shows the active boss's sprite reacting to Realtime events:
   boss_log damage / miss_penalty → hurt once (epic bosses use the first 3
