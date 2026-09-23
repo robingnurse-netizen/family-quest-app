@@ -247,7 +247,12 @@ export function WeekBoard({
           </div>
         </div>
 
-        <DragOverlay dropAnimation={null}>{active}</DragOverlay>
+        {/* The overlay sits under the pointer on release. It must not catch
+            the mouseup: a slot overlay contains a disabled button, and
+            disabled controls swallow mouse events, so the drag never ended. */}
+        <DragOverlay dropAnimation={null} className="pointer-events-none">
+          {active}
+        </DragOverlay>
       </DndContext>
 
       <Modal
