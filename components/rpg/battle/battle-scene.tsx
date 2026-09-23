@@ -8,6 +8,7 @@ import { AnchoredSprite, needsMirror } from "@/components/rpg/sprites/anchored-s
 import { BossSprite } from "@/components/rpg/boss/boss-sprite";
 import { CoinIcon, FlameIcon, HeartIcon, ShieldIcon, SkullIcon, StarIcon } from "@/components/ui/icons";
 import { useBattleContext, useBattleEvents } from "./battle-provider";
+import { SoundToggle } from "@/components/ui/sound-toggle";
 import { HudBar } from "./hud-bar";
 import { usePlayerStats, type LiveStats } from "@/lib/hooks/use-player-stats";
 import { levelProgress } from "@/lib/rpg/levels";
@@ -152,6 +153,8 @@ export function BattleScene({
         </div>
 
         <EventBanner caption={stage.caption} playKey={stage.playKey} />
+        {/* Sound effects on/off, in the empty sky above the hero. */}
+        <SoundToggle className="absolute left-2 top-2 z-30" />
       </div>
 
       {/* HUD: the party (left, under the hero) and the boss (right) as
@@ -250,7 +253,7 @@ function EventBanner({ caption, playKey }: { caption: string | null; playKey: nu
         <p
           key={`${playKey}-${caption}`}
           aria-hidden
-          className="event-banner absolute inset-x-0 top-2 z-20 mx-auto w-fit max-w-[92%] rounded-[3px] border-2 border-parchment-edge bg-parchment px-3 py-1 text-center text-sm font-extrabold text-ink shadow-[2px_2px_0_rgb(0_0_0/0.45)] sm:text-base"
+          className="event-banner absolute inset-x-0 top-2 z-20 mx-auto w-fit max-w-[calc(100%-6.5rem)] rounded-[3px] border-2 border-parchment-edge bg-parchment px-3 py-1 text-center text-sm font-extrabold text-ink shadow-[2px_2px_0_rgb(0_0_0/0.45)] sm:text-base"
         >
           {caption}
         </p>

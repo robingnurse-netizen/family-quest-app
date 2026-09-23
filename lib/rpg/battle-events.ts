@@ -5,9 +5,11 @@
 // scene, the stage machine, the centre-screen hit overlay and anything added
 // later (sound effects) subscribe with useBattleEvents — nothing needs
 // rewiring to add a listener. The overlay also emits named "moment" events
-// (impact, combo, ko, victory, coin), the item shop a "purchase" one, and
-// the stats HUD "level_up" / "streak_milestone", into the same stream for
-// sounds to hook onto.
+// (impact, combo, ko, victory, coin), the item shop a "purchase" one, the
+// stats HUD "level_up" / "streak_milestone", the celebration cards a
+// "celebration" as each card appears, and the quest board "quest_complete" /
+// "quest_dropped", into the same stream. Sound effects map these in
+// components/rpg/battle/battle-sounds.tsx.
 
 import type { Boss, BossLog } from "@/lib/supabase/types";
 
@@ -29,7 +31,13 @@ export type BattleEvent =
   /** The player reached a new level (shown after any hit sequence). */
   | { type: "moment"; name: "level_up"; level: number }
   /** The player's streak reached a milestone (3, 7, 14, 30 days). */
-  | { type: "moment"; name: "streak_milestone"; days: number };
+  | { type: "moment"; name: "streak_milestone"; days: number }
+  /** A level-up / streak card is now on screen (after any hit sequence). */
+  | { type: "moment"; name: "celebration"; kind: "level_up" | "streak_milestone" }
+  /** The quest board: the player ticked a quest done (before the server says so). */
+  | { type: "moment"; name: "quest_complete"; slotId: string }
+  /** The quest board: a quest or weekly quest was dropped somewhere that takes it. */
+  | { type: "moment"; name: "quest_dropped" };
 
 /** Named beats of the hit overlay (components/rpg/battle/hit-overlay.tsx). */
 export type OverlayMoment = "impact" | "combo" | "ko" | "victory" | "coin";

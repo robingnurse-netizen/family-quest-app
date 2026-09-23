@@ -199,6 +199,7 @@ export function WeekBoard({
   async function toggle(slot: TaskSlot) {
     if (justDragged.current) return;
     const status = slot.status === "completed" ? "scheduled" : "completed";
+    if (status === "completed") battle?.emit({ type: "moment", name: "quest_complete", slotId: slot.id });
     board.upsertSlotLocal({ ...slot, status });
     const result = await actions.setSlotStatus(slot.id, status);
     if (result.ok) board.upsertSlotLocal(result.data);
@@ -228,15 +229,21 @@ export function WeekBoard({
       const pool = poolsById.get(id);
       if (!pool) return;
       const remaining = poolTotals(pool, board.slots).remaining;
-      if (remaining > 0) setPrompt({ pool, day: target.slice(4), remaining });
+      if (remaining > 0) {
+        battle?.emit({ type: "moment", name: "quest_dropped" });
+        setPrompt({ pool, day: target.slice(4), remaining });
+      }
       return;
     }
 
     if (kind === "slot") {
       const slot = board.slots.find((s) => s.id === id);
       if (!slot) return;
-      if (target === "tray") void remove(slot);
-      else if (target.startsWith("day:") && target.slice(4) !== slot.scheduled_date) {
+      if (target === "tray") {
+        battle?.emit({ type: "moment", name: "quest_dropped" });
+        void remove(slot);
+      } else if (target.startsWith("day:") && target.slice(4) !== slot.scheduled_date) {
+        battle?.emit({ type: "moment", name: "quest_dropped" });
         void move(slot, target.slice(4));
       }
     }

@@ -16,7 +16,7 @@ type Celebration = { id: number; kind: "level_up"; level: number } | { id: numbe
  * level gained by a hit appears after it. Reduced motion: fade only.
  */
 export function Celebrations() {
-  const { overlayActive } = useBattleContext();
+  const { overlayActive, emit } = useBattleContext();
   const [queue, setQueue] = useState<Celebration[]>([]);
   const [showing, setShowing] = useState<Celebration | null>(null);
 
@@ -33,9 +33,11 @@ export function Celebrations() {
   }
   useEffect(() => {
     if (!showing) return;
+    // The card is up: its sound plays now, not when the level was gained.
+    emit({ type: "moment", name: "celebration", kind: showing.kind === "streak" ? "streak_milestone" : "level_up" });
     const t = setTimeout(() => setShowing(null), CARD_MS);
     return () => clearTimeout(t);
-  }, [showing]);
+  }, [showing, emit]);
 
   const announcement = !showing
     ? ""

@@ -5,6 +5,7 @@ import { RewardStore } from "@/components/rewards/reward-store";
 import { redeemReward } from "./actions";
 import { loadBattle } from "@/lib/rpg/queries";
 import { BattleProvider } from "@/components/rpg/battle/battle-provider";
+import { BattleSounds } from "@/components/rpg/battle/battle-sounds";
 import { ChevronLeft } from "@/components/ui/icons";
 import { GameHeading } from "@/components/ui/game-heading";
 import { pixelButtonClass } from "@/components/ui/pixel-button";
@@ -31,7 +32,7 @@ export default async function PlayerStorePage() {
         </header>
 
         {/* The battle event stream: the shop emits a "purchase" moment into
-            it for sound effects. */}
+            it, and BattleSounds plays it. */}
         <BattleProvider familyId={battle.familyId} initialBoss={battle.boss} initialParty={battle.party}>
           <RewardStore
             familyId={store.familyId}
@@ -40,6 +41,7 @@ export default async function PlayerStorePage() {
             initial={store}
             redeem={redeemReward}
           />
+          <BattleSounds childId={profile.id} />
         </BattleProvider>
       </div>
     </main>

@@ -11,6 +11,7 @@ import { BattleProvider } from "@/components/rpg/battle/battle-provider";
 import { BattleScene } from "@/components/rpg/battle/battle-scene";
 import { HitOverlay } from "@/components/rpg/battle/hit-overlay";
 import { Celebrations } from "@/components/rpg/battle/celebrations";
+import { BattleSounds } from "@/components/rpg/battle/battle-sounds";
 import { ShopBanner } from "@/components/rewards/shop-banner";
 import { loadRewardStore } from "@/lib/rewards/queries";
 import { GameHeading } from "@/components/ui/game-heading";
@@ -72,6 +73,8 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
           <HitOverlay childId={profile.id} />
           {/* LEVEL UP! and streak milestones, after any hit sequence. */}
           <Celebrations />
+          {/* Sound effects for everything in the battle event stream. */}
+          <BattleSounds childId={profile.id} />
 
 
           <WeekBoard

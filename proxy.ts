@@ -9,6 +9,6 @@ export const config = {
   matcher: [
     // Everything except API routes (cron authenticates itself), Next internals
     // and static assets.
-    "/((?!api|_next/static|_next/image|favicon.ico|sprites/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|sprites/|sounds/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|webmanifest|wav|mp3)$).*)",
   ],
 };

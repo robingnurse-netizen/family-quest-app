@@ -328,9 +328,33 @@ PROJECT STATUS:
     loads every migration behind a minimal Supabase shim (with Supabase's
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
-    Files: xp-level-streak, slot-guard, boss-engine, rewards-store
-    (.test.mjs). This is the permanent suite — add new engine rules'
+    Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
+    sound (.test.mjs). This is the permanent suite — add new engine rules'
     tests here.
+- Sound effects (Howler): COMPLETE.
+  * Files in public/sounds/ (attack/ is a pool of 8, mixed wav/mp3).
+    lib/sound/sound-rules.ts (no imports; tested): SOUNDS — name → files,
+    volume (tune by ear there; files aren't loudness-matched), minGapMs
+    (the same sound again within it is dropped: 90–120ms for ticks/hits,
+    1.5s party damage, 4s boss defeated) — plus the no-repeat random
+    picker and the mute store (localStorage "fq:sound-muted").
+  * lib/sound/sound-manager.ts is the ONLY Howler user: playSound(name),
+    setSoundMuted / useSoundMuted, armSounds(). Howler + files load on the
+    first pointer/key press (also the autoplay unlock), not while muted; a
+    sound whose file isn't ready within 800ms is dropped, not played late.
+  * components/rpg/battle/battle-sounds.tsx (BattleSounds, mounted inside
+    BattleProvider on /player and /player/store) is the one event → sound
+    map. Own hits sound on the overlay's beats: attack on "impact" (every
+    combo hit), fanfare on "ko"; others' damage and defeats the overlay
+    doesn't show sound on the event. miss → party damage; "purchase" →
+    item bought; "celebration" (emitted by Celebrations when a level-up /
+    streak card appears, so the sound matches the card, not the XP row) →
+    level-up / streak; quest board "quest_complete" (tick) and
+    "quest_dropped" (pool → day, slot → other day or tray) moments.
+  * Mute: SoundToggle (components/ui/sound-toggle.tsx) in the battle
+    arena's top-left corner; the event banner is narrowed to clear it.
+    No toggle on /player/store (the setting carries over).
+  * proxy.ts matcher skips sounds/ and .wav/.mp3 (as for sprites).
 
 PARKED — future items, NOT to be built until asked:
 - FUTURE — Evergreen play:
