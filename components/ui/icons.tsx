@@ -287,3 +287,186 @@ const SCROLL: PixelArt = {
 };
 /** An empty quest slot */
 export const ScrollIcon = (p: IconProps) => <PixelIcon art={SCROLL} {...p} />;
+
+// --- Reward icons (the item shop) -------------------------------------------
+
+const GIFT: PixelArt = {
+  colors: { o: "#3b0a0a", r: "#e03131", d: "#a51d1d", y: "#fcc419", h: "#fff3bf" },
+  rows: [
+    "...yy..yy...",
+    "..yhy..yhy..",
+    "...yyyyyy...",
+    "oooooyyooooo",
+    "orrrryyrrrro",
+    "oddddyyddddo",
+    ".orrryyrrro.",
+    ".orrryyrrro.",
+    ".orrryyrrro.",
+    ".odddyydddo.",
+    ".oooooooooo.",
+  ],
+};
+/** Gift */
+export const GiftIcon = (p: IconProps) => <PixelIcon art={GIFT} {...p} />;
+
+const CASH: PixelArt = {
+  colors: { o: "#1b4332", g: "#40c057", d: "#2b8a3e", l: "#b2f2bb", w: "#ebfbee" },
+  rows: [
+    "oooooooooooo",
+    "oggggggggggo",
+    "oglwwwwwwlgo",
+    "ogw.oddo.wgo",
+    "ogw.dldd.wgo",
+    "ogw.oddo.wgo",
+    "oglwwwwwwlgo",
+    "oddddddddddo",
+    "oooooooooooo",
+  ],
+};
+/** Pocket money */
+export const CashIcon = (p: IconProps) => <PixelIcon art={CASH} {...p} />;
+
+const CONTROLLER: PixelArt = {
+  colors: { o: "#12141f", b: "#4a5170", h: "#a9b0c8", r: "#e03131", g: "#40c057", y: "#fcc419" },
+  rows: [
+    "..oooooooo..",
+    ".obhbbbbbbo.",
+    "obhhhbbbybbo",
+    "obbhbbbrbgbo",
+    "obbbbbbbbbbo",
+    "obbbooooobbo",
+    ".obo....obo.",
+    "..o......o..",
+  ],
+};
+/** Games / screen time */
+export const ControllerIcon = (p: IconProps) => <PixelIcon art={CONTROLLER} {...p} />;
+
+const TREAT: PixelArt = {
+  colors: { o: "#3b2412", p: "#f783ac", w: "#fff0f6", c: "#d9a066", k: "#a86f43", r: "#e03131" },
+  rows: [
+    "....orro....",
+    "...ooppoo...",
+    "..opwwpppo..",
+    ".opwppppppo.",
+    ".oppppppppo.",
+    "oooooooooooo",
+    ".okcckcckco.",
+    "..okcckcko..",
+    "...okccko...",
+    "....okco....",
+    ".....oo.....",
+  ],
+};
+/** Treat */
+export const TreatIcon = (p: IconProps) => <PixelIcon art={TREAT} {...p} />;
+
+const TICKET: PixelArt = {
+  colors: { o: "#5c3b00", y: "#fcc419", d: "#f59f00", r: "#c92a2a", w: "#fff3bf" },
+  rows: [
+    "oooooooooooo",
+    "oyyyyydyyyyo",
+    ".oyrrydywyyo",
+    "..oyrrdyyyyo",
+    ".oyrrydywyyo",
+    "oyyyyydyyyyo",
+    "oooooooooooo",
+  ],
+};
+/** Day out */
+export const TicketIcon = (p: IconProps) => <PixelIcon art={TICKET} {...p} />;
+
+const TOY: PixelArt = {
+  colors: { o: "#3b2412", b: "#c77d3a", l: "#e8b27a", k: "#12141f", p: "#f783ac" },
+  rows: [
+    ".oo......oo.",
+    "oblo....olbo",
+    "obboooooobbo",
+    ".obbbbbbbbo.",
+    ".obkbbbbkbo.",
+    ".obbbllbbbo.",
+    ".obblkklbbo.",
+    "..obbllbbo..",
+    ".obbbpbbbbo.",
+    "oblbbbbbblbo",
+    ".oboooooobo.",
+  ],
+};
+/** Toy */
+export const ToyIcon = (p: IconProps) => <PixelIcon art={TOY} {...p} />;
+
+const BOOK: PixelArt = {
+  colors: { o: "#12141f", b: "#1c7ed6", d: "#1864ab", p: "#f1e2c0", y: "#fcc419" },
+  rows: [
+    ".ooooooooooo",
+    "obbbbbbbbbbo",
+    "obbyyyyyybbo",
+    "obbbbbbbbbbo",
+    "obbbyyyybbbo",
+    "obbbbbbbbbbo",
+    "obbbbbbbbbbo",
+    "odpppppppppo",
+    "odoooooooooo",
+    ".o..........",
+  ],
+};
+/** Book */
+export const BookIcon = (p: IconProps) => <PixelIcon art={BOOK} {...p} />;
+
+const PIZZA: PixelArt = {
+  colors: { o: "#5c3b00", c: "#e8b27a", k: "#c77d3a", y: "#fcc419", r: "#e03131", h: "#fff3bf" },
+  rows: [
+    "oooooooooooo",
+    "okkkkkkkkkko",
+    ".oyyryyyyyo.",
+    ".oyrryyhyyo.",
+    "..oyyyyrro..",
+    "..oyhyyrro..",
+    "...oyyyyo...",
+    "...oyryo....",
+    "....oyyo....",
+    "....oyo.....",
+    ".....o......",
+  ],
+};
+/** Pizza */
+export const PizzaIcon = (p: IconProps) => <PixelIcon art={PIZZA} {...p} />;
+
+const MOVIE: PixelArt = {
+  colors: { o: "#12141f", w: "#f1f3f5", k: "#343a40", g: "#868e96" },
+  rows: [
+    "owwokkowwokk",
+    ".owwokkowwok",
+    "..oooooooooo",
+    "oooooooooooo",
+    "okkkkkkkkkko",
+    "okwwwwwwwwko",
+    "okkkkkkkkkko",
+    "okgggggggkko",
+    "okkkkkkkkkko",
+    "oooooooooooo",
+  ],
+};
+/** Movie */
+export const MovieIcon = (p: IconProps) => <PixelIcon art={MOVIE} {...p} />;
+
+const COINSTACK: PixelArt = {
+  colors: { o: "#5c3b00", f: "#fcc419", h: "#fff3bf", s: "#e67700" },
+  rows: [
+    "...oooooo...",
+    "..ohhhfffo..",
+    "..osssssso..",
+    "..ofhfffffo.",
+    ".oooooooooo.",
+    ".ohhffffffo.",
+    ".osssssssso.",
+    "oooooooooooo",
+    "ohhhffffffso",
+    "osssssssssso",
+    "ofhffffffffo",
+    "osssssssssso",
+    "oooooooooooo",
+  ],
+};
+/** A stack of gold (the coin purse) */
+export const CoinStackIcon = (p: IconProps) => <PixelIcon art={COINSTACK} {...p} />;

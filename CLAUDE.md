@@ -227,6 +227,33 @@ PROJECT STATUS:
     progress bars and the picker), so the palette itself is unchanged.
   * No automated tests exist in the repo (no recurrence tests, no PGlite);
     Stage 3 was checked in headless Chromium against the live data.
+- Visual overhaul Stage 4 — Item shop (player): COMPLETE (coin flight and
+  live gold after a real victory confirmed in the browser). Reward rules
+  unchanged (same redeem action + DB triggers).
+  * Dashboard: components/rewards/shop-banner.tsx — a merchant's stall
+    (CSS striped awning, wooden front, carved "Item Shop" sign, gold "Browse
+    wares"), live gold, and either "N rewards within reach!" or "X more
+    gold to <cheapest reward he can't afford>" with a gold progress bar
+    (lib/rewards/progress.ts).
+  * /player/store (components/rewards/reward-store.tsx): coin purse with a
+    pixel coin stack; rewards as items in inset slots on wooden shelves
+    with parchment price tags on strings; affordable → gold Buy,
+    otherwise dimmed + padlock + "Need N more" + bar; pending requests as
+    wax-sealed parcels; approved/fulfilled/denied history as a ruled
+    parchment ledger with ink stamps ("+N gold refunded" on denials). Buy
+    confirmation is a parchment dialog; on success coins fly from the purse
+    to the item and a "purchase" moment is emitted into the battle event
+    stream (the store page is wrapped in BattleProvider for this).
+  * Reward icons (lib/rewards/icons.ts): 10 pixel icons stored as "px:<key>"
+    (gift, cash, controller, treat, ticket, toy, book, pizza, movie, star),
+    offered first in the parent's picker (new rewards default to px:gift);
+    legacy emoji still valid. Render any icon with RewardIcon
+    (components/rewards/reward-icon.tsx): variant "slot" frames it in an
+    inset pixel item slot (player), "plain" for Parent HQ.
+  * Live stats: lib/hooks/use-player-stats.ts subscribes the dashboard's
+    Level/XP/Gold/Streak strip to player_stats (Realtime), so gold updates
+    after a victory without a reload; the shop's gold was already live
+    (useRewardStore). WaxSeal is now shared (components/ui/wax-seal.tsx).
 
 PARKED — future items, NOT to be built until asked:
 - FUTURE — Evergreen play:

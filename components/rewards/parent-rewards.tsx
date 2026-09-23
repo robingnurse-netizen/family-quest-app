@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import type { Reward, RewardRedemption } from "@/lib/supabase/types";
 import type { BoardMember } from "@/lib/backlog/types";
 import type { StoreData } from "@/lib/rewards/fetch-store";
-import { DEFAULT_REWARD_ICON, REWARD_ICONS, rewardIcon } from "@/lib/rewards/icons";
+import { DEFAULT_REWARD_ICON, PIXEL_REWARD_ICONS, REWARD_ICONS, rewardIcon } from "@/lib/rewards/icons";
+import { RewardIcon } from "@/components/rewards/reward-icon";
 import { formatRequestTime } from "@/lib/rewards/format";
 import { MAX_REWARD_COST, type CatalogActions, type Resolution, type ResolveAction } from "@/lib/rewards/types";
 import { useRewardStore } from "@/lib/hooks/use-reward-store";
@@ -80,7 +81,7 @@ export function ParentRewards({ familyId, timeZone, members, initial, resolve, c
               {recent.map((r) => (
                 <li key={r.id} className="flex items-center justify-between gap-2 py-1.5">
                   <span className="min-w-0 truncate text-slate-700">
-                    <span aria-hidden>{rewardIcon(store.rewardsById[r.reward_id]?.icon)} </span>
+                    <RewardIcon value={store.rewardsById[r.reward_id]?.icon} size={16} className="mr-1 align-[-3px]" />
                     {store.rewardsById[r.reward_id]?.title ?? "Reward"} · {names[r.child_id] ?? "Player"} ·{" "}
                     {r.gold_spent} gold
                   </span>
@@ -143,9 +144,7 @@ function RequestRow({
       }`}
     >
       <div className="flex items-start gap-3">
-        <span aria-hidden className="text-3xl leading-none">
-          {rewardIcon(reward?.icon)}
-        </span>
+        <RewardIcon value={reward?.icon} size={32} />
         <div className="min-w-0 flex-1">
           <div className="flex items-baseline justify-between gap-2">
             <p className="truncate font-bold text-slate-900">{reward?.title ?? "Reward"}</p>
@@ -330,9 +329,7 @@ function CatalogRow({
   return (
     <li className={`rounded-xl border border-slate-200 p-3 ${reward.active ? "" : "bg-slate-50"}`}>
       <div className="flex items-start gap-3">
-        <span aria-hidden className={`text-3xl leading-none ${reward.active ? "" : "opacity-40 grayscale"}`}>
-          {rewardIcon(reward.icon)}
-        </span>
+        <RewardIcon value={reward.icon} size={32} className={reward.active ? "" : "opacity-40 grayscale"} />
         <div className="min-w-0 flex-1">
           <p className={`truncate font-bold ${reward.active ? "text-slate-900" : "text-slate-500"}`}>
             {reward.title}
@@ -467,14 +464,17 @@ function RewardForm({
       <fieldset>
         <legend className={label}>Icon</legend>
         <div className="flex flex-wrap gap-1.5">
-          {REWARD_ICONS.map((i) => (
-            <label key={i.emoji} className="cursor-pointer">
+          {[
+            ...PIXEL_REWARD_ICONS.map((i) => ({ value: i.key as string, name: i.name })),
+            ...REWARD_ICONS.map((i) => ({ value: i.emoji as string, name: i.name })),
+          ].map((i) => (
+            <label key={i.value} className="cursor-pointer">
               <input
                 type="radio"
                 name="icon"
-                value={i.emoji}
-                checked={icon === i.emoji}
-                onChange={() => setIcon(i.emoji)}
+                value={i.value}
+                checked={icon === i.value}
+                onChange={() => setIcon(i.value)}
                 className="peer sr-only"
               />
               <span
@@ -482,7 +482,7 @@ function RewardForm({
                 title={i.name}
                 className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-2xl peer-checked:border-indigo-500 peer-checked:bg-indigo-50 peer-checked:ring-2 peer-checked:ring-indigo-300 peer-focus-visible:ring-2 peer-focus-visible:ring-indigo-400"
               >
-                {i.emoji}
+                <RewardIcon value={i.value} size={26} />
               </span>
               <span className="sr-only">{i.name}</span>
             </label>

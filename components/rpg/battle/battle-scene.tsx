@@ -8,6 +8,7 @@ import { BossSprite } from "@/components/rpg/boss/boss-sprite";
 import { CoinIcon, FlameIcon, HeartIcon, ShieldIcon, SkullIcon, StarIcon } from "@/components/ui/icons";
 import { useBattleContext, useBattleEvents } from "./battle-provider";
 import { HudBar } from "./hud-bar";
+import { usePlayerStats } from "@/lib/hooks/use-player-stats";
 import { ARENA_STYLE, FEET_X, FeetSpot, HEIGHT, arenaHeight, bossHeight } from "./stage-layout";
 
 // Reuben's battle scene: one framed arena with his hero and Rogue on the left
@@ -26,8 +27,18 @@ export type PlayerStats = { level: number; xp: number; gold: number; streak: num
 
 const tierLabel = (tier: Boss["tier"]) => (tier === "epic" ? "Epic boss" : tier === "mid" ? "Boss" : "Minion");
 
-export function BattleScene({ heroName, stats }: { heroName: string; stats: PlayerStats }) {
+export function BattleScene({
+  heroName,
+  childId,
+  stats: initialStats,
+}: {
+  heroName: string;
+  childId: string;
+  /** Server-rendered stats; kept live from player_stats (Realtime). */
+  stats: PlayerStats;
+}) {
   const { party, stage, onBossAnimationEnd, onBossFinished } = useBattleContext();
+  const stats = usePlayerStats(childId, initialStats);
   const shown = stage.shown;
 
   // Hero reactions, straight from the event stream: strike on damage, take
@@ -212,8 +223,8 @@ function TierCrest({ tier, small = false }: { tier: Boss["tier"]; small?: boolea
 
 /**
  * Level / XP / Gold / Streak as an equipment strip under the hero. Values
- * come from player_stats as-is (level, XP and streak aren't wired to game
- * logic yet). Numbers use the body font (Stage 1's digit rule).
+ * come live from player_stats as-is (level, XP and streak aren't wired to
+ * game logic yet). Numbers use the body font (Stage 1's digit rule).
  */
 function StatsStrip({ stats }: { stats: PlayerStats }) {
   const items = [

@@ -3,13 +3,15 @@ import { requireRole } from "@/lib/supabase/profile";
 import { loadRewardStore } from "@/lib/rewards/queries";
 import { RewardStore } from "@/components/rewards/reward-store";
 import { redeemReward } from "./actions";
+import { loadBattle } from "@/lib/rpg/queries";
+import { BattleProvider } from "@/components/rpg/battle/battle-provider";
 import { ChevronLeft } from "@/components/ui/icons";
 import { GameHeading } from "@/components/ui/game-heading";
 import { pixelButtonClass } from "@/components/ui/pixel-button";
 
 export default async function PlayerStorePage() {
   const profile = await requireRole("child");
-  const store = await loadRewardStore(profile);
+  const [store, battle] = await Promise.all([loadRewardStore(profile), loadBattle(profile.family_id)]);
 
   return (
     // World background, fonts and base text come from app/(player)/layout.tsx.
@@ -22,19 +24,23 @@ export default async function PlayerStorePage() {
           </Link>
           <div>
             <GameHeading as="h1" size="lg">
-              Rewards store
+              Item Shop
             </GameHeading>
-            <p className="text-world-text">Spend the gold you win from bosses.</p>
+            <p className="text-world-text">Spend the gold you win from bosses on real-life rewards.</p>
           </div>
         </header>
 
-        <RewardStore
-          familyId={store.familyId}
-          childId={profile.id}
-          timeZone={store.timeZone}
-          initial={store}
-          redeem={redeemReward}
-        />
+        {/* The battle event stream: the shop emits a "purchase" moment into
+            it for sound effects. */}
+        <BattleProvider familyId={battle.familyId} initialBoss={battle.boss} initialParty={battle.party}>
+          <RewardStore
+            familyId={store.familyId}
+            childId={profile.id}
+            timeZone={store.timeZone}
+            initial={store}
+            redeem={redeemReward}
+          />
+        </BattleProvider>
       </div>
     </main>
   );

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { requireRole } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
@@ -11,8 +10,8 @@ import { loadBattle } from "@/lib/rpg/queries";
 import { BattleProvider } from "@/components/rpg/battle/battle-provider";
 import { BattleScene } from "@/components/rpg/battle/battle-scene";
 import { HitOverlay } from "@/components/rpg/battle/hit-overlay";
-import { ArrowRight, CoinIcon } from "@/components/ui/icons";
-import { panelClass } from "@/components/ui/panel";
+import { ShopBanner } from "@/components/rewards/shop-banner";
+import { loadRewardStore } from "@/lib/rewards/queries";
 import { pixelButtonClass } from "@/components/ui/pixel-button";
 import { GameHeading } from "@/components/ui/game-heading";
 
@@ -21,7 +20,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
   const supabase = await createClient();
   const { week } = await props.searchParams;
 
-  const [{ data: stats }, [board, calendar], battle] = await Promise.all([
+  const [{ data: stats }, [board, calendar], battle, store] = await Promise.all([
     supabase
       .from("player_stats")
       .select("gold, xp, level, current_streak")
@@ -33,6 +32,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
       async (b) => [b, await loadCalendar(profile.family_id, monthKeyOf(b.week))] as const,
     ),
     loadBattle(profile.family_id),
+    loadRewardStore(profile),
   ]);
 
   const playerStats = {
@@ -59,23 +59,12 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
 
           {/* The battle scene: hero and Rogue facing the boss, HUD bars and
               stats. Fixed at the top in normal flow; it never moves. */}
-          <BattleScene heroName={profile.display_name} stats={playerStats} />
+          <BattleScene heroName={profile.display_name} childId={profile.id} stats={playerStats} />
           {/* Centre-screen replay of Reuben's own hits, wherever he's scrolled. */}
           <HitOverlay childId={profile.id} />
 
-          <Link
-            href="/player/store"
-            className={`${panelClass("wood")} flex items-center gap-3 p-4 transition-[filter] hover:brightness-110 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none`}
-          >
-            <CoinIcon className="h-9 w-9 shrink-0" />
-            <div className="min-w-0 flex-1">
-              <GameHeading as="h2" size="md">
-                Rewards store
-              </GameHeading>
-              <p>Spend your gold on real-life rewards.</p>
-            </div>
-            <ArrowRight className="h-7 w-7 shrink-0 text-gold" />
-          </Link>
+          {/* The merchant's stall: live gold and the next reward in reach. */}
+          <ShopBanner familyId={profile.family_id} childId={profile.id} initial={store} />
 
           <WeekBoard
             familyId={board.familyId}
