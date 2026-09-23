@@ -173,19 +173,20 @@ body {
   background: radial-gradient(closest-side, rgb(252 196 25 / 0.65), rgb(224 49 49 / 0.4) 50%, transparent);
 }
 
-/* The party takes a hit: red flash and a jolt on the hero's side. */
+/* The party takes a hit: red flash and a small shove backwards (to the left:
+   the party faces right). The peak (12%) lands on the boss's blow, --impact
+   after the class goes on (BOSS_ATTACK_IMPACT_MS, set by the battle scene). */
 @keyframes hero-hit {
   0% { filter: none; translate: 0 0; }
-  12% { filter: drop-shadow(0 0 8px rgb(255 40 40)) brightness(1.4) sepia(1) hue-rotate(-50deg) saturate(4); translate: -6px 0; }
-  30% { translate: 5px 0; }
-  50% { filter: drop-shadow(0 0 6px rgb(255 40 40)) brightness(1.2) sepia(1) hue-rotate(-50deg) saturate(3); translate: -3px 0; }
+  12% { filter: drop-shadow(0 0 8px rgb(255 40 40)) brightness(1.4) sepia(1) hue-rotate(-50deg) saturate(4); translate: calc(var(--arena, 270px) * -0.035) 0; }
+  50% { filter: drop-shadow(0 0 6px rgb(255 40 40)) brightness(1.2) sepia(1) hue-rotate(-50deg) saturate(3); translate: calc(var(--arena, 270px) * -0.015) 0; }
   100% { filter: none; translate: 0 0; }
 }
 @keyframes hero-hit-flash {
   0%, 50% { filter: drop-shadow(0 0 8px rgb(255 40 40)) brightness(1.4) sepia(1) hue-rotate(-50deg) saturate(4); }
   100% { filter: none; }
 }
-.hero-hit { animation: hero-hit 700ms ease-out; }
+.hero-hit { animation: hero-hit 700ms ease-out calc(var(--impact, 84ms) - 84ms) backwards; }
 
 /* Event banner: drops in, stays, fades out (its element is re-keyed per event). */
 @keyframes event-banner {
@@ -201,7 +202,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .boss-aura { animation: none; opacity: 0.8; }
-  .hero-hit { animation: hero-hit-flash 700ms ease-out; }
+  .hero-hit { animation: hero-hit-flash 700ms ease-out var(--impact, 0ms) backwards; }
   .event-banner { animation: event-banner-fade 3.5s linear forwards; }
 }
 
@@ -353,6 +354,16 @@ body {
 
 /* Sprites are pixel art: never smooth them when scaled (SpriteAnimator). */
 .sprite-pixelated { image-rendering: pixelated; }
+
+/* Battle arenas (components/rpg/battle/stage-layout.tsx): --hero-px is the
+   screen size of one of the hero's art pixels, --hero-k × the arena height.
+   Where the browser can round, it snaps to a whole number of device pixels
+   (--device-px, set on :root by useDevicePixelStep on 2×+ screens), so
+   every art pixel is drawn the same size; elsewhere it's exact. */
+.battle-arena { --hero-px: calc(var(--arena) * var(--hero-k)); }
+@supports (width: round(nearest, 1px, 1px)) {
+  .battle-arena { --hero-px: round(nearest, calc(var(--arena) * var(--hero-k)), var(--device-px, 0.01px)); }
+}
 
 /* ---------------------------------------------------------------------------
    Hit overlay (components/rpg/battle/hit-overlay.tsx). Transforms and opacity

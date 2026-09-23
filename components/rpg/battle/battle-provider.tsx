@@ -73,7 +73,10 @@ export function BattleProvider({
     const tools = {
       emit: (event: BattleEvent) => emitter.emit(event),
       setBoss: (next: Boss | null) => setDev((d) => ({ ...d, boss: next })),
-      setParty: (next: PartyHealth) => setDev((d) => ({ ...d, party: next })),
+      setParty: (next: PartyHealth) => {
+        setDev((d) => ({ ...d, party: next }));
+        emitter.emit({ type: "party", hp: next.current_hp, max: next.max_hp });
+      },
       /** Log / hook every event (e.g. to prototype sounds); returns an unsubscribe. */
       listen: (fn: BattleListener) => emitter.subscribe(fn),
     };

@@ -11,9 +11,10 @@ import { eventFromLog, type BattleEvent } from "@/lib/rpg/battle-events";
  * whichever order they come in, the active one wins.
  *
  * `onEvent` receives the typed battle events (lib/rpg/battle-events.ts):
- * damage / miss from boss_log inserts, defeated / escaped from boss rows, and
- * activated whenever a different boss becomes the active one — whether that
- * arrives over Realtime or via a refetch.
+ * damage / miss from boss_log inserts, defeated / escaped from boss rows,
+ * party from party_health rows (Realtime only), and activated whenever a
+ * different boss becomes the active one — whether that arrives over
+ * Realtime or via a refetch.
  */
 export function useBattle({
   familyId,
@@ -91,7 +92,10 @@ export function useBattle({
         "postgres_changes",
         { event: "*", schema: "public", table: "party_health", filter: `family_id=eq.${familyId}` },
         (p) => {
-          if (p.eventType !== "DELETE") setParty(p.new as PartyHealth);
+          if (p.eventType === "DELETE") return;
+          const row = p.new as PartyHealth;
+          setParty(row);
+          onEventRef.current?.({ type: "party", hp: row.current_hp, max: row.max_hp });
         },
       )
       // boss_log has no family_id; RLS scopes Realtime to this family's bosses.

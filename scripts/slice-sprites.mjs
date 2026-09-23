@@ -28,6 +28,9 @@
 //
 // Coordinates are in source-sheet pixels and were measured from the sheets;
 // they're the thing to tweak if a crop looks wrong.
+//
+// Grid sheets (`grid: { cell }`: transparent, one frame per cell, e.g. the
+// PixelLab hero) skip all of the above: see sliceGridAnimation.
 
 import sharp from "sharp";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
@@ -47,14 +50,17 @@ const CUT_SHARE = 0.2; // a component with ≥20% of its pixels on each side of 
 // Playback defaults per animation name (overridable per animation).
 const PLAYBACK = {
   idle: { fps: 6, loop: true },
-  run: { fps: 12, loop: true },
   running: { fps: 12, loop: true },
   move: { fps: 8, loop: true },
-  jump: { fps: 8, loop: false },
   attack: { fps: 10, loop: false },
   pouncing: { fps: 8, loop: false },
   barking: { fps: 8, loop: false },
   hurt: { fps: 8, loop: false },
+  chop: { fps: 10, loop: false },
+  thrust: { fps: 10, loop: false },
+  slash: { fps: 10, loop: false },
+  ko: { fps: 10, loop: false },
+  victory: { fps: 10, loop: false },
   death: { fps: 6, loop: false },
   defeated: { fps: 8, loop: false },
 };
@@ -74,21 +80,26 @@ const PLAYBACK = {
 
 const SHEETS = [
   {
-    file: "Gemini_Generated_Image_4emgkn4emgkn4emg.png",
-    bg: [[206, 214, 222], [116, 132, 148]],
-    tol: 40,
+    // PixelLab export: a transparent grid of 112×112 cells, 9 columns × 8
+    // rows, no labels or background. Grid animations take a `row` and an
+    // optional `frames` list (0-based columns; default: every non-empty
+    // cell). Column 0 of every action row is his idle pose, the reference
+    // the row's feet anchor is measured from. Row 0 (static rotations) isn't
+    // used in game.
+    file: "hero-pixellab.png",
+    grid: { cell: 112 },
     characters: {
       hero: {
-        idle: { y0: 95, y1: 495, splits: [60, 420, 790, 1200] },
-        run: { y0: 595, y1: 1000, splits: [60, 385, 710, 1030, 1355, 1670, 2000] },
-        jump: {
-          y0: 1028, y1: 1515, splits: [100, 520, 1000, 1500, 2000],
-          exclude: [{ x: 0, y: 1020, w: 330, h: 75 }], // "JUMPING"
-        },
-        attack: {
-          y0: 1555, y1: 2030, splits: [0, 420, 820, 1220, 1620, 2048],
-          exclude: [{ x: 0, y: 1550, w: 280, h: 62 }], // "ATTACK"
-        },
+        idle: { row: 7 },
+        // Attacks (lib/rpg/strike.ts STRIKE_VARIANTS holds each contact frame).
+        chop: { row: 1, fps: 16 },
+        // Columns 1–2 are near-identical to idle and make the start sluggish.
+        thrust: { row: 2, frames: [0, 3, 4, 5, 6, 7, 8], fps: 16 },
+        slash: { row: 4, frames: [0, 3, 4, 5, 6, 7, 8], fps: 16 },
+        hurt: { row: 5, fps: 12 },
+        // Falls forward onto his face; the last frames lie flat.
+        ko: { row: 3, fps: 10 },
+        victory: { row: 6, fps: 10 },
       },
     },
   },
@@ -492,6 +503,79 @@ async function sliceAnimation(sheet, isBg, name, anim) {
 }
 
 // ---------------------------------------------------------------------------
+// Grid sheets
+// ---------------------------------------------------------------------------
+
+async function loadGridSheet(file) {
+  const { data, info } = await sharp(join(ASSETS, file))
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return { data, W: info.width, H: info.height };
+}
+
+/** One cell as a foreground mask (alpha > 0) plus its bounds; null if empty. */
+function gridCell(sheet, cell, row, col) {
+  const mask = new Uint8Array(cell * cell);
+  let minX = cell, maxX = -1, minY = cell, maxY = -1;
+  for (let y = 0; y < cell; y++) {
+    for (let x = 0; x < cell; x++) {
+      if (sheet.data[((row * cell + y) * sheet.W + col * cell + x) * 4 + 3] === 0) continue;
+      mask[y * cell + x] = 1;
+      if (x < minX) minX = x; if (x > maxX) maxX = x;
+      if (y < minY) minY = y; if (y > maxY) maxY = y;
+    }
+  }
+  return maxX < 0 ? null : { row, col, mask, minX, maxX, minY, maxY };
+}
+
+/**
+ * A grid-sheet animation: one row of cells. The cells are padded, and the
+ * feet don't sit on the same line in every row, so each row is anchored on
+ * its first frame (column 0 is the idle pose on every action row): feet x
+ * from the bottom of its main body, the ground line at its lowest pixel.
+ * Every other frame keeps its drawn position relative to that anchor, so
+ * lunges, hops and falls move as drawn — except that no frame may sink
+ * below the ground line: one whose lowest pixel is below it (a body lying
+ * flat) is lifted to rest on it. The canvas is the frames' union, no
+ * padding, so the idle canvas is exactly the standing body's height.
+ */
+function sliceGridAnimation(sheet, cell, name, anim) {
+  const cols = anim.frames ?? Array.from({ length: Math.floor(sheet.W / cell) }, (_, c) => c);
+  const cells = cols.map((c) => gridCell(sheet, cell, anim.row, c)).filter(Boolean);
+  if (!cells.length) throw new Error(`${name}: row ${anim.row} is empty`);
+
+  const ref = cells[0];
+  const main = components({ mask: ref.mask, W: cell, h: cell }).reduce((a, b) => (b.px.length > a.px.length ? b : a));
+  const footX = footAnchorX({ comps: [main.px] }, cell);
+  const ground = ref.maxY;
+  const frames = cells.map((c) => {
+    const lift = Math.max(0, c.maxY - ground);
+    if (lift) console.log(`  ${name}: column ${c.col} lifted ${lift}px onto the ground line`);
+    return { ...c, dy: -lift };
+  });
+
+  const ax = Math.round(footX);
+  const minX = Math.min(...frames.map((f) => f.minX)), maxX = Math.max(...frames.map((f) => f.maxX));
+  const minY = Math.min(...frames.map((f) => f.minY + f.dy)), maxY = Math.max(...frames.map((f) => f.maxY + f.dy));
+  const width = maxX - minX + 1, height = maxY - minY + 1;
+
+  const buffers = frames.map((f) => {
+    const out = Buffer.alloc(width * height * 4);
+    for (let y = f.minY; y <= f.maxY; y++) {
+      for (let x = f.minX; x <= f.maxX; x++) {
+        if (!f.mask[y * cell + x]) continue;
+        const si = ((f.row * cell + y) * sheet.W + f.col * cell + x) * 4;
+        const di = ((y + f.dy - minY) * width + (x - minX)) * 4;
+        sheet.data.copy(out, di, si, si + 4);
+      }
+    }
+    return out;
+  });
+  return { buffers, width, height, anchor: { x: ax - minX, y: ground - minY } };
+}
+
+// ---------------------------------------------------------------------------
 
 // Which way every animation faces as drawn ("right" | "left" | "front"),
 // judged per animation by where the face/eyes point and which way attacks
@@ -500,7 +584,7 @@ async function sliceAnimation(sheet, isBg, name, anim) {
 // poses so the party faces right and bosses face left. Every sliced
 // animation must be listed here.
 const FACING = {
-  hero: { idle: "front", run: "right", jump: "right", attack: "right" },
+  hero: { idle: "right", chop: "right", thrust: "right", slash: "right", hurt: "right", ko: "right", victory: "right" },
   rogue: { idle: "right", running: "right", pouncing: "right", barking: "right" },
   trash_bag_slime: { idle: "front", attack: "right", hurt: "front", death: "front" },
   alarm_clock_swarm: { idle: "front", move: "front", attack: "right", hurt: "front", death: "front" },
@@ -518,8 +602,9 @@ mkdirSync(OUT_MANIFESTS, { recursive: true });
 for (const sheetCfg of SHEETS) {
   const wanted = Object.keys(sheetCfg.characters).filter((c) => !only.size || only.has(c));
   if (!wanted.length) continue;
-  const sheet = await loadSheet(sheetCfg.file);
-  const isBg = makeBgTest(sheetCfg.bg, sheetCfg.tol);
+  const grid = sheetCfg.grid;
+  const sheet = grid ? await loadGridSheet(sheetCfg.file) : await loadSheet(sheetCfg.file);
+  const isBg = grid ? null : makeBgTest(sheetCfg.bg, sheetCfg.tol);
 
   for (const character of wanted) {
     const charDir = join(OUT_PUBLIC, character);
@@ -529,14 +614,19 @@ for (const sheetCfg of SHEETS) {
     for (const [animName, anim] of Object.entries(sheetCfg.characters[character])) {
       const facing = FACING[character]?.[animName];
       if (!facing) throw new Error(`No FACING entry for ${character}/${animName}`);
-      const { buffers, width, height, anchor } = await sliceAnimation(sheet, isBg, `${character}/${animName}`, anim);
+      const label = `${character}/${animName}`;
+      const { buffers, width, height, anchor } = grid
+        ? sliceGridAnimation(sheet, grid.cell, label, anim)
+        : await sliceAnimation(sheet, isBg, label, anim);
       const dir = join(charDir, animName);
       mkdirSync(dir, { recursive: true });
       const paths = [];
       for (let i = 0; i < buffers.length; i++) {
         const fileName = `frame-${String(i + 1).padStart(2, "0")}.png`;
         await sharp(buffers[i], { raw: { width, height, channels: 4 } })
-          .png({ compressionLevel: 9, palette: true, quality: 95 })
+          // Grid sheets are clean pixel art (too many colours for a
+          // palette PNG to keep exactly): lossless.
+          .png(grid ? { compressionLevel: 9 } : { compressionLevel: 9, palette: true, quality: 95 })
           .toFile(join(dir, fileName));
         paths.push(`/sprites/${character}/${animName}/${fileName}`);
       }

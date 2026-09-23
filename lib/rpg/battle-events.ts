@@ -1,6 +1,6 @@
 // Battle events: the one typed stream every battle reaction listens to.
 //
-// Realtime rows (bosses, boss_log) are translated into these in
+// Realtime rows (bosses, boss_log, party_health) are translated into these in
 // lib/hooks/use-battle.ts; the BattleProvider fans them out. The battle
 // scene, the stage machine, the centre-screen hit overlay and anything added
 // later (sound effects) subscribe with useBattleEvents — nothing needs
@@ -24,6 +24,12 @@ export type BattleEvent =
   | { type: "escaped"; boss: Boss }
   /** A (new) boss became the active one. */
   | { type: "activated"; boss: Boss }
+  /**
+   * Party HP changed (a party_health row over Realtime). The nightly reset
+   * empties the party and refills it in one transaction, so hp 0 and the
+   * refill arrive back to back: as events, neither is lost to batching.
+   */
+  | { type: "party"; hp: number; max: number }
   /** A beat in the hit overlay's show, for sound effects. */
   | { type: "moment"; name: OverlayMoment; combo: number; damage: number }
   /** The item shop: a reward was bought (sent to a grown-up), for sounds. */

@@ -55,13 +55,22 @@ PROJECT STATUS:
     up later. (Reward gold is now enforced — see Rewards Store.)
 - RPG Phase B1 — Sprite Pipeline: COMPLETE.
   * scripts/slice-sprites.mjs (sharp) slices /assets into
-    public/sprites/<key>/<animation>/frame-NN.png (178 frames, 10
+    public/sprites/<key>/<animation>/frame-NN.png (218 frames, 10
     characters) and writes components/rpg/sprites/manifests/<key>.json.
     Boss keys = bosses.sprite_key; hero = "hero", dog companion = "rogue".
     Background removed by flood fill; crop coordinates, per-animation fps,
     alignment ("feet" default, "mass" for Rogue's run) and dropFrames live
     in the script's SHEETS config. Re-run per character after any change:
     node scripts/slice-sprites.mjs <key>
+  * Grid sheets (`grid: { cell }` in SHEETS — transparent, one frame per
+    cell, no background removal): each animation is a `row` (+ optional
+    0-based `frames` columns). The row's feet anchor is MEASURED from its
+    first frame (feet x from the main body's bottom, ground = its lowest
+    pixel) — cells are padded and feet sit on different lines per row;
+    other frames keep their drawn offsets (lunges, hops, falls), except no
+    frame may sink below the ground line (lifted onto it; logged). Canvas =
+    the frames' union, no padding (so hero idle height = his body height).
+    Written as lossless PNGs (palette PNGs would change the colours).
   * Sprites are fully decoupled behind the manifests: art can be swapped
     later (new sheets → re-slice, or hand-made frames + a manifest) without
     touching game logic. Components only know manifest keys + animation
@@ -69,11 +78,24 @@ PROJECT STATUS:
   * SpriteAnimator.tsx plays a manifest animation (rAF, preloads frames,
     reduced-motion safe). One-shot animations play once and hold the last
     frame; replayDelayMs replays them (previews only).
-  * Hero + Rogue idle on the player dashboard (components/rpg/hero/hero-party.tsx).
+  * HERO ART = assets/hero-pixellab.png (PixelLab, 1008×896, 112px cells,
+    9×8; keep it as the source). Row 0 static rotations (unused); 1 chop
+    (contact 6); 2 thrust (contact 6; columns 1–2 dropped); 3 K.O. (falls
+    on his face; frames 6–8 lifted 2–3px onto the ground); 4 slash
+    (contact 7; columns 1–2 dropped); 5 hurt (peak 5, 6–8 recover);
+    6 victory (hold last frame; columns 6–7 lifted 1px); 7 idle (8-frame
+    loop with a blink). Column 0 of every action row is his idle pose.
+    Faces right (3/4 view) throughout. Manifest animations: idle, chop,
+    thrust, slash, hurt, ko, victory (fps 6 / 16 / 16 / 16 / 12 / 10 / 10).
+    The old Gemini hero sheet (Gemini_Generated_Image_4emgkn…png) and its
+    frames are deleted (git history keeps them).
   * Known art limits: single-frame animations (Cable Spider all; Alarm
     Clock Swarm idle/move/hurt/death; Slime hurt/death; Goblin death) are
     static; Chronosphinx attack frames 3–4 share an overlapping beam;
-    Shogun-Bot idle drops sheet frames 5 and 7 (sword flash).
+    Shogun-Bot idle drops sheet frames 5 and 7 (sword flash). Lying down
+    (K.O. frames 6–9 / "down"), the hero's legs overlap Rogue's front paws
+    (Rogue stands a dog-length behind him) — to be handled when Rogue gets
+    new art and his own hurt / knocked-out reactions.
   * Future art requirement (not built): when the sprite art is redone,
     boss idle should reflect current_hp — pristine above ~66%, worn at
     ~33–66%, heavily damaged below ~33% — instead of one idle loop at
@@ -162,7 +184,10 @@ PROJECT STATUS:
     capped by its own aspect ratio. Level/XP/Streak aren't wired to game
     logic yet — displayed as stored.
   * ONE EVENT SOURCE: lib/rpg/battle-events.ts (typed BattleEvent: damage,
-    miss, defeated, escaped, activated + a tiny emitter). useBattle
+    miss, defeated, escaped, activated, party + a tiny emitter). "party"
+    (hp, max) comes from party_health Realtime rows (and dev setParty) —
+    an event, because the nightly reset's 0 and refill arrive back to back
+    and React would batch the state away. useBattle
     translates Realtime rows into events; BattleProvider owns the emitter,
     live boss/party and the stage machine (itself just a subscriber). Add
     listeners (hit overlay, sounds) with useBattleEvents inside the
@@ -181,6 +206,15 @@ PROJECT STATUS:
     hero, Rogue a dog-length behind him, boss). Characters stand there by
     their manifest anchors (FeetSpot + AnchoredSprite), never by image
     widths or gaps. The hit overlay must use the same module.
+  * Hero size: HERO_BODY (0.5485 × arena = the old art's body height) is
+    his standing BODY, not a frame; heroHeight(anim) = --hero-px × canvas
+    px, one scale for every pose. Any box drawing him needs ARENA_VARS (or
+    ARENA_STYLE) + ARENA_CLASS ("battle-arena", app/globals.css), which
+    derives --hero-px. Integer scaling: useDevicePixelStep() sets
+    --device-px on :root on 2×+ screens and CSS round() snaps --hero-px to
+    whole device pixels (e.g. 2.5 CSS px = 5 device px at a 270px arena:
+    155px body vs the old 148). 1× screens keep the exact height (nearest
+    whole pixel could be ~20% off). Checked in headless Chromium.
   * Hit overlay (components/rpg/battle/hit-overlay.tsx): COMPLETE. Fires only for damage events whose childId is the
     signed-in player; a fixed pointer-events:none layer centred in the
     viewport. Hero (attack) + Rogue (pouncing) dash in, boss (hurt), pixel
@@ -193,6 +227,9 @@ PROJECT STATUS:
     silhouette (~5.3s). ALL durations live in OVERLAY_TIMING (hit-overlay.tsx).
     While it plays, BattleProvider.overlayActive mutes the scene's
     screen-reader caption, so each own hit is announced once.
+    After the K.O. slam (OVERLAY_TIMING.heroVictory, 380ms) the hero plays
+    his victory pose under the K.O. text and holds its last frame through
+    the victory card (fanfare + gold) — one keyed tree across both phases.
     Emits "moment" events (impact, combo, ko, victory, coin) into the same
     stream for sounds. Reduced motion: fade-only card. Numbers in Nunito
     (Pixelify's 5 reads as S even at 60px). Dev console (next dev only):
@@ -208,18 +245,40 @@ PROJECT STATUS:
       freeze varies: every later beat (K.O., hold, fly) and so every sound
       is still timed from OVERLAY_TIMING.hitStop — tiers never slow the
       show or shift sounds.
-    - Attack variants: the hero sheet has ONE attack row (jump/run have no
-      sword), so STRIKE_VARIANTS are cuts of the attack frames (indices into
-      the manifest's attack animation; same canvas + feet anchor): overhead
-      chop, lunging thrust, leaping chop. strikeAnimation() lines the
-      variant's contact frame up with the impact (after the 280ms dash; at
-      once for combo hits) — before this, the freeze landed on whichever
-      frame happened to be showing. Body motion (lunge / leap, Web
-      Animations on `translate`, px from the stage height) only on a first
-      hit; combo hits just swing (so chop and leap look alike in combos).
-      Picked with createNoRepeatPicker (lib/random.ts, shared with the
-      attack sound pool) — never the same swing twice running.
-    - Miss / boss-attack staging and sound timing unchanged.
+    - Attack variants: STRIKE_VARIANTS are the hero's three real attacks,
+      each its own manifest animation with a `contact` frame index: chop
+      (6, a hop = "leap"), thrust (4 = sheet 6, "lunge"), slash (5 = sheet
+      7, no motion). contactAnimation() lines the contact frame up with the
+      impact (after the 280ms dash: 4 wind-up frames at 16fps; at once for
+      combo hits), dropping wind-up frames that don't fit. Body motion
+      (Web Animations on `translate`) only on a first hit. Picked with
+      createNoRepeatPicker (lib/random.ts, shared with the attack sound
+      pool) — never the same attack twice running (overlay and scene each
+      keep their own picker).
+  * Hero poses in the scene: lib/rpg/hero-stage.ts (pure reducer; tested in
+    tests/hero-stage.test.mjs) — idle / attack / hurt / ko / down / rise /
+    victory, fed by battle events; reactions queue behind the one playing.
+    - Hurt (miss): contactAnimation(hurt, HURT_PEAK_FRAME 5,
+      BOSS_ATTACK_IMPACT_MS 210) — the flinch peaks at the boss's blow (the
+      peak of .boss-fx-attack's lunge: 600ms, 35%). The party's red flash
+      (.hero-hit) now also shoves them back (left, 3.5% of the arena), its
+      peak delayed to --impact. Restarted by re-adding the class, NOT by
+      re-keying the party (that would restart a K.O. mid-fall).
+    - K.O.: party hp → 0 (a "party" event) plays ko (queued after a flinch
+      that's still playing), then "down" holds the last frame. When the
+      party refills he stays down DOWN_HOLD_MS (1.5s), then "rise" plays
+      ko in reverse. Nothing else moves him while down. Loading at hp 0
+      starts him down.
+    - Victory: a "defeated" event plays victory (after his attack if one
+      is playing) and holds the last frame until the next boss takes the
+      stage (stage.shown changes → "swap").
+    - Dev console (next dev only): __fqBattle.hurt(10) (a real miss: boss
+      lunge, sound, flash, flinch, party −10; 0 knocks him out) /
+      knockOut() / standUp() (party to 0 / full, as the nightly reset
+      sends them; he rises after the 1.5s hold) / victory(holdMs = 3000)
+      (the scene pose alone; finalBlow() plays the overlay's).
+    - The party-damage sound plays on the blow too (BOSS_ATTACK_IMPACT_MS
+      after the miss; BattleSounds delays it, minGapMs checked at play).
   * No pinned/sticky strip: removed along with its pin logic; the scene
     stays in normal flow (see the FUTURE note under Phase B2).
 - Visual overhaul Stage 3 — Quest board (player): COMPLETE. Presentation only: drag-and-drop, slot rules and the
@@ -351,7 +410,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
@@ -371,7 +430,8 @@ PROJECT STATUS:
     BattleProvider on /player and /player/store) is the one event → sound
     map. Own hits sound on the overlay's beats: attack on "impact" (every
     combo hit), fanfare on "ko"; others' damage and defeats the overlay
-    doesn't show sound on the event. miss → party damage; "purchase" →
+    doesn't show sound on the event. miss → party damage, delayed
+    BOSS_ATTACK_IMPACT_MS (210ms) to land on the boss's blow; "purchase" →
     item bought; "celebration" (emitted by Celebrations when a level-up /
     streak card appears, so the sound matches the card, not the XP row) →
     level-up / streak; quest board "quest_complete" (tick) and
@@ -380,6 +440,24 @@ PROJECT STATUS:
     arena's top-left corner; the event banner is narrowed to clear it.
     No toggle on /player/store (the setting carries over).
   * proxy.ts matcher skips sounds/ and .wav/.mp3 (as for sprites).
+
+TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
+- Connected as the `pixellab` MCP server (~94 tools: characters, objects,
+  image create/edit/inpaint, animate_image / animate_character, tilesets,
+  maps, UI panels, fonts, cleanup like reduce_colors / correct_pixelart,
+  jobs, get_balance). Generation is async: create → wait_for_jobs → get_*.
+- Balance: NEVER record it here — always check it live with get_balance.
+  Many tools cost 20–40 generations per call (create_image_pro,
+  edit_image, inpaint_image, create_character_state, pro modes), so a
+  single call can use up a small balance. Cheap options:
+  create_image_pixflux / pixen, edit_image_pixen, image_to_pixelart
+  (1 each); v3 animations ~1–4 per direction; unzoom / correct_pixelart /
+  reduce_colors 0.1; pixelart_workbench, create_talking_gif, get_lip_sync
+  free. Check get_balance and confirm cost with the user before any paid
+  generation.
+- New art must still go through the manifest pipeline (see Phase B1):
+  frames under public/sprites/<key>/<animation>/ + a manifest, FACING set
+  per animation — game code never changes for an art swap.
 
 PARKED — future items, NOT to be built until asked:
 - FUTURE — Evergreen play:
@@ -390,6 +468,10 @@ PARKED — future items, NOT to be built until asked:
   * Seasonal events: e.g. seasonal accessories on existing bosses (Magma
     Behemoth in a Santa hat) placed via the manifest anchor points, or
     seasonal bosses tied to calendar dates.
+- FUTURE — Day/night cycle for the battle background: dawn / day / dusk /
+  night variants crossfading, generated with PixelLab environment
+  generation. Undecided: follow the family's timezone (families.timezone)
+  or the device's clock.
 - FUTURE — Test suite: STARTED (npm test; tests/, see "XP, Level &
   Streak"). Covered so far: slot guard, XP, levels, streaks, the boss
   engine + instant damage (roster, activation order, strike, defeat, gold

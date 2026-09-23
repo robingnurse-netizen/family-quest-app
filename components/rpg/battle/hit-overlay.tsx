@@ -7,8 +7,8 @@ import { createNoRepeatPicker } from "@/lib/random";
 import {
   HIT_TIERS,
   STRIKE_VARIANTS,
+  contactAnimation,
   hitTier,
-  strikeAnimation,
   strikeMotion,
   type HitTier,
 } from "@/lib/rpg/strike";
@@ -19,14 +19,18 @@ import type { SpriteAnimation } from "@/components/rpg/sprites/types";
 import { CoinIcon } from "@/components/ui/icons";
 import { registerDevTools, useBattleContext, useBattleEvents } from "./battle-provider";
 import {
+  ARENA_CLASS,
   ARENA_STYLE,
+  ARENA_VARS,
   FEET_X,
   FeetSpot,
   HEIGHT,
   STRIKE_X,
   arenaHeight,
   bossHeight,
+  heroHeight,
   impactPoint,
+  useDevicePixelStep,
 } from "./stage-layout";
 
 // The centre-screen hit overlay: when Reuben's own quest strikes the boss, a
@@ -39,10 +43,12 @@ import {
 // beats back into it as "moment" events (impact, combo, ko, victory, coin) for
 // sound effects. Positions come from ./stage-layout, same as the scene.
 //
-// Each hit varies (lib/rpg/strike.ts): the hero's swing is one of a few
-// attack variants cut from his attack frames (never the same twice running),
-// and the impact's weight — hit-stop, shake, burst, debris, flash — scales in
-// tiers with the quest's minutes. Neither moves the show's beats.
+// Each hit varies (lib/rpg/strike.ts): the hero's swing is one of his three
+// attacks (chop, thrust, slash — never the same twice running), and the
+// impact's weight — hit-stop, shake, burst, debris, flash — scales in tiers
+// with the quest's minutes. Neither moves the show's beats. After a final
+// blow's K.O. he plays his victory pose and holds it through the victory
+// card (the fanfare and his gold).
 
 /**
  * Every duration in the show, in ms — tune here. A normal hit runs
@@ -67,6 +73,9 @@ export const OVERLAY_TIMING = {
   ko: 700,
   /** Victory card + coin shower (the gold moment). */
   victory: 2300,
+  /** The hero's victory pose starts once the K.O. slam has landed
+   *  (.ko-slam, 380ms) and holds its last frame until the teaser. */
+  heroVictory: 380,
   teaser: 950,
   /** Final fade of the whole layer. */
   out: 300,
@@ -108,6 +117,7 @@ export function HitOverlay({ childId }: { childId: string }) {
   const reduced = usePrefersReducedMotion();
   const [show, setShow] = useState<Show | null>(null);
   const layerRef = useRef<HTMLDivElement>(null);
+  useDevicePixelStep();
   // The hero's swing: random, never the same one twice running.
   const [pickVariant] = useState(() => createNoRepeatPicker(STRIKE_VARIANTS.length));
 
@@ -268,7 +278,8 @@ export function HitOverlay({ childId }: { childId: string }) {
 
   // Preload what the overlay draws, so the first hit doesn't stutter.
   useEffect(() => {
-    preload([SPRITES.hero.animations.attack, SPRITES.rogue.animations.pouncing]);
+    const hero = SPRITES.hero.animations;
+    preload([...STRIKE_VARIANTS.map((v) => hero[v.animation]), hero.victory, SPRITES.rogue.animations.pouncing]);
   }, []);
   const shownKey = stage.shown?.sprite_key;
   useEffect(() => {
@@ -367,12 +378,42 @@ export function HitOverlay({ childId }: { childId: string }) {
 /** The full-motion show for the current phase. */
 function Theatre({ show }: { show: Show }) {
   if (show.phase === "hit" || show.phase === "fly") return <Strike show={show} />;
-  if (show.phase === "ko")
+  if (show.phase === "ko" || show.phase === "victory")
     return (
-      <p className="ko-slam text-center font-display text-7xl font-semibold text-gold sm:text-8xl">K.O.!</p>
+      // One tree for both phases (keyed children), so the hero's victory
+      // pose carries on from the K.O. into the victory card, holding its
+      // last frame.
+      <div className={`flex flex-col items-center ${ARENA_CLASS}`} style={ARENA_VARS}>
+        {show.phase === "ko" ? (
+          <p key="ko" className="ko-slam text-center font-display text-7xl font-semibold text-gold sm:text-8xl">
+            K.O.!
+          </p>
+        ) : (
+          <VictoryCard key="card" show={show} />
+        )}
+        <HeroVictory key="hero" />
+      </div>
     );
-  if (show.phase === "victory") return <VictoryCard show={show} />;
   return <Teaser next={show.next} />;
+}
+
+/** The hero cheering under the K.O. / victory card: starts after the slam. */
+function HeroVictory() {
+  const victory = SPRITES.hero.animations.victory;
+  const [started, setStarted] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setStarted(true), T.heroVictory);
+    return () => clearTimeout(t);
+  }, []);
+  return (
+    <div className="relative mt-2 h-[calc(var(--arena)*0.66)] w-full">
+      <div className="overlay-ground absolute inset-x-[30%] bottom-[-3%] h-[6%] rounded-[50%]" />
+      <FeetSpot x="50%">
+        {/* Paused shows frame 1 (standing) until the slam lands. */}
+        <AnchoredSprite animation={victory} height={heroHeight(victory)} paused={!started} alt="" />
+      </FeetSpot>
+    </div>
+  );
 }
 
 /** Hero and Rogue dash in and strike; the boss flinches; impact effects. */
@@ -384,7 +425,7 @@ function Strike({ show }: { show: Show }) {
   const bossAnim = anims ? (struck ? anims.hurt : anims.idle) : null;
   const impact = impactPoint(boss);
   return (
-    <div className="relative" style={ARENA_STYLE}>
+    <div className={`relative ${ARENA_CLASS}`} style={ARENA_STYLE}>
       <div
         className={`absolute inset-x-0 bottom-(--ground) top-0 ${phase === "fly" ? "overlay-fly" : ""}`}
         style={phase === "fly" ? { animationDuration: `${T.fly}ms` } : undefined}
@@ -455,9 +496,9 @@ function Strike({ show }: { show: Show }) {
 }
 
 /**
- * The hero's swing for one hit: a variant cut from his attack frames, timed
- * so its contact frame is on screen at impact, plus its body motion (a lunge
- * or a leap) on the first hit. Stands on his manifest anchor like any sprite.
+ * The hero's swing for one hit: one of his attacks, timed so its contact
+ * frame is on screen at impact, plus its body motion (a lunge or a leap) on
+ * the first hit. Stands on his manifest anchor like any sprite.
  */
 function HeroStrike({
   variant,
@@ -470,9 +511,9 @@ function HeroStrike({
   hitStopMs: number;
   frozen: boolean;
 }) {
-  const hero = SPRITES.hero.animations;
   const v = STRIKE_VARIANTS[variant];
-  const animation = useMemo(() => strikeAnimation(hero.attack, v, leadMs), [hero.attack, v, leadMs]);
+  const attack = SPRITES.hero.animations[v.animation];
+  const animation = useMemo(() => contactAnimation(attack, v.contact, leadMs), [attack, v.contact, leadMs]);
   const ref = useRef<HTMLDivElement>(null);
   // Mount only (the component is keyed per hit): the motion lands on contact.
   useLayoutEffect(() => {
@@ -488,7 +529,7 @@ function HeroStrike({
     <div ref={ref} className="absolute inset-0">
       <AnchoredSprite
         animation={animation}
-        height={arenaHeight(HEIGHT.hero * (animation.height / hero.idle.height))}
+        height={heroHeight(animation)}
         mirror={needsMirror(animation.facing, "right")}
         frozen={frozen}
         alt=""

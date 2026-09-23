@@ -25,6 +25,7 @@ export function AnchoredSprite({
   alt,
   className = "",
   frozen,
+  paused,
   onComplete,
 }: {
   animation: SpriteAnimation;
@@ -36,6 +37,8 @@ export function AnchoredSprite({
   className?: string;
   /** Hold the current frame (hit-stop); see SpriteAnimator. */
   frozen?: boolean;
+  /** Show the first frame only, until false; see SpriteAnimator. */
+  paused?: boolean;
   onComplete?: () => void;
 }) {
   const anchorX = mirror ? animation.width - animation.anchor.x : animation.anchor.x;
@@ -50,6 +53,7 @@ export function AnchoredSprite({
         animation={animation}
         alt={alt}
         frozen={frozen}
+        paused={paused}
         onComplete={onComplete}
         style={{ height, width: "auto", maxWidth: "none", transform: mirror ? "scaleX(-1)" : undefined }}
       />

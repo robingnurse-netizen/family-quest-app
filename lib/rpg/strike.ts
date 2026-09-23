@@ -1,5 +1,5 @@
 // Hit overlay choreography: how hard a hit lands (tiers by quest length) and
-// which of the hero's swings plays (attack variants). Pure data + maths — the
+// which of the hero's attacks plays (attack variants). Pure data + maths — the
 // overlay (components/rpg/battle/hit-overlay.tsx) renders it; tests/
 // strike.test.mjs checks it. No React / browser imports.
 
@@ -48,45 +48,47 @@ export const HIT_TIERS: Record<HitTier, HitTierStyle> = {
 // --- Attack variants ------------------------------------------------------------
 
 /**
- * One of the hero's swings, cut from the frames of his `attack` animation
- * (the sheet has one attack row; the other rows have no sword). Frame
- * indices are into that animation's frames: 0 ready (sword forward),
- * 1 overhead wind-up, 2 back-swing behind the head, 3 raised, 4 chop down.
- * Every frame shares the attack canvas and feet anchor, so any cut stands
- * on the same spot.
+ * One of the hero's three attacks, each its own animation in his manifest
+ * (rows of the PixelLab sheet, sliced by scripts/slice-sprites.mjs; the
+ * thrust and slash drop the sheet's two near-idle frames after frame 0).
+ * Every animation of his stands on the same feet anchor.
  */
 export type StrikeVariant = {
   name: string;
-  frames: number[];
-  /** Position in `frames` of the frame that meets the boss (on screen at impact). */
+  /** The hero manifest animation. */
+  animation: "chop" | "thrust" | "slash";
+  /** Index (into that animation's frames) of the frame that meets the boss:
+   *  on screen at impact. */
   contact: number;
   /** Body motion under the swing (first hit only: combo hits land at once). */
   motion: "none" | "lunge" | "leap";
 };
 
 export const STRIKE_VARIANTS: StrikeVariant[] = [
-  { name: "overhead chop", frames: [0, 1, 4], contact: 2, motion: "none" },
-  { name: "lunging thrust", frames: [1, 2, 0], contact: 2, motion: "lunge" },
-  { name: "leaping chop", frames: [2, 3, 4], contact: 2, motion: "leap" },
+  // Sheet frame 6 of 9: the bat comes down in front of him; a hop into it.
+  { name: "overhead chop", animation: "chop", contact: 6, motion: "leap" },
+  // Sheet frame 6 (columns 1–2 dropped → index 4): arm fully extended.
+  { name: "forward thrust", animation: "thrust", contact: 4, motion: "lunge" },
+  // Sheet frame 7 (columns 1–2 dropped → index 5): the bat sweeps across.
+  { name: "horizontal slash", animation: "slash", contact: 5, motion: "none" },
 ];
 
 /**
- * The variant as a playable animation whose contact frame is the one on
- * screen `leadMs` after it starts (the impact: the dash for a first hit, 0
- * for a combo hit). Wind-up frames that don't fit are dropped from the
- * front; a long lead holds the first frame. Canvas and anchor come from the
- * manifest's attack animation unchanged.
+ * A one-shot animation timed so its `contact` frame is the one on screen
+ * `leadMs` after it starts: a swing's contact at the impact (the dash for a
+ * first hit, 0 for a combo hit), the peak of a flinch when a blow lands.
+ * Frames before contact that don't fit are dropped from the front; a long
+ * lead holds the first frame. Canvas, anchor and facing are unchanged.
  */
-export function strikeAnimation(attack: SpriteAnimation, variant: StrikeVariant, leadMs: number): SpriteAnimation {
-  const frameMs = 1000 / attack.fps;
+export function contactAnimation(anim: SpriteAnimation, contact: number, leadMs: number): SpriteAnimation {
+  const frameMs = 1000 / anim.fps;
   const before = Math.max(0, Math.floor(leadMs / frameMs));
-  const windUp = variant.frames.slice(0, variant.contact);
+  const windUp = anim.frames.slice(0, contact);
   const lead =
     windUp.length >= before
       ? windUp.slice(windUp.length - before)
-      : [...Array(before - windUp.length).fill(windUp[0] ?? variant.frames[variant.contact]), ...windUp];
-  const sequence = [...lead, ...variant.frames.slice(variant.contact)];
-  return { ...attack, frames: sequence.map((i) => attack.frames[i]), loop: false };
+      : [...Array(before - windUp.length).fill(windUp[0] ?? anim.frames[contact]), ...windUp];
+  return { ...anim, frames: [...lead, ...anim.frames.slice(contact)], loop: false };
 }
 
 /** Motion needs a run-up: below this lead (combo hits) the hero just swings. */

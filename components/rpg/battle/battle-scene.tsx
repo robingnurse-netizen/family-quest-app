@@ -1,20 +1,41 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import Link from "next/link";
 import type { Boss } from "@/lib/supabase/types";
 import { SPRITES } from "@/components/rpg/sprites/manifests";
 import { AnchoredSprite, needsMirror } from "@/components/rpg/sprites/anchored-sprite";
 import { BossSprite } from "@/components/rpg/boss/boss-sprite";
 import { CoinIcon, FlameIcon, HeartIcon, ShieldIcon, SkullIcon, StarIcon } from "@/components/ui/icons";
-import { useBattleContext, useBattleEvents } from "./battle-provider";
+import { registerDevTools, useBattleContext, useBattleEvents } from "./battle-provider";
 import { SoundToggle } from "@/components/ui/sound-toggle";
 import { HudBar } from "./hud-bar";
 import { usePlayerStats, type LiveStats } from "@/lib/hooks/use-player-stats";
 import { levelProgress } from "@/lib/rpg/levels";
 import { shopProgress } from "@/lib/rewards/progress";
 import type { Reward } from "@/lib/supabase/types";
-import { ARENA_STYLE, FEET_X, FeetSpot, HEIGHT, arenaHeight, bossHeight } from "./stage-layout";
+import { createNoRepeatPicker } from "@/lib/random";
+import { STRIKE_VARIANTS, contactAnimation } from "@/lib/rpg/strike";
+import {
+  BOSS_ATTACK_IMPACT_MS,
+  DOWN_HOLD_MS,
+  HURT_PEAK_FRAME,
+  heroReducer,
+  initialHero,
+  type HeroState,
+} from "@/lib/rpg/hero-stage";
+import type { SpriteAnimation } from "@/components/rpg/sprites/types";
+import {
+  ARENA_CLASS,
+  ARENA_STYLE,
+  FEET_X,
+  FeetSpot,
+  HEIGHT,
+  arenaHeight,
+  bossHeight,
+  heroHeight,
+  useDevicePixelStep,
+} from "./stage-layout";
 
 // Reuben's battle scene: one framed arena with his hero and Rogue on the left
 // facing the active boss on the right, the HUD bars under each side and his
@@ -76,17 +97,11 @@ export function BattleScene({
   }, [stats.streak, stats.streakThrough, childId, emit]);
   const shown = stage.shown;
 
-  // Hero reactions, straight from the event stream: strike on damage, take
-  // the hit (red flash) on a missed quest.
-  const [heroPose, setHeroPose] = useState<{ pose: "idle" | "attack" | "hit"; key: number }>({ pose: "idle", key: 0 });
-  useBattleEvents((event) => {
-    if (event.type === "damage") setHeroPose((p) => ({ pose: "attack", key: p.key + 1 }));
-    if (event.type === "miss") setHeroPose((p) => ({ pose: "hit", key: p.key + 1 }));
-  });
-  const backToIdle = () => setHeroPose((p) => ({ pose: "idle", key: p.key + 1 }));
-
-  const hero = SPRITES.hero.animations;
-  const heroAnim = heroPose.pose === "attack" ? hero.attack : hero.idle;
+  // The hero, from the event stream (lib/rpg/hero-stage.ts): an attack on
+  // damage, a flinch on a missed quest, knocked out when the party hits 0 HP
+  // (and back up when it refills), a victory pose when a boss falls.
+  const { hero, partyRef } = useHero(party?.current_hp ?? null, shown?.id ?? null);
+  useDevicePixelStep();
 
   return (
     <section
@@ -94,14 +109,19 @@ export function BattleScene({
       // Thick bevel; the container for the arena's cqw sizing.
       className="panel panel-stone border-4 p-2 shadow-[inset_3px_3px_0_var(--panel-hi),inset_-3px_-3px_0_var(--panel-shade)] [container-type:inline-size] sm:p-3"
     >
-      <div className="relative overflow-hidden rounded-[2px] border-2 border-stone-edge" style={ARENA_STYLE}>
+      <div className={`relative overflow-hidden rounded-[2px] border-2 border-stone-edge ${ARENA_CLASS}`} style={ARENA_STYLE}>
         <ArenaBackdrop />
 
-        {/* The party: Rogue just behind the hero, both facing right. */}
+        {/* The party: Rogue just behind the hero, both facing right. A
+            missed quest flashes them red and shoves them back as the boss's
+            blow lands. */}
         <div
-          key={heroPose.key}
-          className={`absolute inset-x-0 bottom-(--ground) top-0 z-10 ${heroPose.pose === "hit" ? "hero-hit" : ""}`}
-          onAnimationEnd={heroPose.pose === "hit" ? backToIdle : undefined}
+          ref={partyRef}
+          className="absolute inset-x-0 bottom-(--ground) top-0 z-10"
+          style={{ "--impact": `${BOSS_ATTACK_IMPACT_MS}ms` } as React.CSSProperties}
+          onAnimationEnd={(e) => {
+            if (e.target === e.currentTarget) e.currentTarget.classList.remove("hero-hit");
+          }}
         >
           <FeetSpot x={FEET_X.rogue}>
             <AnchoredSprite
@@ -113,12 +133,13 @@ export function BattleScene({
           </FeetSpot>
           <FeetSpot x={FEET_X.hero}>
             <AnchoredSprite
-              animation={heroAnim}
-              // One scale for the hero (from idle) so poses don't resize.
-              height={arenaHeight(HEIGHT.hero * (heroAnim.height / hero.idle.height))}
-              mirror={needsMirror(heroAnim.facing, "right")}
+              key={hero.state.key}
+              animation={hero.animation}
+              // One scale for every pose (lib: heroHeight), so he never resizes.
+              height={heroHeight(hero.animation)}
+              mirror={needsMirror(hero.animation.facing, "right")}
               alt={heroName}
-              onComplete={heroPose.pose === "attack" ? backToIdle : undefined}
+              onComplete={hero.onComplete}
             />
           </FeetSpot>
         </div>
@@ -216,6 +237,115 @@ export function BattleScene({
       </div>
     </section>
   );
+}
+
+const heroAnims = SPRITES.hero.animations;
+
+/** The hero's poses as playable animations (stable objects: SpriteAnimator
+ *  restarts when its animation changes). */
+const HERO_POSES = {
+  idle: heroAnims.idle,
+  // Timed so the flinch peaks as the boss's blow lands.
+  hurt: contactAnimation(heroAnims.hurt, HURT_PEAK_FRAME, BOSS_ATTACK_IMPACT_MS),
+  ko: heroAnims.ko,
+  // Lying flat: the K.O.'s last frame, held.
+  down: { ...heroAnims.ko, frames: heroAnims.ko.frames.slice(-1) },
+  // Getting up: the K.O. in reverse.
+  rise: { ...heroAnims.ko, frames: [...heroAnims.ko.frames].reverse() },
+  victory: heroAnims.victory,
+} satisfies Record<Exclude<HeroState["pose"], "attack">, SpriteAnimation>;
+
+/**
+ * The scene's hero: the pose machine fed from the battle events, the
+ * animation for its pose, and the party's red flash (partyRef goes on the
+ * party's box). Also registers the development console hooks for his
+ * reactions.
+ */
+function useHero(partyHp: number | null, shownBossId: string | null) {
+  const [state, dispatch] = useReducer(heroReducer, partyHp, initialHero);
+  // His attacks: random, never the same one twice running.
+  const [pickVariant] = useState(() => createNoRepeatPicker(STRIKE_VARIANTS.length));
+  // The party's red flash + shove (.hero-hit), restarted by re-adding the
+  // class — re-keying the party would restart his pose too (a K.O. mid-fall).
+  const partyRef = useRef<HTMLDivElement>(null);
+  const flashParty = useCallback(() => {
+    const el = partyRef.current;
+    if (!el) return;
+    el.classList.remove("hero-hit");
+    void el.offsetWidth; // restart the CSS animation
+    el.classList.add("hero-hit");
+  }, []);
+
+  useBattleEvents((event) => {
+    dispatch({ type: "event", event, variant: event.type === "damage" ? pickVariant() : undefined });
+    if (event.type === "miss") flashParty();
+  });
+
+  // The victory pose holds until the next boss takes the stage.
+  const lastShown = useRef(shownBossId);
+  useEffect(() => {
+    if (shownBossId === lastShown.current) return;
+    lastShown.current = shownBossId;
+    dispatch({ type: "swap" });
+  }, [shownBossId]);
+
+  // Knocked out and the party's refilled: lie there a moment, then get up.
+  const riseDue = state.pose === "down" && state.pendingRise;
+  useEffect(() => {
+    if (!riseDue) return;
+    const t = setTimeout(() => dispatch({ type: "rise" }), DOWN_HOLD_MS);
+    return () => clearTimeout(t);
+  }, [riseDue]);
+
+  // Development only: his reactions on demand (see CLAUDE.md), through the
+  // same events the database sends.
+  const { party, boss, emit } = useBattleContext();
+  const latest = useRef({ party, boss });
+  useEffect(() => {
+    latest.current = { party, boss };
+  }, [party, boss]);
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    type Tools = { setParty: (p: NonNullable<typeof party>) => void };
+    const tools = () => (window as unknown as { __fqBattle: Tools }).__fqBattle;
+    const setHp = (hp: (current: number, max: number) => number) => {
+      const p = latest.current.party;
+      if (p) tools().setParty({ ...p, current_hp: Math.max(0, Math.min(p.max_hp, hp(p.current_hp, p.max_hp))) });
+    };
+    let victoryTimer: ReturnType<typeof setTimeout> | undefined;
+    const cleanup = registerDevTools({
+      // A missed quest: the boss attacks, he flinches, the party loses HP
+      // (reaching 0 knocks him out).
+      hurt: (amount = 10) => {
+        const b = latest.current.boss;
+        if (b) emit({ type: "miss", bossId: b.id, amount, childId: null, slotId: null, at: new Date().toISOString() });
+        setHp((hp) => hp - amount);
+      },
+      // Party HP to 0 / back to full, as the nightly reset sends them.
+      knockOut: () => setHp(() => 0),
+      standUp: () => setHp((_, max) => max),
+      // His victory pose alone (finalBlow() plays the whole overlay), held
+      // `holdMs` — the next boss would end it in the real game.
+      victory: (holdMs = 3000) => {
+        dispatch({ type: "play", pose: "victory" });
+        clearTimeout(victoryTimer);
+        victoryTimer = setTimeout(() => dispatch({ type: "swap" }), holdMs);
+      },
+    });
+    return () => {
+      clearTimeout(victoryTimer);
+      cleanup();
+    };
+  }, [emit]);
+
+  const variant = STRIKE_VARIANTS[state.variant];
+  const animation = state.pose === "attack" ? heroAnims[variant.animation] : HERO_POSES[state.pose];
+  const oneShot = state.pose === "attack" || state.pose === "hurt" || state.pose === "ko" || state.pose === "rise";
+
+  return {
+    hero: { state, animation, onComplete: oneShot ? () => dispatch({ type: "end" }) : undefined },
+    partyRef,
+  };
 }
 
 /** Night sky with twinkling stars and drifting clouds, far and near pixel

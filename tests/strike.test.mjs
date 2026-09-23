@@ -1,5 +1,6 @@
-// Hit overlay choreography (lib/rpg/strike.ts): hit tiers by quest length
-// and the hero's attack variants, against the real hero manifest.
+// Hit overlay choreography (lib/rpg/strike.ts): hit tiers by quest length,
+// the hero's three attacks and his flinch timing, against the real hero
+// manifest.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -11,7 +12,10 @@ const { createNoRepeatPicker } = await importTs(fileURLToPath(new URL("../lib/ra
 const hero = JSON.parse(
   readFileSync(fileURLToPath(new URL("../components/rpg/sprites/manifests/hero.json", import.meta.url)), "utf8"),
 );
-const attack = hero.animations.attack;
+const anims = hero.animations;
+const { BOSS_ATTACK_IMPACT_MS, HURT_PEAK_FRAME } = await importTs(
+  fileURLToPath(new URL("../lib/rpg/hero-stage.ts", import.meta.url)),
+);
 
 /** The frame a (one-shot) animation shows `ms` after it starts. */
 const frameAt = (anim, ms) => anim.frames[Math.min(anim.frames.length - 1, Math.floor((ms * anim.fps) / 1000))];
@@ -37,36 +41,64 @@ test("heavier tiers never land softer, and stay quick", () => {
 
 // --- Attack variants ------------------------------------------------------------------
 
-test("there are 2–3 distinct swings, all cut from real attack frames", () => {
+test("three attacks — chop, thrust, slash — each its own animation", () => {
   const variants = strike.STRIKE_VARIANTS;
-  assert.ok(variants.length >= 2 && variants.length <= 3);
-  assert.equal(new Set(variants.map((v) => v.frames.join(","))).size, variants.length, "no two swings alike");
+  assert.deepEqual(variants.map((v) => v.animation), ["chop", "thrust", "slash"]);
   for (const v of variants) {
-    for (const i of v.frames) assert.ok(i >= 0 && i < attack.frames.length, `${v.name}: frame ${i}`);
-    assert.ok(v.contact >= 0 && v.contact < v.frames.length, `${v.name}: contact`);
+    const anim = anims[v.animation];
+    assert.ok(anim, `${v.name}: hero manifest has "${v.animation}"`);
+    assert.equal(anim.loop, false, `${v.name}: one-shot`);
+    assert.ok(v.contact > 0 && v.contact < anim.frames.length, `${v.name}: contact inside the swing`);
+  }
+});
+
+test("contact frames are the sheet's (thrust and slash skip sheet frames 1–2)", () => {
+  // Sheet frame numbers (0-based, per row) the user specified: chop 6, thrust 6, slash 7.
+  const sheetFrame = { chop: 6, thrust: 6, slash: 7 };
+  const dropped = { chop: 0, thrust: 2, slash: 2 };
+  for (const v of strike.STRIKE_VARIANTS) {
+    assert.equal(v.contact + dropped[v.animation], sheetFrame[v.animation], v.name);
+    assert.equal(anims[v.animation].frames.length, 9 - dropped[v.animation], `${v.name}: frame count`);
   }
 });
 
 test("each swing's contact frame is on screen at the moment of impact", () => {
   for (const v of strike.STRIKE_VARIANTS) {
-    const contactFrame = attack.frames[v.frames[v.contact]];
+    const anim = anims[v.animation];
+    const contactFrame = anim.frames[v.contact];
     // First hit (after the 280ms dash), a combo hit (no lead), and a long lead.
     for (const lead of [280, 0, 50, 99, 100, 1000]) {
-      const anim = strike.strikeAnimation(attack, v, lead);
-      assert.equal(frameAt(anim, lead), contactFrame, `${v.name} at ${lead}ms`);
+      const timed = strike.contactAnimation(anim, v.contact, lead);
+      assert.equal(frameAt(timed, lead), contactFrame, `${v.name} at ${lead}ms`);
     }
   }
 });
 
-test("a swing keeps the manifest's canvas, anchor and facing (feet stay planted)", () => {
+test("a first hit shows some wind-up before contact", () => {
   for (const v of strike.STRIKE_VARIANTS) {
-    const anim = strike.strikeAnimation(attack, v, 280);
-    assert.deepEqual(
-      { w: anim.width, h: anim.height, anchor: anim.anchor, facing: anim.facing, fps: anim.fps, loop: anim.loop },
-      { w: attack.width, h: attack.height, anchor: attack.anchor, facing: attack.facing, fps: attack.fps, loop: false },
-    );
-    for (const f of anim.frames) assert.ok(attack.frames.includes(f));
+    const timed = strike.contactAnimation(anims[v.animation], v.contact, 280);
+    const contactAt = timed.frames.indexOf(anims[v.animation].frames[v.contact]);
+    assert.ok(contactAt >= 3, `${v.name}: ${contactAt} wind-up frames`);
   }
+});
+
+test("a timed swing keeps the manifest's canvas, anchor and facing (feet stay planted)", () => {
+  for (const v of strike.STRIKE_VARIANTS) {
+    const anim = anims[v.animation];
+    const timed = strike.contactAnimation(anim, v.contact, 280);
+    assert.deepEqual(
+      { w: timed.width, h: timed.height, anchor: timed.anchor, facing: timed.facing, fps: timed.fps, loop: timed.loop },
+      { w: anim.width, h: anim.height, anchor: anim.anchor, facing: anim.facing, fps: anim.fps, loop: false },
+    );
+    for (const f of timed.frames) assert.ok(anim.frames.includes(f));
+  }
+});
+
+test("the hurt flinch peaks (sheet frame 5) as the boss's blow lands", () => {
+  const hurt = strike.contactAnimation(anims.hurt, HURT_PEAK_FRAME, BOSS_ATTACK_IMPACT_MS);
+  assert.equal(frameAt(hurt, BOSS_ATTACK_IMPACT_MS), anims.hurt.frames[5]);
+  // …and still recovers to idle afterwards (sheet frames 6–8).
+  assert.deepEqual(hurt.frames.slice(-3), anims.hurt.frames.slice(6));
 });
 
 test("repeated ticks don't repeat a swing back to back", () => {

@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { armSounds, playSound } from "@/lib/sound/sound-manager";
 import { useBattleEvents } from "./battle-provider";
 import { OVERLAY_TIMING } from "./hit-overlay";
+import { BOSS_ATTACK_IMPACT_MS } from "@/lib/rpg/hero-stage";
 
 /**
  * Sound effects for the battle event stream: the one place events become
@@ -13,10 +14,19 @@ import { OVERLAY_TIMING } from "./hit-overlay";
  * Own hits sound on the hit overlay's beats (the attack on "impact", the
  * fanfare on "ko") so they land with the picture; hits and defeats the
  * overlay doesn't show (someone else's, the nightly reset, a refetch) sound
- * when the event arrives.
+ * when the event arrives. A missed quest's party damage sounds on the
+ * boss's blow (BOSS_ATTACK_IMPACT_MS after the miss, as the hero's flinch
+ * peaks); its minGapMs still applies, checked when it plays.
  */
 export function BattleSounds({ childId }: { childId: string }) {
   useEffect(() => armSounds(), []);
+
+  // Delayed sounds (party damage on the blow), cancelled on unmount.
+  const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
+  useEffect(() => {
+    const pending = timers.current;
+    return () => pending.forEach(clearTimeout);
+  }, []);
 
   // Bosses this player hit recently: their defeat gets its sound from the
   // overlay's K.O. beat instead.
@@ -33,9 +43,14 @@ export function BattleSounds({ childId }: { childId: string }) {
         if (hitAt === undefined || Date.now() - hitAt > OVERLAY_TIMING.recent) playSound("bossDefeated");
         return;
       }
-      case "miss":
-        playSound("partyDamage");
+      case "miss": {
+        const t = setTimeout(() => {
+          timers.current.delete(t);
+          playSound("partyDamage");
+        }, BOSS_ATTACK_IMPACT_MS);
+        timers.current.add(t);
         return;
+      }
       case "moment":
         switch (event.name) {
           case "quest_complete":
