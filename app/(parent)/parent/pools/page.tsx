@@ -15,9 +15,9 @@ export default async function ParentPoolsPage(props: PageProps<"/parent/pools">)
         <Link href="/parent" className="text-sm font-semibold text-indigo-600 hover:text-indigo-500">
           ← Parent HQ
         </Link>
-        <h1 className="text-3xl font-black text-slate-900">Weekly pools</h1>
+        <h1 className="text-3xl font-black text-slate-900">Weekly quests</h1>
         <p className="text-sm text-slate-600">
-          Give each player a pool of minutes for the week. They drag it onto days to plan it.
+          Give each player weekly quests: minutes to spend during the week. They drag them onto days to plan them.
         </p>
       </header>
 

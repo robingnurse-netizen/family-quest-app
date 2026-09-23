@@ -15,9 +15,10 @@ export function WeekNav({
   today: string;
   onChange: (week: string) => void;
   titleClassName: string;
+  /** The nav buttons' full styling (each board has its own look). */
   buttonClassName: string;
 }) {
-  const button = `inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2.5 text-sm font-semibold ${buttonClassName}`;
+  const button = buttonClassName;
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
       <h2 className={titleClassName}>{formatWeekLabel(week)}</h2>

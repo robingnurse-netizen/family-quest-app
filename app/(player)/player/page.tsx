@@ -11,7 +11,10 @@ import { loadBattle } from "@/lib/rpg/queries";
 import { BossStatus } from "@/components/rpg/boss/boss-status";
 import { BossHud } from "@/components/rpg/boss/boss-hud";
 import { HeroParty } from "@/components/rpg/hero/hero-party";
-import { ArrowRight } from "@/components/ui/icons";
+import { ArrowRight, CoinIcon, FlameIcon, ShieldIcon, StarIcon } from "@/components/ui/icons";
+import { Panel, panelClass } from "@/components/ui/panel";
+import { pixelButtonClass } from "@/components/ui/pixel-button";
+import { GameHeading } from "@/components/ui/game-heading";
 
 export default async function PlayerDashboard(props: PageProps<"/player">) {
   const profile = await requireRole("child");
@@ -30,46 +33,55 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
   ]);
 
   const tiles = [
-    { label: "Level", value: stats?.level ?? 1 },
-    { label: "XP", value: stats?.xp ?? 0 },
-    { label: "Gold", value: stats?.gold ?? 0 },
-    { label: "Streak", value: stats?.current_streak ?? 0 },
+    { label: "Level", value: stats?.level ?? 1, Icon: ShieldIcon, valueClass: "text-white" },
+    { label: "XP", value: stats?.xp ?? 0, Icon: StarIcon, valueClass: "text-white" },
+    { label: "Gold", value: stats?.gold ?? 0, Icon: CoinIcon, valueClass: "text-gold" },
+    { label: "Streak", value: stats?.current_streak ?? 0, Icon: FlameIcon, valueClass: "text-white" },
   ];
 
   return (
-    <main className="flex-1 bg-gradient-to-b from-indigo-950 via-purple-900 to-indigo-950 px-4 pb-40 pt-8 text-white">
+    // World background, fonts and base text come from app/(player)/layout.tsx.
+    <main className="flex-1 px-4 pb-40 pt-8">
       {/* One spacing scale: gap-6 between sections, space-y-3 within a group. */}
       <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
         <header className="flex items-center justify-between gap-4">
-          <h1 className="text-3xl font-black">
+          <GameHeading as="h1" size="lg">
             Welcome back, {profile.display_name}!
-          </h1>
-          <SignOutButton className="bg-white/10 text-white hover:bg-white/20" />
+          </GameHeading>
+          <SignOutButton className={`${pixelButtonClass("stone", "sm")} shrink-0`} />
         </header>
 
         <div className="space-y-3">
           <HeroParty heroName={profile.display_name} />
 
           <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            {tiles.map((t) => (
-              <div key={t.label} className="rounded-2xl bg-white/10 p-4 text-center">
-                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-200">
-                  {t.label}
-                </p>
-                <p className="text-3xl font-black text-amber-300">{t.value}</p>
-              </div>
+            {tiles.map(({ label, value, Icon, valueClass }) => (
+              <Panel key={label} variant="stone" className="flex items-center gap-3 px-3 py-2.5">
+                <Icon className="h-8 w-8 shrink-0" />
+                <div className="min-w-0">
+                  <p className="font-display text-sm font-semibold uppercase tracking-wide text-stone-text">
+                    {label}
+                  </p>
+                  <p className={`font-display text-2xl font-semibold leading-none tabular-nums text-shadow-pixel ${valueClass}`}>
+                    {value}
+                  </p>
+                </div>
+              </Panel>
             ))}
           </section>
 
           <Link
             href="/player/store"
-            className="flex items-center justify-between gap-3 rounded-2xl border border-amber-300/40 bg-amber-400/10 p-4 transition hover:bg-amber-400/20"
+            className={`${panelClass("wood")} flex items-center gap-3 p-4 transition-[filter] hover:brightness-110 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-white motion-reduce:transition-none`}
           >
-            <div>
-              <h2 className="font-black text-amber-300">Rewards store</h2>
-              <p className="text-sm text-indigo-200">Spend your gold on real-life rewards.</p>
+            <CoinIcon className="h-9 w-9 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <GameHeading as="h2" size="md">
+                Rewards store
+              </GameHeading>
+              <p>Spend your gold on real-life rewards.</p>
             </div>
-            <ArrowRight className="h-6 w-6 shrink-0 text-amber-300" />
+            <ArrowRight className="h-7 w-7 shrink-0 text-gold" />
           </Link>
         </div>
 
@@ -95,9 +107,9 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
         />
 
         <section>
-          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-amber-300">
+          <GameHeading size="sm" className="mb-2 uppercase tracking-wide">
             Quest log
-          </h2>
+          </GameHeading>
           {/* Read-only: no `actions`, so no edit controls. */}
           <MonthCalendar
             variant="player"

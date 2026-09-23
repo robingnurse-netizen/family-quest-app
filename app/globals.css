@@ -23,6 +23,67 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* ---------------------------------------------------------------------------
+   Player RPG design tokens (player pages only; Parent HQ keeps its look).
+   Purple is the *world* (page background) only; UI surfaces are materials:
+   stone for combat/HUD, wood for boards and frames, parchment for cards,
+   notes and the shop. Contrast (WCAG AA) was checked for every text pairing
+   used: e.g. ink on parchment 11.3:1, parchment on wood 5.8:1, gold on
+   stone 7.7:1, go-ink on go 6.3:1.
+   ------------------------------------------------------------------------- */
+
+/* Fonts are loaded in app/(player)/layout.tsx; `inline` so the utilities
+   resolve the next/font variables on that layout's element. Swap either
+   face here in one place. */
+@theme inline {
+  --font-display: var(--font-pixelify), ui-monospace, monospace;
+  --font-body: var(--font-nunito), ui-rounded, system-ui, sans-serif;
+}
+
+@theme {
+  /* World (page background). */
+  --color-world-deep: #1b1535;
+  --color-world: #2a1d52;
+  --color-world-text: #c9bde8; /* muted text on the world, 8.5:1 */
+
+  /* Stone: combat / HUD. */
+  --color-stone: #2f3448;
+  --color-stone-edge: #12141f;
+  --color-stone-hi: #4a5170;
+  --color-stone-shade: #232738;
+  --color-stone-text: #a9b0c8; /* muted text on stone, 5.7:1 */
+
+  /* Wood: boards and frames. */
+  --color-wood: #7a4a26;
+  --color-wood-edge: #3a2210;
+  --color-wood-hi: #a8703f;
+  --color-wood-shade: #5e381b;
+
+  /* Parchment: cards, notes, the shop. */
+  --color-parchment: #f1e2c0;
+  --color-parchment-dark: #d9c9a3;
+  --color-parchment-edge: #b89458;
+  --color-ink: #3b2412;
+  --color-ink-soft: #6b4423; /* secondary text on parchment, 6.6:1 */
+
+  /* Inset wells (bar tracks, empty slots). */
+  --color-well: #0d0f19;
+
+  /* Accents. */
+  --color-gold: #fcc419;
+  --color-gold-deep: #f59f00;
+  --color-gold-ink: #7c5200; /* gold amounts on parchment, 5.4:1 */
+  --color-boss: #e03131; /* fills only — too dark for text on stone */
+  --color-boss-text: #ff8787;
+  --color-party: #40c057;
+  --color-party-text: #8ce99a;
+  --color-go: #58cc02; /* the one primary action */
+  --color-go-ledge: #46a302;
+  --color-go-ink: #173800;
+  --color-danger: #c92a2a;
+  --color-danger-ledge: #962020;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -86,3 +147,151 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .boss-hud-in { animation: none; }
 }
+
+/* ---------------------------------------------------------------------------
+   Player materials: bevelled panels and pressable buttons
+   (components/ui/panel.tsx, components/ui/pixel-button.tsx).
+   ------------------------------------------------------------------------- */
+
+/* The world: night sky with a faint 4×4 dither so it isn't a flat void. */
+.bg-world {
+  background-color: var(--color-world-deep);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' shape-rendering='crispEdges'%3E%3Crect width='1' height='1' fill='%23fff' fill-opacity='.045'/%3E%3Crect x='2' y='2' width='1' height='1' fill='%23fff' fill-opacity='.03'/%3E%3C/svg%3E"),
+    linear-gradient(to bottom, var(--color-world-deep), var(--color-world) 40%, var(--color-world-deep));
+  background-size: 4px 4px, 100% 100%;
+  image-rendering: pixelated;
+}
+
+@layer components {
+  /* 3px dark edge, small radius, 2px light bevel top-left and dark bottom-right. */
+  .panel {
+    border: 3px solid var(--panel-edge);
+    border-radius: 4px;
+    background-color: var(--panel-face);
+    color: var(--panel-text);
+    box-shadow:
+      inset 2px 2px 0 var(--panel-hi),
+      inset -2px -2px 0 var(--panel-shade);
+  }
+  .panel-stone {
+    --panel-face: var(--color-stone);
+    --panel-edge: var(--color-stone-edge);
+    --panel-hi: var(--color-stone-hi);
+    --panel-shade: var(--color-stone-shade);
+    --panel-text: #fff;
+  }
+  .panel-wood {
+    --panel-face: var(--color-wood);
+    --panel-edge: var(--color-wood-edge);
+    --panel-hi: var(--color-wood-hi);
+    --panel-shade: var(--color-wood-shade);
+    --panel-text: var(--color-parchment);
+  }
+  .panel-parchment {
+    --panel-face: var(--color-parchment);
+    --panel-edge: var(--color-parchment-edge);
+    --panel-hi: #fff8e6;
+    --panel-shade: var(--color-parchment-dark);
+    --panel-text: var(--color-ink);
+    /* Focus rings must show on a light surface. */
+    --focus-ring: var(--color-ink);
+  }
+  /* Recessed dark well: shadow top-left, faint light bottom-right. */
+  .panel-inset {
+    --panel-face: var(--color-well);
+    --panel-edge: var(--color-stone-edge);
+    --panel-hi: rgb(0 0 0 / 0.6);
+    --panel-shade: rgb(255 255 255 / 0.06);
+    --panel-text: #fff;
+  }
+
+  /* Solid face over a 4px ledge; pressing drops it onto the ledge. */
+  .btn-pixel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    border: 3px solid var(--btn-edge);
+    border-radius: 4px;
+    background-color: var(--btn-face);
+    color: var(--btn-text);
+    /* The next/font variable itself: `@theme inline` tokens (--font-display)
+       only exist inside utilities, not as CSS variables. */
+    font-family: var(--font-pixelify), ui-monospace, monospace;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow:
+      inset 2px 2px 0 rgb(255 255 255 / 0.28),
+      0 4px 0 var(--btn-ledge);
+    margin-bottom: 4px; /* room for the ledge */
+    cursor: pointer;
+    user-select: none;
+    transition: filter 120ms ease-out;
+  }
+  .btn-pixel:hover:not(:disabled) { filter: brightness(1.1); }
+  .btn-pixel:active:not(:disabled) {
+    translate: 0 4px;
+    box-shadow: inset 2px 2px 0 rgb(255 255 255 / 0.18);
+  }
+  .btn-pixel:focus-visible {
+    outline: 3px solid var(--focus-ring, #fff);
+    outline-offset: 2px;
+  }
+  /* Disabled: flat, grey, no ledge — reads as clearly not pressable. */
+  .btn-pixel:disabled {
+    --btn-face: #575b69;
+    --btn-edge: #3a3d48;
+    --btn-text: #f1f2f5; /* 6.0:1 */
+    box-shadow: none;
+    translate: 0 4px;
+    filter: saturate(0);
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    --btn-face: var(--color-go);
+    --btn-edge: #2d6b00;
+    --btn-ledge: var(--color-go-ledge);
+    --btn-text: var(--color-go-ink);
+  }
+  .btn-gold {
+    --btn-face: var(--color-gold);
+    --btn-edge: #8a5a00;
+    --btn-ledge: var(--color-gold-deep);
+    --btn-text: var(--color-ink);
+  }
+  .btn-stone {
+    --btn-face: var(--color-stone-hi);
+    --btn-edge: var(--color-stone-edge);
+    --btn-ledge: #1f2330;
+    --btn-text: #fff;
+  }
+  .btn-danger {
+    --btn-face: var(--color-danger);
+    --btn-edge: #5c1010;
+    --btn-ledge: var(--color-danger-ledge);
+    --btn-text: #fff;
+  }
+  .btn-sm { min-height: 2rem; padding: 0 0.625rem; font-size: 0.875rem; }
+  .btn-md { min-height: 2.5rem; padding: 0 1rem; font-size: 1rem; }
+  .btn-lg { min-height: 3rem; padding: 0 1.5rem; font-size: 1.25rem; }
+
+  /* Pixel drop shadow for game headings (components/ui/game-heading.tsx). */
+  .text-shadow-pixel { text-shadow: 2px 2px 0 var(--color-stone-edge); }
+
+  /* Bars: hard edges, a highlight stripe on top, a darker lip underneath. */
+  .bar-fill {
+    height: 100%;
+    box-shadow:
+      inset 0 2px 0 rgb(255 255 255 / 0.35),
+      inset 0 -2px 0 rgb(0 0 0 / 0.25);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-pixel { transition: none; }
+}
+
+/* Sprites are pixel art: never smooth them when scaled (SpriteAnimator). */
+.sprite-pixelated { image-rendering: pixelated; }

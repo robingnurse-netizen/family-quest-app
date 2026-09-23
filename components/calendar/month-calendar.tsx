@@ -157,12 +157,12 @@ export function MonthCalendar({
       </header>
 
       <div
-        className={`grid grid-cols-7 gap-px overflow-hidden rounded-xl transition-opacity ${loading ? "opacity-60" : ""}`}
+        className={`grid grid-cols-7 gap-px overflow-hidden transition-opacity ${theme.grid} ${loading ? "opacity-60" : ""}`}
       >
         {WEEKDAYS.map((d) => (
           <div
             key={d}
-            className={`pb-1 text-center text-[11px] font-semibold uppercase tracking-wide ${theme.weekday}`}
+            className={`pb-1 text-center uppercase tracking-wide ${theme.weekday}`}
           >
             {d}
           </div>
@@ -194,7 +194,7 @@ export function MonthCalendar({
                     ? `Add event on ${formatDayLabel(day)}`
                     : `${formatDayLabel(day)}: ${dayEvents.length} event${dayEvents.length === 1 ? "" : "s"}`
                 }
-                className={`flex h-6 w-6 shrink-0 items-center justify-center self-start rounded-full text-xs font-bold ${
+                className={`flex h-6 w-6 shrink-0 items-center justify-center self-start ${theme.dayShape} ${
                   isToday ? theme.today : inMonth ? theme.dayNumber : ""
                 }`}
               >
@@ -212,7 +212,7 @@ export function MonthCalendar({
                       openOccurrence(event);
                     }}
                     title={event.title}
-                    className={`w-full truncate rounded px-1 py-0.5 text-left text-[10px] font-semibold leading-tight sm:text-xs ${
+                    className={`w-full truncate px-1 py-0.5 text-left leading-tight ${theme.chipShape} ${
                       event.all_day ? theme.chipAllDay : theme.chip
                     }`}
                   >
@@ -233,7 +233,7 @@ export function MonthCalendar({
                     e.stopPropagation();
                     setDialog({ kind: "day", day });
                   }}
-                  className={`text-left text-[10px] font-semibold sm:text-xs ${theme.more}`}
+                  className={`text-left ${theme.chipText} ${theme.more}`}
                 >
                   +{hidden} more
                 </button>

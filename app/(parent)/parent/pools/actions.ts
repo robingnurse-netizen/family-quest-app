@@ -31,7 +31,7 @@ export async function savePool(formData: FormData): Promise<ActionResult<WeeklyP
   const color = field(formData, "color");
   const totalMinutes = Number(field(formData, "total_minutes"));
 
-  if (!title) return { ok: false, error: "Give the pool a title." };
+  if (!title) return { ok: false, error: "Give the weekly quest a title." };
   if (title.length > 120) return { ok: false, error: "That title is a bit long." };
   if (!isDayKey(week)) return { ok: false, error: "Pick a week." };
   if (!Number.isInteger(totalMinutes) || totalMinutes <= 0 || totalMinutes > MAX_POOL_MINUTES) {
@@ -47,7 +47,7 @@ export async function savePool(formData: FormData): Promise<ActionResult<WeeklyP
     .eq("family_id", profile.family_id)
     .eq("role", "child")
     .maybeSingle();
-  if (!child) return { ok: false, error: "Pick who this pool is for." };
+  if (!child) return { ok: false, error: "Pick who this weekly quest is for." };
 
   const values = {
     child_id: child.id,
@@ -70,7 +70,7 @@ export async function savePool(formData: FormData): Promise<ActionResult<WeeklyP
 
   const { data, error } = await query.select().single();
   if (error || !data) {
-    return { ok: false, error: friendlyBacklogError(error?.message, "Couldn't save that pool.") };
+    return { ok: false, error: friendlyBacklogError(error?.message, "Couldn't save that weekly quest.") };
   }
   return { ok: true, data };
 }
@@ -86,7 +86,7 @@ export async function deletePool(id: string): Promise<ActionResult<string>> {
     .eq("id", id)
     .eq("family_id", profile.family_id);
 
-  if (error) return { ok: false, error: "Couldn't delete that pool." };
-  if (!count) return { ok: false, error: "That pool no longer exists." };
+  if (error) return { ok: false, error: "Couldn't delete that weekly quest." };
+  if (!count) return { ok: false, error: "That weekly quest no longer exists." };
   return { ok: true, data: id };
 }

@@ -1,12 +1,10 @@
 import { logout } from "@/app/(auth)/actions";
 
-export function SignOutButton({ className = "" }: { className?: string }) {
+/** `className` is the button's full styling: each dashboard has its own look. */
+export function SignOutButton({ className }: { className: string }) {
   return (
     <form action={logout}>
-      <button
-        type="submit"
-        className={`rounded-lg px-3 py-1.5 text-sm font-semibold transition ${className}`}
-      >
+      <button type="submit" className={className}>
         Sign out
       </button>
     </form>

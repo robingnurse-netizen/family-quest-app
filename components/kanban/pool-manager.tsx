@@ -63,13 +63,13 @@ export function PoolManager({
         today={today}
         onChange={goTo}
         titleClassName="text-xl font-black text-slate-900"
-        buttonClassName="text-slate-700 hover:bg-slate-100"
+        buttonClassName="inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
       />
 
       <div className={`mt-4 space-y-3 transition-opacity ${board.loading ? "opacity-60" : ""}`}>
         {board.pools.length === 0 ? (
           <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-            No pools for this week yet.
+            No weekly quests for this week yet.
           </p>
         ) : (
           board.pools.map((pool) => (
@@ -92,12 +92,12 @@ export function PoolManager({
             onClick={() => setEditing("new")}
             className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 font-bold text-white shadow hover:bg-indigo-500"
           >
-            New pool
+            New weekly quest
           </button>
         ) : (
           <p className="mt-4 text-sm text-slate-500">
-            Pools are assigned to a player. Once a player joins the family with the invite code,
-            you can create pools for them.
+            Weekly quests are assigned to a player. Once a player joins the family with the invite
+            code, you can create weekly quests for them.
           </p>
         ))}
 
@@ -105,7 +105,7 @@ export function PoolManager({
         <Modal
           open={editing !== null}
           onClose={() => setEditing(null)}
-          title={editing === "new" ? "New pool" : "Edit pool"}
+          title={editing === "new" ? "New weekly quest" : "Edit weekly quest"}
           className="rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-xl backdrop:bg-slate-900/40"
           titleClassName="text-lg font-black text-slate-900"
           closeClassName="text-slate-500"
@@ -385,7 +385,7 @@ function PoolForm({
               ? "Deleting…"
               : confirmDelete
                 ? allocated > 0
-                  ? "Delete pool and its slots?"
+                  ? "Delete quest and its slots?"
                   : "Really delete?"
                 : "Delete"}
           </button>

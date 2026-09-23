@@ -38,7 +38,7 @@ export default async function ParentDashboard() {
             {family?.name ?? "Your family"}
           </h1>
         </div>
-        <SignOutButton className="bg-slate-200 text-slate-700 hover:bg-slate-300" />
+        <SignOutButton className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-300" />
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2">
@@ -115,12 +115,12 @@ export default async function ParentDashboard() {
 
       <section className="mt-8">
         <div className="mb-3 flex items-baseline justify-between gap-2">
-          <h2 className="text-lg font-black text-slate-900">This week&apos;s pools</h2>
+          <h2 className="text-lg font-black text-slate-900">This week&apos;s quests</h2>
           <Link
             href="/parent/pools"
             className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
           >
-            Manage pools →
+            Manage weekly quests →
           </Link>
         </div>
         {/* Read-only and live: completions on the player's board show up here. */}

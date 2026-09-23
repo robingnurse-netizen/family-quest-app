@@ -77,7 +77,8 @@ PROJECT STATUS:
   * Future art requirement (not built): when the sprite art is redone,
     boss idle should reflect current_hp — pristine above ~66%, worn at
     ~33–66%, heavily damaged below ~33% — instead of one idle loop at
-    every HP.
+    every HP. Hero and Rogue get the same treatment from party HP (see
+    "FUTURE — Battle feedback redesign" under Phase B2).
 - RPG Phase B2 — Boss Battle Rendering: COMPLETE. BossStatus (both
   dashboards) shows the active boss's sprite reacting to Realtime events:
   boss_log damage / miss_penalty → hurt once (epic bosses use the first 3
@@ -99,6 +100,21 @@ PROJECT STATUS:
   server-rendered panel briefly sits in-flow (off-screen if scrolled past),
   then appears pinned without animation. Pure CSS (sticky) can't pin in
   both scroll directions, so this flash stays.
+  * FUTURE — Battle feedback redesign (design note, NOT to be built yet):
+    - The battle scene (hero, Rogue and boss together, built in Stage 2)
+      sits fixed at the top of Reuben's dashboard in normal page flow,
+      with no sticky/pinned behaviour.
+    - Instead, ticking a task off plays a high-energy hit animation
+      centred in whatever part of the page he's scrolled to: hero strikes,
+      explosive impact, damage number, screen shake. Then the characters
+      "return" to their places in the battle scene at the top.
+    - Back in the scene, each character idles in a visibly damaged state
+      by HP: the boss from boss HP, the hero and Rogue from party HP (ties
+      in with the HP-based idle art note under Phase B1).
+    - Once the overlay exists, remove the sticky boss panel (BossHud) and
+      its compact variant; the overlay replaces the job they do.
+    - Until then, Stage 2 KEEPS the current sticky compact behaviour so
+      Reuben doesn't lose feedback when scrolled down.
 - Rewards Store: COMPLETE, pushed as b2104a3. Tested live: reward creation, redeem with live
   gold deduction, approve → fulfil, deny with refund (both dashboards), and
   the gold-gated Redeem button with "how much more" messaging.
@@ -122,6 +138,28 @@ PROJECT STATUS:
   * Realtime: lib/hooks/use-reward-store.ts (rewards, reward_redemptions,
     and the player's player_stats row). Friendly trigger errors in
     lib/rewards/errors.ts.
+- Visual overhaul Stage 1 — Design foundation (player pages only): COMPLETE.
+  Tactile 16-bit RPG look; Parent HQ keeps its own look.
+  * Tokens in app/globals.css (@theme): purple is the world background
+    only (.bg-world, dithered); surfaces are materials — stone (HUD),
+    wood (boards/frames), parchment (cards/notes/shop), inset wells.
+    Contrast checked for every text pairing (AA).
+  * Primitives in components/ui/: Panel (+ panelClass), PixelButton
+    (+ pixelButtonClass; 4px ledge, presses down, flat grey disabled),
+    GameHeading, pixel icons in icons.tsx (coin, star, flame, shield,
+    heart, skull — character grids, crispEdges).
+  * Fonts load in app/(player)/layout.tsx only: Pixelify Sans (display)
+    and Nunito (body), used as font-display / font-body. DIGIT RULE:
+    Pixelify at weight 600 only (700 fills in 2/3/5), and numbers under
+    ~24px use Nunito extra-bold — Pixelify's small digits are ambiguous.
+    `@theme inline` font tokens aren't real CSS variables: plain CSS must
+    use var(--font-pixelify) / var(--font-nunito).
+  * Every sprite renders image-rendering: pixelated (SpriteAnimator).
+  * Shared components keep Parent HQ unchanged via per-variant style keys
+    (BossStatus styles, calendar theme.ts); SignOutButton and WeekNav take
+    their full styling from the caller.
+  * UI wording: weekly_pools are "weekly quests" on screen (code, table
+    and routes still say pool).
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at

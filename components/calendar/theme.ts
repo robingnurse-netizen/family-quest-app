@@ -7,7 +7,12 @@ export type CalendarTheme = {
   shell: string;
   title: string;
   navButton: string;
+  /** Weekday header row: size/weight/colour. */
   weekday: string;
+  /** Day grid wrapper (shape and grid-line colour showing through gap-px). */
+  grid: string;
+  /** Day number badge: shape, size, weight. */
+  dayShape: string;
   cell: string;
   cellOutside: string;
   cellHover: string;
@@ -16,6 +21,9 @@ export type CalendarTheme = {
   chip: string;
   chipAllDay: string;
   chipTime: string;
+  /** Event chip shape and text size. */
+  chipShape: string;
+  chipText: string;
   more: string;
   dialog: string;
   dialogTitle: string;
@@ -37,7 +45,9 @@ export const calendarThemes: Record<CalendarVariant, CalendarTheme> = {
     title: "text-xl font-black text-slate-900",
     navButton:
       "inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100",
-    weekday: "text-slate-500",
+    weekday: "text-[11px] font-semibold text-slate-500",
+    grid: "rounded-xl",
+    dayShape: "rounded-full text-xs font-bold",
     cell: "bg-white",
     cellOutside: "bg-slate-50 text-slate-400",
     cellHover: "hover:bg-indigo-50 focus-visible:bg-indigo-50",
@@ -46,6 +56,8 @@ export const calendarThemes: Record<CalendarVariant, CalendarTheme> = {
     chip: "bg-indigo-100 text-indigo-900 hover:bg-indigo-200",
     chipAllDay: "bg-indigo-600 text-white hover:bg-indigo-500",
     chipTime: "text-indigo-600",
+    chipShape: "rounded text-[10px] font-semibold sm:text-xs",
+    chipText: "text-[10px] font-semibold sm:text-xs",
     more: "text-slate-500 hover:text-slate-800",
     dialog:
       "rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-xl backdrop:bg-slate-900/40",
@@ -65,33 +77,38 @@ export const calendarThemes: Record<CalendarVariant, CalendarTheme> = {
     toggleOn: "bg-indigo-600 text-white hover:bg-indigo-500",
     toggleOff: "bg-slate-100 text-slate-600 hover:bg-slate-200",
   },
+  // Player: a wood-framed notice board with parchment day cells.
   player: {
-    shell: "rounded-2xl border border-white/15 bg-white/5 p-3 sm:p-5",
-    title: "text-xl font-black text-amber-300",
-    navButton:
-      "inline-flex h-8 min-w-8 items-center justify-center rounded-lg px-2.5 text-sm font-semibold text-indigo-100 hover:bg-white/10",
-    weekday: "text-indigo-300",
-    cell: "bg-indigo-950/60",
-    cellOutside: "bg-indigo-950/20 text-indigo-400/60",
+    shell: "panel panel-wood p-3 sm:p-5",
+    // One line next to the nav buttons on a phone.
+    title: "font-display text-lg font-semibold text-gold text-shadow-pixel sm:text-xl",
+    navButton: "btn-pixel btn-stone btn-sm min-w-9",
+    weekday: "font-display text-sm font-semibold text-parchment",
+    // gap-px lines show the dark edge colour between parchment cells.
+    grid: "rounded-[3px] border-2 border-wood-edge bg-wood-edge",
+    dayShape: "rounded-[3px] text-sm font-black tabular-nums",
+    cell: "bg-parchment text-ink",
+    cellOutside: "bg-parchment-dark/60 text-ink-soft",
     cellHover: "",
-    dayNumber: "text-indigo-100",
-    today: "bg-amber-400 text-indigo-950",
-    chip: "bg-purple-500/30 text-purple-50 hover:bg-purple-500/45",
-    chipAllDay: "bg-amber-400/90 text-indigo-950 hover:bg-amber-300",
-    chipTime: "text-amber-200",
-    more: "text-indigo-300 hover:text-white",
-    dialog:
-      "rounded-2xl border border-amber-300/40 bg-indigo-950 text-white shadow-2xl backdrop:bg-black/60",
-    dialogTitle: "text-lg font-black text-amber-300",
-    label: "text-sm font-semibold text-indigo-200",
+    dayNumber: "text-ink",
+    today: "bg-gold text-ink ring-2 ring-ink",
+    chip: "bg-stone text-white hover:bg-stone-hi",
+    chipAllDay: "bg-gold text-ink hover:brightness-105",
+    chipTime: "text-gold",
+    // Seven columns on a phone only fit ~12px chips; revisited in a later
+    // stage's layout pass.
+    chipShape: "rounded-[2px] text-xs font-bold sm:text-sm",
+    chipText: "text-xs font-bold sm:text-sm",
+    more: "text-ink-soft hover:text-ink",
+    dialog: "panel panel-parchment backdrop:bg-black/60",
+    dialogTitle: "font-display text-xl font-semibold text-ink",
+    label: "font-bold text-ink-soft",
     input: "",
-    muted: "text-indigo-300",
-    primaryButton:
-      "rounded-lg bg-amber-400 px-4 py-2 font-bold text-indigo-950 hover:bg-amber-300",
-    secondaryButton:
-      "rounded-lg bg-white/10 px-4 py-2 font-semibold text-white hover:bg-white/20",
+    muted: "text-ink-soft",
+    primaryButton: "btn-pixel btn-primary btn-md",
+    secondaryButton: "btn-pixel btn-stone btn-md",
     dangerButton: "",
-    error: "rounded-lg bg-red-500/20 px-3 py-2 text-sm text-red-100",
+    error: "rounded-[3px] border-2 border-danger bg-[#fff0f0] px-3 py-2 font-bold text-ink",
     // Edit-only styles; the player calendar is read-only.
     note: "",
     toggleOn: "",

@@ -13,21 +13,28 @@ const ROGUE_SCALE = 80 / SPRITES.rogue.animations.idle.height;
  */
 export function HeroParty({ heroName }: { heroName: string }) {
   return (
-    <div className="relative flex items-end justify-center gap-2 overflow-hidden rounded-2xl bg-gradient-to-b from-indigo-900/40 to-indigo-950/60 px-4 pt-6">
-      {/* Ground: painted first and at z-0 so it sits behind the characters' feet. */}
-      <div aria-hidden className="absolute inset-x-0 bottom-0 z-0 h-3 bg-emerald-900/50" />
-      <SpriteAnimator
-        animation={SPRITES.rogue.animations.idle}
-        scale={ROGUE_SCALE}
-        alt="Rogue the dog"
-        className="relative z-10"
-      />
-      <SpriteAnimator
-        animation={SPRITES.hero.animations.idle}
-        scale={HERO_SCALE}
-        alt={heroName}
-        className="relative z-10"
-      />
+    // Wood frame around a night-sky scene.
+    <div className="panel panel-wood p-1.5">
+      <div className="relative flex items-end justify-center gap-2 overflow-hidden rounded-[2px] border-2 border-wood-edge bg-gradient-to-b from-world-deep to-world px-4 pt-6">
+        {/* Ground: painted first and at z-0 so it sits behind the characters'
+            feet. Grass with a lighter top edge, then soil. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 z-0 h-3 border-t-2 border-[#69db7c] bg-[#2b8a3e] shadow-[inset_0_-4px_0_#5c3b1e]"
+        />
+        <SpriteAnimator
+          animation={SPRITES.rogue.animations.idle}
+          scale={ROGUE_SCALE}
+          alt="Rogue the dog"
+          className="relative z-10"
+        />
+        <SpriteAnimator
+          animation={SPRITES.hero.animations.idle}
+          scale={HERO_SCALE}
+          alt={heroName}
+          className="relative z-10"
+        />
+      </div>
     </div>
   );
 }

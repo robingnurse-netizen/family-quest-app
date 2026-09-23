@@ -5,13 +5,13 @@
 export function friendlyBacklogError(message: string | undefined, fallback: string) {
   if (!message) return fallback;
   if (message.startsWith("pool_over_allocated")) {
-    return "That's more minutes than this pool has left.";
+    return "That's more minutes than this weekly quest has left.";
   }
   if (message.startsWith("pool_below_allocated")) {
     return "More minutes than that are already scheduled — remove some slots first.";
   }
   if (message.startsWith("slot_outside_week")) {
-    return "That day isn't in this pool's week.";
+    return "That day isn't in this quest's week.";
   }
   if (message.startsWith("slot_locked")) {
     return "That quest's damage has already been dealt — it's locked in.";

@@ -5,6 +5,7 @@ import type { Boss, DailyResetResult, PartyHealth } from "@/lib/supabase/types";
 import { useBattle, type BattleEvent } from "@/lib/hooks/use-battle";
 import { initialStage, stageReducer } from "@/lib/rpg/boss-stage";
 import { BossSprite } from "./boss-sprite";
+import { HeartIcon, SkullIcon } from "@/components/ui/icons";
 
 // Boss battle panel: the active boss's sprite reacting live to game events
 // (hurt on damage / missed quests, death or escape, then the next boss), its
@@ -32,6 +33,15 @@ const styles: Record<
     hpRow: string;
     hpLabel: string;
     hpBar: string;
+    /** HP bar track and fill shape. */
+    barTrack: string;
+    barFill: string;
+    bossFill: string;
+    partyFill: string;
+    /** "current / max" text. */
+    hpNumbers: string;
+    /** Pixel icons beside the HP labels. */
+    icons: boolean;
     spriteHeight: number;
   }
 > = {
@@ -40,41 +50,59 @@ const styles: Record<
     title: "text-lg font-black text-slate-900",
     muted: "text-slate-500",
     track: "bg-slate-100",
-    badge: "bg-slate-100 text-slate-600",
+    badge: "rounded-full px-2 py-0.5 text-xs font-semibold uppercase bg-slate-100 text-slate-600",
     button:
       "rounded-lg bg-slate-900 px-3 py-1.5 text-sm font-bold text-white hover:bg-slate-700 disabled:opacity-60",
     note: "rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700",
-    stage: "mb-3 h-[160px] bg-gradient-to-b from-slate-50 to-slate-100 text-slate-400",
+    stage: "mb-3 h-[160px] rounded-xl bg-gradient-to-b from-slate-50 to-slate-100 text-slate-400",
     stageLayer: "absolute inset-0",
     ground: "bg-slate-300/70",
     caption: "mb-2 min-h-5 text-sm text-slate-600",
     hpRow: "mt-3",
     hpLabel: "mb-1 text-xs",
     hpBar: "h-3",
+    barTrack: "rounded-full",
+    barFill: "rounded-full",
+    bossFill: "bg-gradient-to-r from-rose-600 to-orange-500",
+    partyFill: "bg-gradient-to-r from-emerald-500 to-lime-400",
+    hpNumbers: "",
+    icons: false,
     spriteHeight: 120,
   },
   player: {
-    // Pinned while Reuben scrolls to his quests: opaque enough to read over
-    // the board, and a single compact row on narrow or short screens.
+    // Stone HUD panel. Pinned while Reuben scrolls to his quests (opaque, so
+    // it reads over the board), and a single compact row on narrow or short
+    // screens. Display font only at ≥14px; compact labels use the body font.
     shell:
-      "rounded-2xl border border-white/15 bg-indigo-950/85 p-4 shadow-lg shadow-black/30 backdrop-blur-md sm:p-5 compact:flex compact:items-center compact:gap-3 compact:p-3",
-    title: "text-lg font-black text-amber-300 compact:min-w-0 compact:truncate compact:text-base",
-    muted: "text-indigo-300",
-    track: "bg-black/30",
-    badge: "bg-white/10 text-indigo-100 compact:px-1.5 compact:text-[10px]",
+      "panel panel-stone p-4 sm:p-5 compact:flex compact:items-center compact:gap-3 compact:p-2.5",
+    title:
+      "font-display text-xl font-semibold text-gold text-shadow-pixel compact:min-w-0 compact:truncate compact:text-base",
+    muted: "text-stone-text",
+    track: "bg-well",
+    badge:
+      "rounded-[3px] border-2 border-stone-edge bg-stone-hi px-1.5 py-0.5 font-display text-sm font-semibold text-white compact:px-1 compact:py-0 compact:font-body compact:text-[10px] compact:font-extrabold compact:uppercase",
     button: "",
     note: "",
     stage:
-      "mb-3 h-[190px] bg-gradient-to-b from-indigo-900/40 to-indigo-950/70 text-indigo-300 compact:mb-0 compact:h-24 compact:w-36 compact:shrink-0",
+      "panel panel-inset mb-3 h-[190px] bg-gradient-to-b from-world-deep to-world text-stone-text compact:mb-0 compact:h-24 compact:w-36 compact:shrink-0",
     // Compact: lay the scene out at twice the box size and scale it down by
     // half, so the sprite shrinks with no JS measuring (and no layout jump).
     stageLayer:
       "absolute bottom-0 left-0 h-full w-full compact:h-[200%] compact:w-[200%] compact:origin-bottom-left compact:scale-50",
-    ground: "bg-emerald-900/50",
-    caption: "mb-2 min-h-5 text-sm text-amber-200 compact:mb-0.5 compact:min-h-4 compact:truncate compact:text-xs",
+    ground: "border-t-2 border-[#69db7c] bg-[#2b8a3e]",
+    caption:
+      "mb-2 min-h-6 text-parchment compact:mb-0.5 compact:min-h-4 compact:truncate compact:text-xs",
     hpRow: "mt-3 compact:mt-1",
-    hpLabel: "mb-1 text-xs compact:mb-0.5 compact:text-[11px] compact:leading-none",
-    hpBar: "h-3 compact:h-2",
+    hpLabel:
+      "mb-1 items-center font-display text-sm compact:mb-0.5 compact:font-body compact:text-[11px] compact:leading-none",
+    hpBar: "h-4 compact:h-2.5",
+    barTrack: "rounded-[3px] border-2 border-stone-edge",
+    barFill: "bar-fill",
+    bossFill: "bg-boss",
+    partyFill: "bg-party",
+    // Body font: Pixelify's small digits are ambiguous (app/(player)/layout.tsx).
+    hpNumbers: "font-body font-extrabold tabular-nums",
+    icons: true,
     spriteHeight: 150,
   },
 };
@@ -122,7 +150,7 @@ export function BossStatus({
   return (
     <section className={s.shell} aria-label="Boss battle">
       {/* Stage: sprite stands on the ground line at the bottom. */}
-      <div className={`relative overflow-hidden rounded-xl ${s.stage}`}>
+      <div className={`relative overflow-hidden ${s.stage}`}>
         <div className={s.stageLayer}>
           {/* Ground first, at z-0, so it never paints over the boss's feet. */}
           <div aria-hidden className={`absolute inset-x-0 bottom-0 z-0 h-3 ${s.ground}`} />
@@ -157,17 +185,16 @@ export function BossStatus({
           <>
             <div className="flex items-baseline justify-between gap-2">
               <h2 className={s.title}>{shown.name}</h2>
-              <span
-                className={`shrink-0 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-semibold uppercase ${s.badge}`}
-              >
+              <span className={`shrink-0 whitespace-nowrap ${s.badge}`}>
                 {shown.tier === "epic" ? "Epic boss" : shown.tier === "mid" ? "Boss" : "Minion"}
               </span>
             </div>
             <HpBar
               label="Boss HP"
+              icon={s.icons && <SkullIcon className="h-4 w-4 compact:hidden" />}
               current={shown.current_hp}
               max={shown.max_hp}
-              fill="bg-gradient-to-r from-rose-600 to-orange-500"
+              fill={s.bossFill}
               styles={s}
             />
           </>
@@ -178,9 +205,10 @@ export function BossStatus({
         {party && (
           <HpBar
             label="Party HP"
+            icon={s.icons && <HeartIcon className="h-4 w-4 compact:hidden" />}
             current={party.current_hp}
             max={party.max_hp}
-            fill="bg-gradient-to-r from-emerald-500 to-lime-400"
+            fill={s.partyFill}
             styles={s}
           />
         )}
@@ -209,12 +237,14 @@ export function BossStatus({
 
 function HpBar({
   label,
+  icon,
   current,
   max,
   fill,
   styles: s,
 }: {
   label: string;
+  icon?: React.ReactNode;
   current: number;
   max: number;
   fill: string;
@@ -224,20 +254,26 @@ function HpBar({
   return (
     <div className={s.hpRow}>
       <div className={`flex justify-between font-semibold ${s.hpLabel} ${s.muted}`}>
-        <span>{label}</span>
-        <span>
+        <span className="flex items-center gap-1.5">
+          {icon}
+          {label}
+        </span>
+        <span className={s.hpNumbers}>
           {current} / {max}
         </span>
       </div>
       <div
-        className={`overflow-hidden rounded-full ${s.hpBar} ${s.track}`}
+        className={`overflow-hidden ${s.barTrack} ${s.hpBar} ${s.track}`}
         role="progressbar"
         aria-label={label}
         aria-valuemin={0}
         aria-valuemax={max}
         aria-valuenow={current}
       >
-        <div className={`h-full rounded-full transition-all duration-700 ${fill}`} style={{ width: `${pct}%` }} />
+        <div
+          className={`h-full transition-all duration-700 motion-reduce:transition-none ${s.barFill} ${fill}`}
+          style={{ width: `${pct}%` }}
+        />
       </div>
     </div>
   );

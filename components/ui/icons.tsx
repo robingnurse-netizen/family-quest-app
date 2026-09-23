@@ -1,6 +1,6 @@
 // Small inline SVG icons (lucide-style, 24×24, stroke = currentColor), so
 // buttons render consistently across fonts instead of relying on glyphs
-// like ‹ › or ×.
+// like ‹ › or ×. Pixel-art game icons (coin, heart…) are at the bottom.
 
 type IconProps = React.SVGProps<SVGSVGElement>;
 
@@ -51,3 +51,156 @@ export const CheckIcon = (p: IconProps) => (
     <path d="M20 6 9 17l-5-5" />
   </Icon>
 );
+
+// --- Pixel icons -------------------------------------------------------------
+// Player RPG icons drawn on a pixel grid: one character per pixel, mapped to
+// a colour ('.' is transparent). Each row is drawn as runs of <rect>s with
+// crispEdges so they stay sharp at any size — size them in multiples of the
+// grid for the crispest result.
+
+type PixelArt = { colors: Record<string, string>; rows: string[] };
+
+function PixelIcon({ art, className = "h-6 w-6", ...props }: IconProps & { art: PixelArt }) {
+  const width = art.rows[0].length;
+  const rects: React.ReactElement[] = [];
+  art.rows.forEach((row, y) => {
+    let x = 0;
+    while (x < row.length) {
+      const c = row[x];
+      let end = x + 1;
+      while (end < row.length && row[end] === c) end++;
+      const fill = art.colors[c];
+      if (fill) rects.push(<rect key={`${x},${y}`} x={x} y={y} width={end - x} height={1} fill={fill} />);
+      x = end;
+    }
+  });
+  return (
+    <svg
+      viewBox={`0 0 ${width} ${art.rows.length}`}
+      shapeRendering="crispEdges"
+      aria-hidden
+      className={className}
+      {...props}
+    >
+      {rects}
+    </svg>
+  );
+}
+
+const COIN: PixelArt = {
+  colors: { o: "#5c3b00", f: "#fcc419", h: "#fff3bf", s: "#e67700", d: "#f59f00" },
+  rows: [
+    "....oooo....",
+    "..oohhhhoo..",
+    ".ohhffffffo.",
+    ".ohffddffso.",
+    "ohfffddfffso",
+    "ohfffddfffso",
+    "ohfffddfffso",
+    "ohfffddfffso",
+    ".offfddffso.",
+    ".offffffsso.",
+    "..oossssoo..",
+    "....oooo....",
+  ],
+};
+/** Gold */
+export const CoinIcon = (p: IconProps) => <PixelIcon art={COIN} {...p} />;
+
+const HEART: PixelArt = {
+  colors: { o: "#4a0808", f: "#e03131", h: "#ffc9c9", s: "#a51d1d" },
+  rows: [
+    ".ooo...ooo.",
+    "ohhfo.offfo",
+    "ohfffofffso",
+    "ohfffffffso",
+    "offfffffsso",
+    ".offfffsso.",
+    "..offfsso..",
+    "...offso...",
+    "....oso....",
+    ".....o.....",
+  ],
+};
+/** Party HP */
+export const HeartIcon = (p: IconProps) => <PixelIcon art={HEART} {...p} />;
+
+const STAR: PixelArt = {
+  colors: { o: "#5c3b00", f: "#fcc419", h: "#fff3bf", s: "#f59f00" },
+  rows: [
+    ".....o.....",
+    "....oho....",
+    "...ohffo...",
+    "oooohfffooo",
+    "ohhhfffffso",
+    ".ohffffffo.",
+    "..offfffo..",
+    "..offoffo..",
+    ".offo.osfo.",
+    ".oso...oso.",
+    ".oo.....oo.",
+  ],
+};
+/** XP */
+export const StarIcon = (p: IconProps) => <PixelIcon art={STAR} {...p} />;
+
+const FLAME: PixelArt = {
+  colors: { o: "#5c1a00", f: "#fd7e14", h: "#fff3bf", s: "#e03131", y: "#fcc419" },
+  rows: [
+    "....o......",
+    "...ofo.....",
+    "...offo..o.",
+    "..offfo.ofo",
+    "..offsfoofo",
+    ".offsyffffo",
+    ".ofsyyyfsfo",
+    "ofsyyyyyfso",
+    "ofsyyhyyfso",
+    "ofsyhhhysso",
+    ".ossyyysso.",
+    "..ossssso..",
+    "...ooooo...",
+  ],
+};
+/** Streak */
+export const FlameIcon = (p: IconProps) => <PixelIcon art={FLAME} {...p} />;
+
+const SHIELD: PixelArt = {
+  colors: { o: "#12141f", f: "#4dabf7", h: "#d0ebff", s: "#1c7ed6", g: "#fcc419" },
+  rows: [
+    "ooooooooooo",
+    "ohhhhgffffo",
+    "ohffggffffo",
+    "ohfffgfffso",
+    "oggggggggso",
+    "ohfffgfffso",
+    "offffgfffso",
+    ".offfgffso.",
+    ".offfgffso.",
+    "..offgfso..",
+    "...ofgso...",
+    "....oso....",
+    ".....o.....",
+  ],
+};
+/** Level */
+export const ShieldIcon = (p: IconProps) => <PixelIcon art={SHIELD} {...p} />;
+
+const SKULL: PixelArt = {
+  colors: { o: "#12141f", f: "#f1f3f5", h: "#ffffff", s: "#adb5bd", e: "#e03131" },
+  rows: [
+    "...ooooo...",
+    "..ohhfffo..",
+    ".ohfffffso.",
+    "ohfffffffso",
+    "ofoofffooso",
+    "ofoeofoeoso",
+    "ofoooooooso",
+    ".offfofffo.",
+    "..offffso..",
+    "..ofofofo..",
+    "...ooooo...",
+  ],
+};
+/** Boss */
+export const SkullIcon = (p: IconProps) => <PixelIcon art={SKULL} {...p} />;

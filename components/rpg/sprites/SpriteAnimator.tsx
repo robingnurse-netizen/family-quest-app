@@ -119,7 +119,8 @@ export function SpriteAnimator({
       width={Math.round(animation.width * scale)}
       height={Math.round(animation.height * scale)}
       draggable={false}
-      className={`select-none ${className}`}
+      // Pixel art: scale with hard pixels, never smoothed (every sprite).
+      className={`sprite-pixelated select-none ${className}`}
     />
   );
 }
