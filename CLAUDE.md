@@ -89,7 +89,7 @@ PROJECT STATUS:
   The `compact` Tailwind variant (globals.css: width < 48rem, height < 50rem,
   or inside [data-pinned]) makes it one row with a half-scale stage. The parent
   dashboard's panel is unchanged.
-- Rewards Store: COMPLETE. Tested live: reward creation, redeem with live
+- Rewards Store: COMPLETE, pushed as b2104a3. Tested live: reward creation, redeem with live
   gold deduction, approve → fulfil, deny with refund (both dashboards), and
   the gold-gated Redeem button with "how much more" messaging.
   * 20260923000009_rewards_store.sql: BEFORE INSERT trigger on
