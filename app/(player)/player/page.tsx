@@ -8,6 +8,7 @@ import { WeekBoard } from "@/components/kanban/week-board";
 import { createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
 import { loadBattle } from "@/lib/rpg/queries";
 import { BossStatus } from "@/components/rpg/boss/boss-status";
+import { BossHud } from "@/components/rpg/boss/boss-hud";
 import { HeroParty } from "@/components/rpg/hero/hero-party";
 
 export default async function PlayerDashboard(props: PageProps<"/player">) {
@@ -34,7 +35,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
   ];
 
   return (
-    <main className="flex-1 bg-gradient-to-b from-indigo-950 via-purple-900 to-indigo-950 px-4 py-8 text-white">
+    <main className="flex-1 bg-gradient-to-b from-indigo-950 via-purple-900 to-indigo-950 px-4 pb-40 pt-8 text-white">
       <div className="mx-auto w-full max-w-3xl">
         <header className="mb-8 flex items-center justify-between">
           <div>
@@ -63,14 +64,16 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
           ))}
         </section>
 
-        <div className="mt-8">
+        {/* Pins to the bottom of the screen once scrolled away, so the
+            boss's reactions stay in view while Reuben ticks off quests. */}
+        <BossHud className="mt-8">
           <BossStatus
             variant="player"
             familyId={battle.familyId}
             initialBoss={battle.boss}
             initialParty={battle.party}
           />
-        </div>
+        </BossHud>
 
         <div className="mt-8">
           <WeekBoard

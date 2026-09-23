@@ -49,7 +49,16 @@ export function SpriteAnimator({
     img.src = frames[0];
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (paused || reduced || frames.length === 1) return;
+    if (paused) return;
+    // Nothing to animate (one frame, or reduced motion): show the first frame
+    // for the animation's normal duration, then report completion so callers
+    // waiting on a one-shot (hurt → idle) still move on.
+    if (reduced || frames.length === 1) {
+      if (loop) return;
+      const holdMs = Math.max(600, (frames.length / fps) * 1000);
+      const timer = setTimeout(() => onCompleteRef.current?.(), holdMs);
+      return () => clearTimeout(timer);
+    }
 
     // Preload every frame before starting the clock.
     let cancelled = false;

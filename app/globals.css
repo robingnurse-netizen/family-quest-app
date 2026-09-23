@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Narrow or short viewports, or inside a pinned bar ([data-pinned], the
+   player's boss HUD): panels that must stay small. */
+@custom-variant compact {
+  @media (width < 48rem), (height < 50rem) {
+    @slot;
+  }
+  [data-pinned] & {
+    @slot;
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -23,4 +34,55 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ---------------------------------------------------------------------------
+   Boss stage reactions (components/rpg/boss/boss-sprite.tsx). Each class is
+   applied to an element re-keyed per event, so the animation restarts.
+   ------------------------------------------------------------------------- */
+@keyframes boss-hit {
+  0% { translate: 0 0; filter: none; }
+  10% { translate: -10px 0; filter: drop-shadow(0 0 10px rgb(255 40 40)) brightness(1.5) saturate(1.6); }
+  25% { translate: 9px 0; }
+  40% { translate: -7px 0; }
+  55% { translate: 5px 0; filter: drop-shadow(0 0 6px rgb(255 40 40)) brightness(1.2); }
+  75% { translate: -2px 0; }
+  100% { translate: 0 0; filter: none; }
+}
+@keyframes boss-enter {
+  from { opacity: 0; scale: 0.85; }
+  to { opacity: 1; scale: 1; }
+}
+@keyframes boss-escape {
+  0% { opacity: 1; translate: 0 0; }
+  100% { opacity: 0; translate: 140% 0; }
+}
+@keyframes boss-fall {
+  0% { filter: none; }
+  100% { filter: grayscale(0.7) brightness(0.8); }
+}
+/* New boss arriving (on a wrapper keyed by boss id, so hits don't replay it). */
+.boss-enter { animation: boss-enter 500ms ease-out both; }
+.boss-fx-hurt { animation: boss-hit 450ms ease-out; }
+.boss-fx-defeated { animation: boss-fall 1400ms ease-in forwards; }
+.boss-fx-escaped { animation: boss-escape 1400ms ease-in forwards; }
+
+@keyframes boss-flash {
+  0%, 60% { filter: drop-shadow(0 0 10px rgb(255 40 40)) brightness(1.5); }
+  100% { filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No movement; keep the colour cues so reactions stay visible. */
+  .boss-enter, .boss-fx-escaped { animation: none; }
+  .boss-fx-hurt { animation: boss-flash 450ms ease-out; }
+}
+
+/* Player boss HUD sliding up when it pins to the bottom (boss-hud.tsx). */
+@keyframes boss-hud-in {
+  from { translate: 0 100%; }
+  to { translate: 0 0; }
+}
+.boss-hud-in { animation: boss-hud-in 250ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .boss-hud-in { animation: none; }
 }

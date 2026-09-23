@@ -74,7 +74,22 @@ PROJECT STATUS:
     Clock Swarm idle/move/hurt/death; Slime hurt/death; Goblin death) are
     static; Chronosphinx attack frames 3–4 share an overlapping beam;
     Shogun-Bot idle drops sheet frames 5 and 7 (sword flash).
-- Later: RPG Phase B2 (boss battle rendering), rewards store.
+- RPG Phase B2 — Boss Battle Rendering: COMPLETE. BossStatus (both
+  dashboards) shows the active boss's sprite reacting to Realtime events:
+  boss_log damage / miss_penalty → hurt once (epic bosses use the first 3
+  frames of `defeated`); status defeated → death once + hold; escaped →
+  move loop sliding off; then the next boss enters. State machine in
+  lib/rpg/boss-stage.ts (pure reducer); the on-stage boss (sprite, name, HP)
+  briefly lags the DB while a finished boss plays out. Animation mapping in
+  components/rpg/sprites/boss-animations.ts. Data-driven only — no manual
+  battle controls or floating damage numbers. On /player the boss panel
+  (BossHud) pins to the BOTTOM of the viewport once <90% of it is on screen,
+  so reactions stay visible while Reuben ticks quests. Not top: Chrome's
+  hiding toolbar (ChromeOS tablet mode) slides over top-pinned content.
+  The `compact` Tailwind variant (globals.css: width < 48rem, height < 50rem,
+  or inside [data-pinned]) makes it one row with a half-scale stage. The parent
+  dashboard's panel is unchanged.
+- Later: rewards store.
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at
