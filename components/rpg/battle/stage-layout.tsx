@@ -38,6 +38,16 @@ export const FEET_X = {
 } as const;
 
 /**
+ * The hit overlay's strike: the party dashes in closer so the hero's swing
+ * reaches the boss (the boss stays at FEET_X.boss). Rogue keeps the same
+ * dog-length behind the hero.
+ */
+export const STRIKE_X = {
+  hero: "46%",
+  rogue: "calc(46% - var(--arena) * 0.3)",
+} as const;
+
+/**
  * Inline style for an arena container: its height (--arena) and ground line
  * (--ground). The arena must sit inside a `container-type: inline-size`
  * element, which the cqw sizing refers to.
@@ -69,4 +79,14 @@ export function FeetSpot({ x, className = "", children }: { x: string; className
       {children}
     </div>
   );
+}
+
+/**
+ * Where a hit lands: the boss's leading (left) edge, from its idle pose's
+ * proportions — as a CSS length across the arena, plus a height share.
+ */
+export function impactPoint(boss: Boss) {
+  const idle = bossAnimations(boss.sprite_key)?.idle;
+  const aspect = idle ? idle.width / idle.height : 1;
+  return { x: `calc(${FEET_X.boss} - ${bossHeight(boss)} * ${(aspect * 0.32).toFixed(3)})`, y: 0.42 };
 }

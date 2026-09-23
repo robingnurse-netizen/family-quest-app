@@ -16,6 +16,14 @@ type BattleContextValue = {
   /** The finished boss's defeat / escape has played out. */
   onBossFinished: () => void;
   subscribe: (listener: BattleListener) => () => void;
+  /** Emit into the stream (the overlay's "moment" events). */
+  emit: (event: BattleEvent) => void;
+  /**
+   * The hit overlay is playing (it announces the hit itself, so the scene
+   * mutes its screen-reader caption meanwhile).
+   */
+  overlayActive: boolean;
+  setOverlayActive: (active: boolean) => void;
   refetch: () => Promise<void>;
 };
 
@@ -45,6 +53,7 @@ export function BattleProvider({
   const party = dev.party ?? live.party;
 
   const [stage, dispatch] = useReducer(stageReducer, initialBoss, initialStage);
+  const [overlayActive, setOverlayActive] = useState(false);
   // The stage machine is just another listener.
   useEffect(() => emitter.subscribe((event) => dispatch({ type: "event", event })), [emitter]);
   // The database's active boss (also covers refetches, not just events).
@@ -53,18 +62,18 @@ export function BattleProvider({
   }, [boss]);
 
   // Development only: drive the battle from the console / screenshot scripts
-  // without touching the database. Stripped from production builds.
+  // without touching the database. Stripped from production builds. Other
+  // components (the hit overlay) add their own helpers to the same object.
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
-    const w = window as unknown as { __fqBattle?: unknown };
-    w.__fqBattle = {
+    const tools = {
       emit: (event: BattleEvent) => emitter.emit(event),
       setBoss: (next: Boss | null) => setDev((d) => ({ ...d, boss: next })),
       setParty: (next: PartyHealth) => setDev((d) => ({ ...d, party: next })),
+      /** Log / hook every event (e.g. to prototype sounds); returns an unsubscribe. */
+      listen: (fn: BattleListener) => emitter.subscribe(fn),
     };
-    return () => {
-      delete w.__fqBattle;
-    };
+    return registerDevTools(tools);
   }, [emitter]);
 
   const onBossAnimationEnd = useCallback(() => dispatch({ type: "animation-end" }), []);
@@ -78,9 +87,12 @@ export function BattleProvider({
       onBossAnimationEnd,
       onBossFinished,
       subscribe: emitter.subscribe,
+      emit: emitter.emit,
+      overlayActive,
+      setOverlayActive,
       refetch: live.refetch,
     }),
-    [boss, party, stage, onBossAnimationEnd, onBossFinished, emitter, live.refetch],
+    [boss, party, stage, onBossAnimationEnd, onBossFinished, emitter, overlayActive, live.refetch],
   );
 
   return <BattleContext.Provider value={value}>{children}</BattleContext.Provider>;
@@ -104,3 +116,21 @@ export function useBattleEvents(listener: BattleListener) {
   }, [listener]);
   useEffect(() => subscribe((event) => ref.current(event)), [subscribe]);
 }
+
+/**
+ * Development only: merge helpers into window.__fqBattle (the console / test
+ * hook). Returns a cleanup that removes them again. A no-op in production
+ * builds, so no trace of the hook ships.
+ */
+export const registerDevTools: (tools: Record<string, unknown>) => () => void =
+  process.env.NODE_ENV === "development"
+    ? (tools) => {
+        const w = window as unknown as { __fqBattle?: Record<string, unknown> };
+        w.__fqBattle = { ...w.__fqBattle, ...tools };
+        return () => {
+          if (!w.__fqBattle) return;
+          for (const key of Object.keys(tools)) delete w.__fqBattle[key];
+          if (Object.keys(w.__fqBattle).length === 0) delete w.__fqBattle;
+        };
+      }
+    : () => () => {};

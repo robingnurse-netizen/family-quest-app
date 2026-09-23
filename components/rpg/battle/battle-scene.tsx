@@ -168,6 +168,14 @@ function ArenaBackdrop() {
 
 /** Event captions as a parchment banner across the top of the arena. */
 function EventBanner({ caption, playKey }: { caption: string | null; playKey: number }) {
+  const { overlayActive } = useBattleContext();
+  // Screen readers: announce each new caption once — but not while the hit
+  // overlay is playing (it announces Reuben's own hits itself), and not
+  // late when it finishes.
+  const [spoken, setSpoken] = useState({ playKey, text: caption ?? "" });
+  if (playKey !== spoken.playKey) {
+    setSpoken({ playKey, text: overlayActive ? spoken.text : (caption ?? "") });
+  }
   return (
     <>
       {caption && (
@@ -180,7 +188,7 @@ function EventBanner({ caption, playKey }: { caption: string | null; playKey: nu
         </p>
       )}
       <p aria-live="polite" className="sr-only">
-        {caption ?? ""}
+        {spoken.text}
       </p>
     </>
   );

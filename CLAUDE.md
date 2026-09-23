@@ -90,7 +90,8 @@ PROJECT STATUS:
   boss-animations.ts. Data-driven only — no manual battle controls.
   Parent HQ: BossStatus (components/rpg/boss/boss-status.tsx, parent-only).
   Nothing on /player is sticky or pinned any more (see the FUTURE note).
-  * FUTURE — Battle feedback redesign (design note, NOT to be built yet):
+  * Battle feedback redesign (design note; the hit overlay is now BUILT —
+    see "Hit overlay" under Stage 2; HP-damaged idles are still future):
     - The battle scene (hero, Rogue and boss together, built in Stage 2)
       sits fixed at the top of Reuben's dashboard in normal page flow,
       with no sticky/pinned behaviour.
@@ -104,8 +105,7 @@ PROJECT STATUS:
     - DONE: the sticky boss panel (BossHud), its compact variant and
       Stage 2's temporary pinned strip have all been REMOVED, with their
       pin logic. The scene sits fixed at the top in normal flow and never
-      moves; until the overlay lands, Reuben gets no battle feedback while
-      scrolled down past it. The overlay is being built next.
+      moves; the hit overlay gives Reuben feedback wherever he's scrolled.
 - Rewards Store: COMPLETE, pushed as b2104a3. Tested live: reward creation, redeem with live
   gold deduction, approve → fulfil, deny with refund (both dashboards), and
   the gold-gated Redeem button with "how much more" messaging.
@@ -181,6 +181,23 @@ PROJECT STATUS:
     hero, Rogue a dog-length behind him, boss). Characters stand there by
     their manifest anchors (FeetSpot + AnchoredSprite), never by image
     widths or gaps. The hit overlay must use the same module.
+  * Hit overlay (components/rpg/battle/hit-overlay.tsx): COMPLETE. Fires only for damage events whose childId is the
+    signed-in player; a fixed pointer-events:none layer centred in the
+    viewport. Hero (attack) + Rogue (pouncing) dash in, boss (hurt), pixel
+    ~150ms hit-stop freeze on impact (SpriteAnimator `frozen`), then
+    starburst, slash, debris, damage number, layer shake (Web Animations,
+    never the page), then fly up and fade (~2.5s). More hits during the hold
+    or fly-back extend it (COMBO xN, total adds up). Final blow (a
+    "defeated" event for the hit boss): K.O. → victory card + coin shower +
+    his share from the "gold" event (boss_log gold_awarded) → next-foe
+    silhouette (~5.3s). ALL durations live in OVERLAY_TIMING (hit-overlay.tsx).
+    While it plays, BattleProvider.overlayActive mutes the scene's
+    screen-reader caption, so each own hit is announced once.
+    Emits "moment" events (impact, combo, ko, victory, coin) into the same
+    stream for sounds. Reduced motion: fade-only card. Numbers in Nunito
+    (Pixelify's 5 reads as S even at 60px). Dev console (next dev only):
+    __fqBattle.hit(15) / combo(3, 10) / finalBlow() / otherHit(15) /
+    listen(fn).
   * No pinned/sticky strip: removed along with its pin logic; the scene
     stays in normal flow (see the FUTURE note under Phase B2).
 

@@ -353,3 +353,101 @@ body {
 
 /* Sprites are pixel art: never smooth them when scaled (SpriteAnimator). */
 .sprite-pixelated { image-rendering: pixelated; }
+
+/* ---------------------------------------------------------------------------
+   Hit overlay (components/rpg/battle/hit-overlay.tsx). Transforms and opacity
+   only; the reduced-motion version is a separate, fade-only card.
+   ------------------------------------------------------------------------- */
+@keyframes overlay-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-fade-out { from { opacity: 1; } to { opacity: 0; } }
+.overlay-vignette {
+  background: radial-gradient(ellipse at center, rgb(10 6 24 / 0.45) 20%, rgb(10 6 24 / 0.88) 100%);
+  animation: overlay-fade-in 180ms ease-out both;
+}
+.overlay-vignette-out { animation: overlay-fade-out 500ms ease-in forwards; }
+.overlay-out { animation: overlay-fade-out 260ms ease-in forwards; }
+.overlay-ground { background: radial-gradient(closest-side, rgb(0 0 0 / 0.55), transparent); }
+
+/* The party dashes in from the left edge. */
+@keyframes overlay-dash {
+  from { translate: -70vw 0; }
+  to { translate: 0 0; }
+}
+.overlay-dash { animation: overlay-dash 280ms cubic-bezier(0.2, 0.9, 0.3, 1) both; }
+@keyframes overlay-boss-in {
+  from { opacity: 0; scale: 0.85; }
+  to { opacity: 1; scale: 1; }
+}
+.overlay-boss-in { animation: overlay-boss-in 200ms ease-out both; }
+
+/* Impact: starburst, slash streak, debris, the damage number. */
+@keyframes impact-burst {
+  0% { opacity: 1; scale: 0.55; }
+  35% { opacity: 1; scale: 1.2; }
+  100% { opacity: 0; scale: 1; }
+}
+/* Impact effects start after the hit-stop (--hitstop, from OVERLAY_TIMING),
+   holding their first frame until then. */
+.impact-burst { animation: impact-burst 520ms ease-out var(--hitstop, 0ms) both; }
+@keyframes impact-slash {
+  0% { opacity: 1; scale: 0 1; }
+  45% { opacity: 1; scale: 1 1; }
+  100% { opacity: 0; scale: 1 1; }
+}
+.impact-slash {
+  background: linear-gradient(90deg, transparent, #fff 30%, #fcc419 70%, transparent);
+  rotate: -22deg;
+  transform-origin: left center;
+  animation: impact-slash 380ms ease-out var(--hitstop, 0ms) both;
+}
+@keyframes impact-debris {
+  from { opacity: 1; translate: 0 0; rotate: 0deg; }
+  to { opacity: 0; translate: var(--dx) var(--dy); rotate: var(--rot); }
+}
+.impact-debris { animation: impact-debris 650ms cubic-bezier(0.2, 0.7, 0.4, 1) var(--hitstop, 0ms) both; }
+@keyframes damage-pop {
+  0% { opacity: 0; scale: 0.3; }
+  45% { opacity: 1; scale: 1.35; }
+  100% { opacity: 1; scale: 1; }
+}
+.damage-pop { animation: damage-pop 260ms ease-out var(--hitstop, 0ms) both; }
+@keyframes combo-pop {
+  from { opacity: 0; scale: 0.5; }
+  to { opacity: 1; scale: 1; }
+}
+.combo-pop { animation: combo-pop 200ms ease-out var(--hitstop, 0ms) both; }
+
+/* Everyone shrinks and flies back up toward the battle scene (duration set
+   inline from OVERLAY_TIMING, as are the fades below). */
+@keyframes overlay-fly {
+  from { opacity: 1; translate: 0 0; scale: 1; }
+  to { opacity: 0; translate: 0 -70vh; scale: 0.25; }
+}
+.overlay-fly { animation: overlay-fly 560ms ease-in forwards; }
+
+/* Final blow: K.O. slam, victory card, coin shower, next-foe teaser. */
+@keyframes ko-slam {
+  0% { opacity: 0; scale: 2.6; }
+  60% { opacity: 1; scale: 0.9; }
+  100% { opacity: 1; scale: 1; }
+}
+.ko-slam {
+  text-shadow: 4px 4px 0 #12141f, -2px -2px 0 #c92a2a, 2px -2px 0 #c92a2a, -2px 2px 0 #c92a2a;
+  animation: ko-slam 380ms ease-out both;
+}
+@keyframes victory-pop {
+  0% { opacity: 0; scale: 0.6; }
+  70% { opacity: 1; scale: 1.06; }
+  100% { opacity: 1; scale: 1; }
+}
+.victory-pop { animation: victory-pop 320ms ease-out both; }
+@keyframes coin-fall {
+  from { translate: 0 0; rotate: 0deg; }
+  to { translate: 0 118vh; rotate: var(--spin); }
+}
+.coin-fall { animation: coin-fall 1400ms ease-in both; }
+.teaser-silhouette { filter: brightness(0) drop-shadow(0 0 6px rgb(224 49 49 / 0.9)); }
+
+/* Reduced motion: the overlay swaps to this card (no dash, shake or flying). */
+.reduced-card { animation: overlay-fade-in 200ms ease-out both; }
+.reduced-card-out { animation: overlay-fade-out 400ms ease-in forwards; }

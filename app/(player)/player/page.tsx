@@ -10,6 +10,7 @@ import { createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
 import { loadBattle } from "@/lib/rpg/queries";
 import { BattleProvider } from "@/components/rpg/battle/battle-provider";
 import { BattleScene } from "@/components/rpg/battle/battle-scene";
+import { HitOverlay } from "@/components/rpg/battle/hit-overlay";
 import { ArrowRight, CoinIcon } from "@/components/ui/icons";
 import { panelClass } from "@/components/ui/panel";
 import { pixelButtonClass } from "@/components/ui/pixel-button";
@@ -56,6 +57,8 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
           {/* The battle scene: hero and Rogue facing the boss, HUD bars and
               stats. Fixed at the top in normal flow; it never moves. */}
           <BattleScene heroName={profile.display_name} stats={playerStats} />
+          {/* Centre-screen replay of Reuben's own hits, wherever he's scrolled. */}
+          <HitOverlay childId={profile.id} />
 
           <Link
             href="/player/store"

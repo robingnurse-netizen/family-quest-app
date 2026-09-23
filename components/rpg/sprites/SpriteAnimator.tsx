@@ -11,8 +11,13 @@ type Props = {
   className?: string;
   /** Extra inline style for the <img> (e.g. a CSS height instead of `scale`). */
   style?: React.CSSProperties;
-  /** Pause on the current frame. */
+  /** Show the first frame only (no animation). */
   paused?: boolean;
+  /**
+   * Hold the current frame (a hit-stop) and carry on from it afterwards —
+   * the clock doesn't advance while frozen, and nothing restarts.
+   */
+  frozen?: boolean;
   /** Called when a non-looping animation reaches its last frame. */
   onComplete?: () => void;
   /**
@@ -36,10 +41,15 @@ export function SpriteAnimator({
   className = "",
   style,
   paused = false,
+  frozen = false,
   onComplete,
   replayDelayMs,
 }: Props) {
   const imgRef = useRef<HTMLImageElement>(null);
+  const frozenRef = useRef(frozen);
+  useEffect(() => {
+    frozenRef.current = frozen;
+  }, [frozen]);
   const onCompleteRef = useRef(onComplete);
   useEffect(() => {
     onCompleteRef.current = onComplete;
@@ -80,15 +90,20 @@ export function SpriteAnimator({
       if (cancelled) return;
       const frameMs = 1000 / fps;
       let start: number | null = null;
+      let last: number | null = null;
       let shown = 0;
       const restart = () => {
         start = null;
+        last = null;
         shown = 0;
         img.src = frames[0];
         raf = requestAnimationFrame(tick);
       };
       const tick = (now: number) => {
         start ??= now;
+        // Frozen: push the start forward so the clock stands still.
+        if (frozenRef.current && last !== null) start += now - last;
+        last = now;
         let index = Math.floor((now - start) / frameMs);
         if (loop) index %= frames.length;
         else if (index >= frames.length - 1) index = frames.length - 1;

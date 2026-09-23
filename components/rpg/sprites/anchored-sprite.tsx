@@ -24,6 +24,7 @@ export function AnchoredSprite({
   mirror = false,
   alt,
   className = "",
+  frozen,
   onComplete,
 }: {
   animation: SpriteAnimation;
@@ -33,6 +34,8 @@ export function AnchoredSprite({
   alt: string;
   /** On the positioning wrapper — CSS effects (shake, slide) go here. */
   className?: string;
+  /** Hold the current frame (hit-stop); see SpriteAnimator. */
+  frozen?: boolean;
   onComplete?: () => void;
 }) {
   const anchorX = mirror ? animation.width - animation.anchor.x : animation.anchor.x;
@@ -46,6 +49,7 @@ export function AnchoredSprite({
       <SpriteAnimator
         animation={animation}
         alt={alt}
+        frozen={frozen}
         onComplete={onComplete}
         style={{ height, width: "auto", maxWidth: "none", transform: mirror ? "scaleX(-1)" : undefined }}
       />
