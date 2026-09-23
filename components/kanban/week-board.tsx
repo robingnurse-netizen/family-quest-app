@@ -215,6 +215,10 @@ export function WeekBoard({
       )}
 
       <DndContext
+        // Fixed id: dnd-kit's auto ids come from a module-level counter that
+        // keeps climbing across server requests, so aria-describedby
+        // wouldn't match the browser's and hydration would warn.
+        id="week-board"
         sensors={sensors}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
