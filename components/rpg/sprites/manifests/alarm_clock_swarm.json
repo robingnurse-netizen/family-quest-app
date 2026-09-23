@@ -1,0 +1,71 @@
+{
+  "character": "alarm_clock_swarm",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/alarm_clock_swarm/idle/frame-01.png"
+      ],
+      "width": 322,
+      "height": 261,
+      "anchor": {
+        "x": 153,
+        "y": 256
+      },
+      "fps": 6,
+      "loop": true
+    },
+    "move": {
+      "frames": [
+        "/sprites/alarm_clock_swarm/move/frame-01.png"
+      ],
+      "width": 421,
+      "height": 228,
+      "anchor": {
+        "x": 84,
+        "y": 223
+      },
+      "fps": 8,
+      "loop": true
+    },
+    "attack": {
+      "frames": [
+        "/sprites/alarm_clock_swarm/attack/frame-01.png",
+        "/sprites/alarm_clock_swarm/attack/frame-02.png"
+      ],
+      "width": 340,
+      "height": 226,
+      "anchor": {
+        "x": 81,
+        "y": 221
+      },
+      "fps": 3,
+      "loop": false
+    },
+    "hurt": {
+      "frames": [
+        "/sprites/alarm_clock_swarm/hurt/frame-01.png"
+      ],
+      "width": 337,
+      "height": 210,
+      "anchor": {
+        "x": 167,
+        "y": 205
+      },
+      "fps": 8,
+      "loop": false
+    },
+    "death": {
+      "frames": [
+        "/sprites/alarm_clock_swarm/death/frame-01.png"
+      ],
+      "width": 327,
+      "height": 271,
+      "anchor": {
+        "x": 212,
+        "y": 266
+      },
+      "fps": 6,
+      "loop": false
+    }
+  }
+}

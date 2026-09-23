@@ -1,0 +1,70 @@
+{
+  "character": "cable_spider",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/cable_spider/idle/frame-01.png"
+      ],
+      "width": 390,
+      "height": 251,
+      "anchor": {
+        "x": 152,
+        "y": 246
+      },
+      "fps": 6,
+      "loop": true
+    },
+    "move": {
+      "frames": [
+        "/sprites/cable_spider/move/frame-01.png"
+      ],
+      "width": 405,
+      "height": 239,
+      "anchor": {
+        "x": 193,
+        "y": 234
+      },
+      "fps": 8,
+      "loop": true
+    },
+    "attack": {
+      "frames": [
+        "/sprites/cable_spider/attack/frame-01.png"
+      ],
+      "width": 440,
+      "height": 261,
+      "anchor": {
+        "x": 113,
+        "y": 256
+      },
+      "fps": 10,
+      "loop": false
+    },
+    "hurt": {
+      "frames": [
+        "/sprites/cable_spider/hurt/frame-01.png"
+      ],
+      "width": 353,
+      "height": 251,
+      "anchor": {
+        "x": 175,
+        "y": 246
+      },
+      "fps": 8,
+      "loop": false
+    },
+    "death": {
+      "frames": [
+        "/sprites/cable_spider/death/frame-01.png"
+      ],
+      "width": 372,
+      "height": 245,
+      "anchor": {
+        "x": 182,
+        "y": 240
+      },
+      "fps": 6,
+      "loop": false
+    }
+  }
+}

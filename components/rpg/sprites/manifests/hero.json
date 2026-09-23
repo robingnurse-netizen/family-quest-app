@@ -1,0 +1,71 @@
+{
+  "character": "hero",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/hero/idle/frame-01.png",
+        "/sprites/hero/idle/frame-02.png",
+        "/sprites/hero/idle/frame-03.png"
+      ],
+      "width": 176,
+      "height": 390,
+      "anchor": {
+        "x": 94,
+        "y": 385
+      },
+      "fps": 6,
+      "loop": true
+    },
+    "run": {
+      "frames": [
+        "/sprites/hero/run/frame-01.png",
+        "/sprites/hero/run/frame-02.png",
+        "/sprites/hero/run/frame-03.png",
+        "/sprites/hero/run/frame-04.png",
+        "/sprites/hero/run/frame-05.png",
+        "/sprites/hero/run/frame-06.png"
+      ],
+      "width": 276,
+      "height": 400,
+      "anchor": {
+        "x": 193,
+        "y": 395
+      },
+      "fps": 12,
+      "loop": true
+    },
+    "jump": {
+      "frames": [
+        "/sprites/hero/jump/frame-01.png",
+        "/sprites/hero/jump/frame-02.png",
+        "/sprites/hero/jump/frame-03.png",
+        "/sprites/hero/jump/frame-04.png"
+      ],
+      "width": 261,
+      "height": 493,
+      "anchor": {
+        "x": 118,
+        "y": 488
+      },
+      "fps": 8,
+      "loop": false
+    },
+    "attack": {
+      "frames": [
+        "/sprites/hero/attack/frame-01.png",
+        "/sprites/hero/attack/frame-02.png",
+        "/sprites/hero/attack/frame-03.png",
+        "/sprites/hero/attack/frame-04.png",
+        "/sprites/hero/attack/frame-05.png"
+      ],
+      "width": 458,
+      "height": 481,
+      "anchor": {
+        "x": 193,
+        "y": 476
+      },
+      "fps": 10,
+      "loop": false
+    }
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "character": "laundry_goblin",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/laundry_goblin/idle/frame-01.png",
+        "/sprites/laundry_goblin/idle/frame-02.png"
+      ],
+      "width": 204,
+      "height": 229,
+      "anchor": {
+        "x": 96,
+        "y": 224
+      },
+      "fps": 2,
+      "loop": true
+    },
+    "move": {
+      "frames": [
+        "/sprites/laundry_goblin/move/frame-01.png",
+        "/sprites/laundry_goblin/move/frame-02.png",
+        "/sprites/laundry_goblin/move/frame-03.png"
+      ],
+      "width": 169,
+      "height": 229,
+      "anchor": {
+        "x": 84,
+        "y": 224
+      },
+      "fps": 8,
+      "loop": true
+    },
+    "attack": {
+      "frames": [
+        "/sprites/laundry_goblin/attack/frame-01.png",
+        "/sprites/laundry_goblin/attack/frame-02.png"
+      ],
+      "width": 268,
+      "height": 264,
+      "anchor": {
+        "x": 117,
+        "y": 259
+      },
+      "fps": 4,
+      "loop": false
+    },
+    "hurt": {
+      "frames": [
+        "/sprites/laundry_goblin/hurt/frame-01.png",
+        "/sprites/laundry_goblin/hurt/frame-02.png"
+      ],
+      "width": 213,
+      "height": 220,
+      "anchor": {
+        "x": 116,
+        "y": 215
+      },
+      "fps": 4,
+      "loop": false
+    },
+    "death": {
+      "frames": [
+        "/sprites/laundry_goblin/death/frame-01.png"
+      ],
+      "width": 300,
+      "height": 143,
+      "anchor": {
+        "x": 155,
+        "y": 138
+      },
+      "fps": 6,
+      "loop": false
+    }
+  }
+}

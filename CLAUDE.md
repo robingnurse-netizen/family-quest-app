@@ -53,7 +53,28 @@ PROJECT STATUS:
   * Known open points: completions on future-dated slots strike immediately;
     completed-but-unapplied slots (no active boss at the time) aren't swept
     up later; reward requests don't yet check/deduct gold.
-- Later: RPG Phase B (sprites, battle UI, rewards store).
+- RPG Phase B1 — Sprite Pipeline: COMPLETE.
+  * scripts/slice-sprites.mjs (sharp) slices /assets into
+    public/sprites/<key>/<animation>/frame-NN.png (178 frames, 10
+    characters) and writes components/rpg/sprites/manifests/<key>.json.
+    Boss keys = bosses.sprite_key; hero = "hero", dog companion = "rogue".
+    Background removed by flood fill; crop coordinates, per-animation fps,
+    alignment ("feet" default, "mass" for Rogue's run) and dropFrames live
+    in the script's SHEETS config. Re-run per character after any change:
+    node scripts/slice-sprites.mjs <key>
+  * Sprites are fully decoupled behind the manifests: art can be swapped
+    later (new sheets → re-slice, or hand-made frames + a manifest) without
+    touching game logic. Components only know manifest keys + animation
+    names (idle/move/attack/hurt/death/defeated, etc.).
+  * SpriteAnimator.tsx plays a manifest animation (rAF, preloads frames,
+    reduced-motion safe). One-shot animations play once and hold the last
+    frame; replayDelayMs replays them (previews only).
+  * Hero + Rogue idle on the player dashboard (components/rpg/hero/hero-party.tsx).
+  * Known art limits: single-frame animations (Cable Spider all; Alarm
+    Clock Swarm idle/move/hurt/death; Slime hurt/death; Goblin death) are
+    static; Chronosphinx attack frames 3–4 share an overlapping beam;
+    Shogun-Bot idle drops sheet frames 5 and 7 (sword flash).
+- Later: RPG Phase B2 (boss battle rendering), rewards store.
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at

@@ -1,0 +1,76 @@
+{
+  "character": "rogue",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/rogue/idle/frame-01.png",
+        "/sprites/rogue/idle/frame-02.png",
+        "/sprites/rogue/idle/frame-03.png",
+        "/sprites/rogue/idle/frame-04.png",
+        "/sprites/rogue/idle/frame-05.png",
+        "/sprites/rogue/idle/frame-06.png"
+      ],
+      "width": 309,
+      "height": 298,
+      "anchor": {
+        "x": 132,
+        "y": 293
+      },
+      "fps": 6,
+      "loop": true
+    },
+    "running": {
+      "frames": [
+        "/sprites/rogue/running/frame-01.png",
+        "/sprites/rogue/running/frame-02.png",
+        "/sprites/rogue/running/frame-03.png",
+        "/sprites/rogue/running/frame-04.png",
+        "/sprites/rogue/running/frame-05.png",
+        "/sprites/rogue/running/frame-06.png",
+        "/sprites/rogue/running/frame-07.png",
+        "/sprites/rogue/running/frame-08.png"
+      ],
+      "width": 453,
+      "height": 287,
+      "anchor": {
+        "x": 234,
+        "y": 282
+      },
+      "fps": 12,
+      "loop": true
+    },
+    "pouncing": {
+      "frames": [
+        "/sprites/rogue/pouncing/frame-01.png",
+        "/sprites/rogue/pouncing/frame-02.png",
+        "/sprites/rogue/pouncing/frame-03.png",
+        "/sprites/rogue/pouncing/frame-04.png"
+      ],
+      "width": 843,
+      "height": 391,
+      "anchor": {
+        "x": 449,
+        "y": 386
+      },
+      "fps": 8,
+      "loop": false
+    },
+    "barking": {
+      "frames": [
+        "/sprites/rogue/barking/frame-01.png",
+        "/sprites/rogue/barking/frame-02.png",
+        "/sprites/rogue/barking/frame-03.png",
+        "/sprites/rogue/barking/frame-04.png",
+        "/sprites/rogue/barking/frame-05.png"
+      ],
+      "width": 487,
+      "height": 355,
+      "anchor": {
+        "x": 152,
+        "y": 350
+      },
+      "fps": 8,
+      "loop": false
+    }
+  }
+}

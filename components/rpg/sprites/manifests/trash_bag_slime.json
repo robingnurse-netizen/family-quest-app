@@ -1,0 +1,61 @@
+{
+  "character": "trash_bag_slime",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/trash_bag_slime/idle/frame-01.png",
+        "/sprites/trash_bag_slime/idle/frame-02.png",
+        "/sprites/trash_bag_slime/idle/frame-03.png"
+      ],
+      "width": 194,
+      "height": 194,
+      "anchor": {
+        "x": 97,
+        "y": 189
+      },
+      "fps": 3,
+      "loop": true
+    },
+    "attack": {
+      "frames": [
+        "/sprites/trash_bag_slime/attack/frame-01.png",
+        "/sprites/trash_bag_slime/attack/frame-02.png",
+        "/sprites/trash_bag_slime/attack/frame-03.png"
+      ],
+      "width": 374,
+      "height": 195,
+      "anchor": {
+        "x": 137,
+        "y": 190
+      },
+      "fps": 6,
+      "loop": false
+    },
+    "hurt": {
+      "frames": [
+        "/sprites/trash_bag_slime/hurt/frame-01.png"
+      ],
+      "width": 297,
+      "height": 76,
+      "anchor": {
+        "x": 150,
+        "y": 71
+      },
+      "fps": 8,
+      "loop": false
+    },
+    "death": {
+      "frames": [
+        "/sprites/trash_bag_slime/death/frame-01.png"
+      ],
+      "width": 300,
+      "height": 173,
+      "anchor": {
+        "x": 167,
+        "y": 168
+      },
+      "fps": 6,
+      "loop": false
+    }
+  }
+}

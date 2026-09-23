@@ -1,0 +1,80 @@
+{
+  "character": "abyssal_kraken",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/abyssal_kraken/idle/frame-01.png",
+        "/sprites/abyssal_kraken/idle/frame-02.png",
+        "/sprites/abyssal_kraken/idle/frame-03.png",
+        "/sprites/abyssal_kraken/idle/frame-04.png",
+        "/sprites/abyssal_kraken/idle/frame-05.png",
+        "/sprites/abyssal_kraken/idle/frame-06.png"
+      ],
+      "width": 337,
+      "height": 364,
+      "anchor": {
+        "x": 166,
+        "y": 359
+      },
+      "fps": 6,
+      "loop": true
+    },
+    "move": {
+      "frames": [
+        "/sprites/abyssal_kraken/move/frame-01.png",
+        "/sprites/abyssal_kraken/move/frame-02.png",
+        "/sprites/abyssal_kraken/move/frame-03.png",
+        "/sprites/abyssal_kraken/move/frame-04.png",
+        "/sprites/abyssal_kraken/move/frame-05.png",
+        "/sprites/abyssal_kraken/move/frame-06.png"
+      ],
+      "width": 441,
+      "height": 263,
+      "anchor": {
+        "x": 250,
+        "y": 258
+      },
+      "fps": 8,
+      "loop": true
+    },
+    "attack": {
+      "frames": [
+        "/sprites/abyssal_kraken/attack/frame-01.png",
+        "/sprites/abyssal_kraken/attack/frame-02.png",
+        "/sprites/abyssal_kraken/attack/frame-03.png",
+        "/sprites/abyssal_kraken/attack/frame-04.png",
+        "/sprites/abyssal_kraken/attack/frame-05.png",
+        "/sprites/abyssal_kraken/attack/frame-06.png",
+        "/sprites/abyssal_kraken/attack/frame-07.png",
+        "/sprites/abyssal_kraken/attack/frame-08.png"
+      ],
+      "width": 375,
+      "height": 335,
+      "anchor": {
+        "x": 176,
+        "y": 330
+      },
+      "fps": 10,
+      "loop": false
+    },
+    "defeated": {
+      "frames": [
+        "/sprites/abyssal_kraken/defeated/frame-01.png",
+        "/sprites/abyssal_kraken/defeated/frame-02.png",
+        "/sprites/abyssal_kraken/defeated/frame-03.png",
+        "/sprites/abyssal_kraken/defeated/frame-04.png",
+        "/sprites/abyssal_kraken/defeated/frame-05.png",
+        "/sprites/abyssal_kraken/defeated/frame-06.png",
+        "/sprites/abyssal_kraken/defeated/frame-07.png"
+      ],
+      "width": 501,
+      "height": 315,
+      "anchor": {
+        "x": 219,
+        "y": 310
+      },
+      "fps": 8,
+      "loop": false
+    }
+  }
+}

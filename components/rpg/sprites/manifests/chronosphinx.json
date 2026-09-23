@@ -1,0 +1,80 @@
+{
+  "character": "chronosphinx",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/chronosphinx/idle/frame-01.png",
+        "/sprites/chronosphinx/idle/frame-02.png",
+        "/sprites/chronosphinx/idle/frame-03.png",
+        "/sprites/chronosphinx/idle/frame-04.png"
+      ],
+      "width": 465,
+      "height": 312,
+      "anchor": {
+        "x": 184,
+        "y": 307
+      },
+      "fps": 3,
+      "loop": true
+    },
+    "move": {
+      "frames": [
+        "/sprites/chronosphinx/move/frame-01.png",
+        "/sprites/chronosphinx/move/frame-02.png",
+        "/sprites/chronosphinx/move/frame-03.png",
+        "/sprites/chronosphinx/move/frame-04.png",
+        "/sprites/chronosphinx/move/frame-05.png",
+        "/sprites/chronosphinx/move/frame-06.png"
+      ],
+      "width": 356,
+      "height": 351,
+      "anchor": {
+        "x": 202,
+        "y": 346
+      },
+      "fps": 8,
+      "loop": true
+    },
+    "attack": {
+      "frames": [
+        "/sprites/chronosphinx/attack/frame-01.png",
+        "/sprites/chronosphinx/attack/frame-02.png",
+        "/sprites/chronosphinx/attack/frame-03.png",
+        "/sprites/chronosphinx/attack/frame-04.png",
+        "/sprites/chronosphinx/attack/frame-05.png",
+        "/sprites/chronosphinx/attack/frame-06.png",
+        "/sprites/chronosphinx/attack/frame-07.png",
+        "/sprites/chronosphinx/attack/frame-08.png"
+      ],
+      "width": 403,
+      "height": 294,
+      "anchor": {
+        "x": 190,
+        "y": 289
+      },
+      "fps": 10,
+      "loop": false
+    },
+    "defeated": {
+      "frames": [
+        "/sprites/chronosphinx/defeated/frame-01.png",
+        "/sprites/chronosphinx/defeated/frame-02.png",
+        "/sprites/chronosphinx/defeated/frame-03.png",
+        "/sprites/chronosphinx/defeated/frame-04.png",
+        "/sprites/chronosphinx/defeated/frame-05.png",
+        "/sprites/chronosphinx/defeated/frame-06.png",
+        "/sprites/chronosphinx/defeated/frame-07.png",
+        "/sprites/chronosphinx/defeated/frame-08.png",
+        "/sprites/chronosphinx/defeated/frame-09.png"
+      ],
+      "width": 352,
+      "height": 302,
+      "anchor": {
+        "x": 164,
+        "y": 297
+      },
+      "fps": 8,
+      "loop": false
+    }
+  }
+}

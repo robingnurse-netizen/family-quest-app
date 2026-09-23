@@ -8,6 +8,7 @@ import { WeekBoard } from "@/components/kanban/week-board";
 import { createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
 import { loadBattle } from "@/lib/rpg/queries";
 import { BossStatus } from "@/components/rpg/boss/boss-status";
+import { HeroParty } from "@/components/rpg/hero/hero-party";
 
 export default async function PlayerDashboard(props: PageProps<"/player">) {
   const profile = await requireRole("child");
@@ -46,6 +47,10 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
           </div>
           <SignOutButton className="bg-white/10 text-white hover:bg-white/20" />
         </header>
+
+        <div className="mb-4">
+          <HeroParty heroName={profile.display_name} />
+        </div>
 
         <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {tiles.map((t) => (

@@ -1,0 +1,77 @@
+{
+  "character": "magma_behemoth",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/magma_behemoth/idle/frame-01.png",
+        "/sprites/magma_behemoth/idle/frame-02.png",
+        "/sprites/magma_behemoth/idle/frame-03.png",
+        "/sprites/magma_behemoth/idle/frame-04.png",
+        "/sprites/magma_behemoth/idle/frame-05.png"
+      ],
+      "width": 328,
+      "height": 269,
+      "anchor": {
+        "x": 148,
+        "y": 264
+      },
+      "fps": 6,
+      "loop": true
+    },
+    "move": {
+      "frames": [
+        "/sprites/magma_behemoth/move/frame-01.png",
+        "/sprites/magma_behemoth/move/frame-02.png",
+        "/sprites/magma_behemoth/move/frame-03.png",
+        "/sprites/magma_behemoth/move/frame-04.png",
+        "/sprites/magma_behemoth/move/frame-05.png",
+        "/sprites/magma_behemoth/move/frame-06.png"
+      ],
+      "width": 329,
+      "height": 269,
+      "anchor": {
+        "x": 162,
+        "y": 264
+      },
+      "fps": 8,
+      "loop": true
+    },
+    "attack": {
+      "frames": [
+        "/sprites/magma_behemoth/attack/frame-01.png",
+        "/sprites/magma_behemoth/attack/frame-02.png",
+        "/sprites/magma_behemoth/attack/frame-03.png",
+        "/sprites/magma_behemoth/attack/frame-04.png",
+        "/sprites/magma_behemoth/attack/frame-05.png",
+        "/sprites/magma_behemoth/attack/frame-06.png",
+        "/sprites/magma_behemoth/attack/frame-07.png"
+      ],
+      "width": 451,
+      "height": 287,
+      "anchor": {
+        "x": 261,
+        "y": 282
+      },
+      "fps": 10,
+      "loop": false
+    },
+    "defeated": {
+      "frames": [
+        "/sprites/magma_behemoth/defeated/frame-01.png",
+        "/sprites/magma_behemoth/defeated/frame-02.png",
+        "/sprites/magma_behemoth/defeated/frame-03.png",
+        "/sprites/magma_behemoth/defeated/frame-04.png",
+        "/sprites/magma_behemoth/defeated/frame-05.png",
+        "/sprites/magma_behemoth/defeated/frame-06.png"
+      ],
+      "width": 477,
+      "height": 301,
+      "anchor": {
+        "x": 231,
+        "y": 296
+      },
+      "fps": 8,
+      "loop": false
+    }
+  }
+}
