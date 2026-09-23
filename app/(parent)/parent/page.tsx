@@ -6,13 +6,16 @@ import { loadWeekBoard } from "@/lib/backlog/queries";
 import { PoolManager } from "@/components/kanban/pool-manager";
 import { loadBattle } from "@/lib/rpg/queries";
 import { BossStatus } from "@/components/rpg/boss/boss-status";
+import { loadRewardStore } from "@/lib/rewards/queries";
+import { ParentRewards } from "@/components/rewards/parent-rewards";
 import { runDailyResetNow } from "./actions";
+import { resolveRedemption } from "./rewards/actions";
 
 export default async function ParentDashboard() {
   const profile = await requireRole("parent");
   const supabase = await createClient();
 
-  const [{ data: family }, { data: members }, board, battle] = await Promise.all([
+  const [{ data: family }, { data: members }, board, battle, rewards] = await Promise.all([
     supabase.from("families").select("*").eq("id", profile.family_id).single(),
     supabase
       .from("profiles")
@@ -21,6 +24,7 @@ export default async function ParentDashboard() {
       .order("created_at"),
     loadWeekBoard(profile),
     loadBattle(profile.family_id),
+    loadRewardStore(profile),
   ]);
 
   return (
@@ -80,6 +84,25 @@ export default async function ParentDashboard() {
       </Link>
 
       <section className="mt-8">
+        <div className="mb-3 flex items-baseline justify-end gap-2">
+          <Link
+            href="/parent/rewards"
+            className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+          >
+            Manage rewards →
+          </Link>
+        </div>
+        {/* Live: a new request from the player shows up here straight away. */}
+        <ParentRewards
+          familyId={rewards.familyId}
+          timeZone={rewards.timeZone}
+          members={rewards.members}
+          initial={rewards}
+          resolve={resolveRedemption}
+        />
+      </section>
+
+      <section className="mt-8">
         <h2 className="mb-3 text-lg font-black text-slate-900">Current boss</h2>
         <BossStatus
           variant="parent"
@@ -111,9 +134,6 @@ export default async function ParentDashboard() {
         />
       </section>
 
-      <p className="mt-8 rounded-2xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-        The battle screen and rewards store arrive in the next phase.
-      </p>
     </main>
   );
 }

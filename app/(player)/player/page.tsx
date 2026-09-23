@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
@@ -63,6 +64,19 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
             </div>
           ))}
         </section>
+
+        <Link
+          href="/player/store"
+          className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-amber-300/40 bg-amber-400/10 p-4 transition hover:bg-amber-400/20"
+        >
+          <div>
+            <h2 className="font-black text-amber-300">Rewards store</h2>
+            <p className="text-sm text-indigo-200">Spend your gold on real-life rewards.</p>
+          </div>
+          <span aria-hidden className="text-2xl text-amber-300">
+            →
+          </span>
+        </Link>
 
         {/* Pins to the bottom of the screen once scrolled away, so the
             boss's reactions stay in view while Reuben ticks off quests. */}

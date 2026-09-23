@@ -52,7 +52,7 @@ PROJECT STATUS:
     only, same engine as the cron); remove/hide once the schedule's trusted.
   * Known open points: completions on future-dated slots strike immediately;
     completed-but-unapplied slots (no active boss at the time) aren't swept
-    up later; reward requests don't yet check/deduct gold.
+    up later. (Reward gold is now enforced — see Rewards Store.)
 - RPG Phase B1 — Sprite Pipeline: COMPLETE.
   * scripts/slice-sprites.mjs (sharp) slices /assets into
     public/sprites/<key>/<animation>/frame-NN.png (178 frames, 10
@@ -89,7 +89,29 @@ PROJECT STATUS:
   The `compact` Tailwind variant (globals.css: width < 48rem, height < 50rem,
   or inside [data-pinned]) makes it one row with a half-scale stage. The parent
   dashboard's panel is unchanged.
-- Later: rewards store.
+- Rewards Store: COMPLETE. Tested live: reward creation, redeem with live
+  gold deduction, approve → fulfil, deny with refund (both dashboards), and
+  the gold-gated Redeem button with "how much more" messaging.
+  * 20260923000009_rewards_store.sql: BEFORE INSERT trigger on
+    reward_redemptions prices a request from the reward's current gold_cost
+    (overwrites gold_spent / redeemed_at) and deducts it from
+    player_stats.gold in one atomic `update … where gold >= cost` — concurrent
+    requests serialize on that row, so they can't overspend. BEFORE UPDATE
+    trigger: only status changes; pending → approved|fulfilled|denied,
+    approved → fulfilled|denied; → denied refunds gold_spent in the same
+    transaction; denied/fulfilled are final; resolved_by = auth.uid().
+    These hold for every caller (it's the gold ledger). Parents may only
+    UPDATE redemptions (no insert/delete). reward_id FK is NO ACTION, so a
+    reward with requests can't be deleted — the UI hides it (active=false).
+  * Parent: /parent/rewards (catalog: emoji icon palette in
+    lib/rewards/icons.ts, hide/show, delete only if never requested) + the
+    request queue (also live on /parent): Approve / Deny (refund) / Fulfilled.
+  * Player: /player/store — spendable gold (live from player_stats), reward
+    cards with Redeem (disabled when short), confirm step, "waiting for a
+    grown-up" requests, recent results.
+  * Realtime: lib/hooks/use-reward-store.ts (rewards, reward_redemptions,
+    and the player's player_stats row). Friendly trigger errors in
+    lib/rewards/errors.ts.
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at
@@ -123,7 +145,7 @@ Reuben can only write task_slots (his own pools) and reward_redemptions.
 
 FOLDER STRUCTURE:
 /app/(auth), /app/(parent), /app/(player), /app/api/cron/daily-reset
-/components/calendar, /kanban, /rpg/{sprites,boss,hero,companion}
+/components/calendar, /kanban, /rewards, /rpg/{sprites,boss,hero,companion}
 /lib/supabase, /lib/game-logic, /lib/hooks
 /public/sprites — I have sprite sheets in /assets: hero, companion (dog),
 4 low-level bosses (one sheet), and 4 epic bosses (Magma Behemoth,

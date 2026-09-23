@@ -232,9 +232,11 @@ export type Database = {
         Reward,
         "id" | "description" | "icon" | "active" | "created_by" | "created_at"
       >;
+      // gold_spent / redeemed_at are set by the request trigger
+      // (20260923000009_rewards_store.sql), whatever the client sends.
       reward_redemptions: Table<
         RewardRedemption,
-        "id" | "status" | "redeemed_at" | "resolved_by"
+        "id" | "gold_spent" | "status" | "redeemed_at" | "resolved_by"
       >;
     };
     Views: Record<string, never>;
