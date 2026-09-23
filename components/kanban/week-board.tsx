@@ -449,6 +449,8 @@ function SlotCardView({
 }) {
   const done = slot.status === "completed";
   const missed = slot.status === "missed";
+  // Completing a slot strikes the boss instantly and locks it (no un-tick).
+  const locked = slot.applied_to_boss;
   const color = poolColor(pool.color);
   return (
     <div
@@ -464,10 +466,16 @@ function SlotCardView({
       <button
         type="button"
         onClick={onToggle}
-        disabled={!onToggle || missed || isTemp(slot)}
+        disabled={!onToggle || missed || locked || isTemp(slot)}
         aria-pressed={done}
         aria-label={`${pool.title}, ${formatMinutes(slot.duration_minutes)}${
-          missed ? ", missed" : done ? ", done. Tap to undo" : ". Tap when done"
+          missed
+            ? ", missed"
+            : locked
+              ? ", done. Damage dealt"
+              : done
+                ? ", done. Tap to undo"
+                : ". Tap when done"
         }`}
         className="min-w-0 flex-1 px-2 py-1.5 text-left disabled:cursor-default md:px-1.5"
       >
@@ -480,7 +488,13 @@ function SlotCardView({
         >
           {pool.title}
         </span>
-        <span className={`mt-1 flex items-center gap-1.5 ${onRemove ? "pr-6" : ""}`}>
+        <span
+          className={`mt-1 flex items-center gap-1.5 ${onRemove ? "pr-6" : ""} ${
+            // Locked slots carry a "hit!" badge: let it drop to its own line
+            // on narrow day columns rather than being clipped.
+            locked ? "flex-wrap gap-y-0.5" : ""
+          }`}
+        >
           <span
             aria-hidden
             className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 ${
@@ -493,6 +507,11 @@ function SlotCardView({
             {formatMinutes(slot.duration_minutes)}
             {missed && " · missed"}
           </span>
+          {locked && (
+            <span className="shrink-0 whitespace-nowrap rounded bg-amber-400/90 px-1 text-[10px] font-black leading-4 text-indigo-950">
+              hit!
+            </span>
+          )}
         </span>
       </button>
       {onRemove && (

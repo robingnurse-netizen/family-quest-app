@@ -4,12 +4,15 @@ import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
 import { loadWeekBoard } from "@/lib/backlog/queries";
 import { PoolManager } from "@/components/kanban/pool-manager";
+import { loadBattle } from "@/lib/rpg/queries";
+import { BossStatus } from "@/components/rpg/boss/boss-status";
+import { runDailyResetNow } from "./actions";
 
 export default async function ParentDashboard() {
   const profile = await requireRole("parent");
   const supabase = await createClient();
 
-  const [{ data: family }, { data: members }, board] = await Promise.all([
+  const [{ data: family }, { data: members }, board, battle] = await Promise.all([
     supabase.from("families").select("*").eq("id", profile.family_id).single(),
     supabase
       .from("profiles")
@@ -17,6 +20,7 @@ export default async function ParentDashboard() {
       .eq("family_id", profile.family_id)
       .order("created_at"),
     loadWeekBoard(profile),
+    loadBattle(profile.family_id),
   ]);
 
   return (
@@ -76,6 +80,17 @@ export default async function ParentDashboard() {
       </Link>
 
       <section className="mt-8">
+        <h2 className="mb-3 text-lg font-black text-slate-900">Current boss</h2>
+        <BossStatus
+          variant="parent"
+          familyId={battle.familyId}
+          initialBoss={battle.boss}
+          initialParty={battle.party}
+          runReset={runDailyResetNow}
+        />
+      </section>
+
+      <section className="mt-8">
         <div className="mb-3 flex items-baseline justify-between gap-2">
           <h2 className="text-lg font-black text-slate-900">This week&apos;s pools</h2>
           <Link
@@ -97,7 +112,7 @@ export default async function ParentDashboard() {
       </section>
 
       <p className="mt-8 rounded-2xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
-        Boss management arrives in a later phase.
+        The battle screen and rewards store arrive in the next phase.
       </p>
     </main>
   );

@@ -8,7 +8,13 @@ export type Role = "parent" | "child";
 export type TaskSlotStatus = "scheduled" | "completed" | "missed";
 export type BossTier = "low" | "mid" | "epic";
 export type BossStatus = "inactive" | "active" | "defeated" | "escaped";
-export type BossLogEvent = "damage" | "miss_penalty" | "defeated" | "escaped";
+export type BossLogEvent =
+  | "damage"
+  | "miss_penalty"
+  | "defeated"
+  | "escaped"
+  | "activated"
+  | "gold_awarded";
 export type RedemptionStatus = "pending" | "approved" | "fulfilled" | "denied";
 
 export type Family = {
@@ -74,8 +80,11 @@ export type Boss = {
   sprite_key: string;
   max_hp: number;
   current_hp: number;
-  week_start_date: string;
+  /** Monday of the week the boss was activated; null while queued. */
+  week_start_date: string | null;
   status: BossStatus;
+  /** Activation order within a tier (low → mid → epic). */
+  queue_position: number;
   created_at: string;
 };
 
@@ -85,6 +94,8 @@ export type BossLog = {
   event_type: BossLogEvent;
   amount: number;
   source_task_slot_id: string | null;
+  /** Child who dealt the damage / took the penalty / got the gold. */
+  child_id: string | null;
   created_at: string;
 };
 
@@ -140,6 +151,23 @@ export type RewardRedemption = {
   resolved_by: string | null;
 };
 
+/**
+ * Summary returned by run_daily_reset() for one family. Boss damage isn't
+ * part of the nightly run any more — it's dealt instantly on completion.
+ */
+export type DailyResetResult = {
+  family_id: string;
+  today: string;
+  boss_id: string | null;
+  missed_minutes: number;
+  party_damage: number;
+  party_hp: number;
+  defeated: string | null;
+  escaped: string | null;
+  gold_awarded: { child_id: string; gold: number }[];
+  activated: string | null;
+};
+
 // Columns with a database default (or nullable) are optional on insert.
 type Table<Row, Optional extends keyof Row> = {
   Row: Row;
@@ -177,10 +205,13 @@ export type Database = {
         | "completed_at"
         | "created_at"
       >;
-      bosses: Table<Boss, "id" | "status" | "created_at">;
+      bosses: Table<
+        Boss,
+        "id" | "status" | "week_start_date" | "queue_position" | "created_at"
+      >;
       boss_log: Table<
         BossLog,
-        "id" | "amount" | "source_task_slot_id" | "created_at"
+        "id" | "amount" | "source_task_slot_id" | "child_id" | "created_at"
       >;
       party_health: Table<
         PartyHealth,
@@ -211,6 +242,15 @@ export type Database = {
       current_family_id: { Args: Record<string, never>; Returns: string };
       is_parent: { Args: Record<string, never>; Returns: boolean };
       lookup_invite_code: { Args: { code: string }; Returns: string | null };
+      // Service role only (see 20260923000006_boss_engine.sql).
+      run_daily_reset: {
+        Args: { p_family_id: string; p_today?: string };
+        Returns: DailyResetResult;
+      };
+      run_daily_reset_all: {
+        Args: Record<string, never>;
+        Returns: (DailyResetResult | { family_id: string; error: string })[];
+      };
     };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;

@@ -73,7 +73,11 @@ export async function removeSlot(slotId: string): Promise<ActionResult<string>> 
   return { ok: true, data: slotId };
 }
 
-/** Tap-to-toggle between scheduled and completed. Missed slots are locked. */
+/**
+ * Tap-to-toggle between scheduled and completed. Completing a slot damages
+ * the boss instantly (database trigger) and locks it; missed slots are
+ * locked too.
+ */
 export async function setSlotStatus(
   slotId: string,
   status: Exclude<TaskSlotStatus, "missed">,
@@ -89,11 +93,12 @@ export async function setSlotStatus(
     .update({ status })
     .eq("id", slotId)
     .in("status", ["scheduled", "completed"])
+    .eq("applied_to_boss", false)
     .select()
     .maybeSingle();
   if (error) {
     return { ok: false, error: friendlyBacklogError(error.message, "Couldn't update that slot.") };
   }
-  if (!data) return { ok: false, error: "That slot can't be changed." };
+  if (!data) return { ok: false, error: "That quest is locked in and can't be changed." };
   return { ok: true, data };
 }

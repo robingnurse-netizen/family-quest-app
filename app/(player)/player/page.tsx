@@ -6,13 +6,15 @@ import { MonthCalendar } from "@/components/calendar/month-calendar";
 import { loadWeekBoard } from "@/lib/backlog/queries";
 import { WeekBoard } from "@/components/kanban/week-board";
 import { createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
+import { loadBattle } from "@/lib/rpg/queries";
+import { BossStatus } from "@/components/rpg/boss/boss-status";
 
 export default async function PlayerDashboard(props: PageProps<"/player">) {
   const profile = await requireRole("child");
   const supabase = await createClient();
   const { month, week } = await props.searchParams;
 
-  const [{ data: stats }, calendar, board] = await Promise.all([
+  const [{ data: stats }, calendar, board, battle] = await Promise.all([
     supabase
       .from("player_stats")
       .select("gold, xp, level, current_streak")
@@ -20,6 +22,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
       .maybeSingle(),
     loadCalendar(profile.family_id, month),
     loadWeekBoard(profile, week),
+    loadBattle(profile.family_id),
   ]);
 
   const tiles = [
@@ -56,6 +59,15 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
         </section>
 
         <div className="mt-8">
+          <BossStatus
+            variant="player"
+            familyId={battle.familyId}
+            initialBoss={battle.boss}
+            initialParty={battle.party}
+          />
+        </div>
+
+        <div className="mt-8">
           <WeekBoard
             familyId={board.familyId}
             childId={profile.id}
@@ -84,7 +96,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
         </div>
 
         <p className="mt-8 rounded-2xl border border-dashed border-white/30 p-6 text-center text-indigo-200">
-          Boss battles and your companion are on their way.
+          Boss artwork, battles and your companion are on their way.
         </p>
       </div>
     </main>

@@ -13,6 +13,9 @@ export function friendlyBacklogError(message: string | undefined, fallback: stri
   if (message.startsWith("slot_outside_week")) {
     return "That day isn't in this pool's week.";
   }
+  if (message.startsWith("slot_locked")) {
+    return "That quest's damage has already been dealt — it's locked in.";
+  }
   if (message.startsWith("slot_child_forbidden")) {
     return "That change isn't allowed from the quest board.";
   }

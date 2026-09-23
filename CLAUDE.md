@@ -20,7 +20,40 @@ PROJECT STATUS:
   week board on /player (dnd-kit). DB triggers in migration
   20260922000004_pool_integrity.sql cap slots at the pool's total_minutes,
   keep slots inside the pool's Mon–Sun week, and set completed_at from status.
-- Later: RPG mechanics (bosses, applied_to_boss, pending_damage, sprites).
+- Child slot guard (migration 20260922000005): COMPLETE, pushed as 30c6839
+  and 00f667e. A child can only insert 'scheduled' slots, toggle status
+  between 'scheduled' and 'completed', and delete slots that are still
+  'scheduled' and not applied_to_boss; never set 'missed' or touch
+  applied_to_boss. Parents, the service role and direct SQL are unaffected.
+  Game-engine writes MUST use the service role key, never a user session.
+- RPG Phase A — Boss Data & Daily Reset Engine: COMPLETE.
+  * 20260923000006_boss_engine.sql: per-family boss roster seeded on family
+    creation (4 low → 4 epic, activated in that order; Trash-Bag Slime
+    first), boss_log.child_id for damage attribution, run_daily_reset() /
+    run_daily_reset_all() Postgres functions (service role only). A child
+    reads only their own player_stats / companions.
+  * 20260923000007_realtime_rpg_tables.sql: idempotently ensures bosses,
+    boss_log, party_health, player_stats are in supabase_realtime.
+  * 20260923000008_instant_damage.sql: INSTANT DAMAGE REPLACED the original
+    "pending damage applied at midnight" design. Completing a slot damages
+    the active boss immediately (1 min = 1 damage) via trigger
+    task_slots_strike_boss (SECURITY DEFINER — the one controlled bypass of
+    the child guard), logs it, sets applied_to_boss and locks the slot (no
+    un-tick / re-tick). Shared end-of-boss logic is finish_boss(): defeat →
+    gold split by damage share (low 25 / mid 50 / epic 100) → next boss;
+    escape → next boss. The nightly job (/api/cron/daily-reset, 00:05 UTC)
+    now only marks past open slots 'missed', damages party_health, handles
+    escape at party 0 (and any boss left at 0 HP), and refills the party.
+    player_stats.pending_damage is unused.
+  * BEFORE triggers fire in name order: task_slots_strike_boss must sort
+    after task_slots_guard_child_writes — don't rename it. Lock order is
+    slot row → boss row in both the trigger and the nightly job.
+  * Parent dashboard has a "Run daily reset now" testing aid (own family
+    only, same engine as the cron); remove/hide once the schedule's trusted.
+  * Known open points: completions on future-dated slots strike immediately;
+    completed-but-unapplied slots (no active boss at the time) aren't swept
+    up later; reward requests don't yet check/deduct gold.
+- Later: RPG Phase B (sprites, battle UI, rewards store).
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at
