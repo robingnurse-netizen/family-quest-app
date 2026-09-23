@@ -5,8 +5,9 @@
 // scene, the stage machine, the centre-screen hit overlay and anything added
 // later (sound effects) subscribe with useBattleEvents — nothing needs
 // rewiring to add a listener. The overlay also emits named "moment" events
-// (impact, combo, ko, victory, coin), and the item shop a "purchase" one,
-// into the same stream for sounds to hook onto.
+// (impact, combo, ko, victory, coin), the item shop a "purchase" one, and
+// the stats HUD "level_up" / "streak_milestone", into the same stream for
+// sounds to hook onto.
 
 import type { Boss, BossLog } from "@/lib/supabase/types";
 
@@ -24,7 +25,11 @@ export type BattleEvent =
   /** A beat in the hit overlay's show, for sound effects. */
   | { type: "moment"; name: OverlayMoment; combo: number; damage: number }
   /** The item shop: a reward was bought (sent to a grown-up), for sounds. */
-  | { type: "moment"; name: "purchase"; rewardId: string; cost: number };
+  | { type: "moment"; name: "purchase"; rewardId: string; cost: number }
+  /** The player reached a new level (shown after any hit sequence). */
+  | { type: "moment"; name: "level_up"; level: number }
+  /** The player's streak reached a milestone (3, 7, 14, 30 days). */
+  | { type: "moment"; name: "streak_milestone"; days: number };
 
 /** Named beats of the hit overlay (components/rpg/battle/hit-overlay.tsx). */
 export type OverlayMoment = "impact" | "combo" | "ko" | "victory" | "coin";

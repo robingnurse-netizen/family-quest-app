@@ -10,6 +10,7 @@ import { loadBattle } from "@/lib/rpg/queries";
 import { BattleProvider } from "@/components/rpg/battle/battle-provider";
 import { BattleScene } from "@/components/rpg/battle/battle-scene";
 import { HitOverlay } from "@/components/rpg/battle/hit-overlay";
+import { Celebrations } from "@/components/rpg/battle/celebrations";
 import { ShopBanner } from "@/components/rewards/shop-banner";
 import { loadRewardStore } from "@/lib/rewards/queries";
 import { GameHeading } from "@/components/ui/game-heading";
@@ -22,7 +23,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
   const [{ data: stats }, [board, calendar], battle, store] = await Promise.all([
     supabase
       .from("player_stats")
-      .select("gold, xp, level, current_streak")
+      .select("gold, xp, level, current_streak, best_streak, streak_through")
       .eq("child_id", profile.id)
       .maybeSingle(),
     // The board's day notices come from the calendar for its week's month
@@ -39,6 +40,8 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
     xp: stats?.xp ?? 0,
     gold: stats?.gold ?? 0,
     streak: stats?.current_streak ?? 0,
+    bestStreak: stats?.best_streak ?? 0,
+    streakThrough: stats?.streak_through ?? null,
   };
 
   return (
@@ -67,6 +70,8 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
           />
           {/* Centre-screen replay of Reuben's own hits, wherever he's scrolled. */}
           <HitOverlay childId={profile.id} />
+          {/* LEVEL UP! and streak milestones, after any hit sequence. */}
+          <Celebrations />
 
 
           <WeekBoard

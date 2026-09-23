@@ -4,17 +4,29 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { PlayerStats } from "@/lib/supabase/types";
 
-export type LiveStats = { level: number; xp: number; gold: number; streak: number };
+export type LiveStats = {
+  level: number;
+  xp: number;
+  gold: number;
+  streak: number;
+  bestStreak: number;
+  /** Last day the nightly reset evaluated the streak (YYYY-MM-DD) or null. */
+  streakThrough: string | null;
+};
 
-const fromRow = (row: Pick<PlayerStats, "level" | "xp" | "gold" | "current_streak">): LiveStats => ({
+type StatsRow = Pick<PlayerStats, "level" | "xp" | "gold" | "current_streak" | "best_streak" | "streak_through">;
+
+const fromRow = (row: StatsRow): LiveStats => ({
   level: row.level,
   xp: row.xp,
   gold: row.gold,
   streak: row.current_streak,
+  bestStreak: row.best_streak ?? 0,
+  streakThrough: row.streak_through ?? null,
 });
 
 /**
- * A player's Level / XP / Gold / Streak, kept live with Supabase Realtime
+ * A player's Level / XP / Gold / Streak (+ best streak), kept live with Supabase Realtime
  * (player_stats is in the publication). Gold moves with boss payouts,
  * purchases and refunds, so the HUD follows along without a reload.
  * Refetches when the channel (re)connects to cover the gap after the
@@ -28,7 +40,7 @@ export function usePlayerStats(childId: string, initial: LiveStats) {
     const refetch = async () => {
       const { data } = await supabase
         .from("player_stats")
-        .select("level, xp, gold, current_streak")
+        .select("level, xp, gold, current_streak, best_streak, streak_through")
         .eq("child_id", childId)
         .maybeSingle();
       if (data) setStats(fromRow(data));

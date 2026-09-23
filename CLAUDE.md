@@ -295,6 +295,39 @@ PROJECT STATUS:
     strip slides exactly one tile, --tile, for a seamless loop). Static
     under reduced motion. The Gold stat's "N within reach" badge is a tab
     on its top-right corner, with space above the stats row.
+- XP, Level & Streak: COMPLETE.
+  Migration 20260925000011_xp_level_streak.sql — APPLIED to Supabase (SQL
+  editor). The app selects player_stats.best_streak / streak_through, which
+  only exist after it.
+  * XP: 1 per minute of a completed quest, to the pool's child, in the
+    strike trigger (same transaction as the damage); exactly once per slot
+    via task_slots.xp_awarded, with or without an active boss. xp_awarded
+    locks the slot like applied_to_boss (so a quest ticked while no boss is
+    active can no longer be re-ticked later to hit one). Defeat bonus XP
+    50 / 100 (mid, interpolated) / 200 split by damage share like gold.
+    No backfill (completed slots were marked xp_awarded, nothing awarded).
+  * Level curve lives ONLY in public.xp_for_level() (50·L·(L−1)); mirror in
+    lib/rpg/levels.ts, checked by the tests. award_xp() recomputes level.
+  * Streaks: evaluate_streaks(), run at the end of run_daily_reset — per
+    child, day by day from streak_through+1 to yesterday (first run:
+    yesterday only): all done +1 (best_streak kept), any missed → 0, rest
+    day no change. Idempotent; catches up over missed nights.
+  * FIXES A REGRESSION from …10 (which rebuilt the guard from …05 and lost
+    …08's slot_locked rule — a child's API could un-tick a locked quest).
+    Restored and extended to xp_awarded. No live slots were affected.
+  * Lock order stays slot → boss → player_stats (XP after the boss step).
+  * UI: XP cell shows total/next-level XP with a 5-segment bar of progress
+    through the current level (lib/rpg/levels.ts levelProgress); streak
+    cell glows + "Keep your N-day streak: X quests left today" when today
+    has quests to do (the quest board reports the count via
+    BattleProvider.questsLeftToday). Moments "level_up" (live level rise)
+    and "streak_milestone" (3/7/14/30; celebrated once per run, remembered
+    in localStorage) → components/rpg/battle/celebrations.tsx shows the
+    cards after any hit sequence.
+  * TESTS: `npm test` (node:test + PGlite, tests/). tests/helpers/db.mjs
+    loads every migration behind a minimal Supabase shim; files:
+    xp-level-streak.test.mjs, slot-guard.test.mjs. This is the start of
+    the permanent suite — add new engine rules' tests here.
 
 PARKED — future items, NOT to be built until asked:
 - FUTURE — Evergreen play:
@@ -305,11 +338,11 @@ PARKED — future items, NOT to be built until asked:
   * Seasonal events: e.g. seasonal accessories on existing bosses (Magma
     Behemoth in a Santa hat) placed via the manifest anchor points, or
     seasonal bosses tied to calendar dates.
-- FUTURE — Test suite: rebuild the earlier one-off PGlite integrity checks
-  (pools, slot guard, boss engine, instant damage, rewards) as a permanent
-  test suite in the repo before production use. The original one-off
-  scripts aren't in the repo (no test files or test tooling exist today),
-  so this starts from the migrations.
+- FUTURE — Test suite: STARTED (npm test; tests/, see "XP, Level &
+  Streak"). Covered so far: slot guard, XP, levels, streaks. Still to add
+  before production use: pool integrity (allocation / week bounds), the
+  boss engine + instant damage (strike, defeat, escape, gold split,
+  activation) and the rewards store triggers.
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at

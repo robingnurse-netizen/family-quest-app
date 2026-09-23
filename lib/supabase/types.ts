@@ -68,6 +68,8 @@ export type TaskSlot = {
   sort_order: number;
   status: TaskSlotStatus;
   applied_to_boss: boolean;
+  /** XP for this quest has been given (set by the game engine; locks it). */
+  xp_awarded: boolean;
   completed_at: string | null;
   created_at: string;
 };
@@ -114,6 +116,9 @@ export type PlayerStats = {
   xp: number;
   level: number;
   current_streak: number;
+  best_streak: number;
+  /** Last day the nightly reset evaluated for the streak (YYYY-MM-DD). */
+  streak_through: string | null;
   pending_damage: number;
   updated_at: string;
 };
@@ -166,6 +171,7 @@ export type DailyResetResult = {
   escaped: string | null;
   gold_awarded: { child_id: string; gold: number }[];
   activated: string | null;
+  streaks?: { child_id: string; streak: number; best: number; through: string }[];
 };
 
 // Columns with a database default (or nullable) are optional on insert.
@@ -202,6 +208,7 @@ export type Database = {
         | "sort_order"
         | "status"
         | "applied_to_boss"
+        | "xp_awarded"
         | "completed_at"
         | "created_at"
       >;
@@ -224,6 +231,8 @@ export type Database = {
         | "xp"
         | "level"
         | "current_streak"
+        | "best_streak"
+        | "streak_through"
         | "pending_damage"
         | "updated_at"
       >;

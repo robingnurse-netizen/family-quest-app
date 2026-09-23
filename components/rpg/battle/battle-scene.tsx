@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { Boss } from "@/lib/supabase/types";
 import { SPRITES } from "@/components/rpg/sprites/manifests";
@@ -9,7 +9,8 @@ import { BossSprite } from "@/components/rpg/boss/boss-sprite";
 import { CoinIcon, FlameIcon, HeartIcon, ShieldIcon, SkullIcon, StarIcon } from "@/components/ui/icons";
 import { useBattleContext, useBattleEvents } from "./battle-provider";
 import { HudBar } from "./hud-bar";
-import { usePlayerStats } from "@/lib/hooks/use-player-stats";
+import { usePlayerStats, type LiveStats } from "@/lib/hooks/use-player-stats";
+import { levelProgress } from "@/lib/rpg/levels";
 import { shopProgress } from "@/lib/rewards/progress";
 import type { Reward } from "@/lib/supabase/types";
 import { ARENA_STYLE, FEET_X, FeetSpot, HEIGHT, arenaHeight, bossHeight } from "./stage-layout";
@@ -26,7 +27,10 @@ import { ARENA_STYLE, FEET_X, FeetSpot, HEIGHT, arenaHeight, bossHeight } from "
 const BOSS_SEGMENTS: Record<Boss["tier"], number> = { low: 10, mid: 15, epic: 20 };
 const PARTY_SEGMENTS = 10;
 
-export type PlayerStats = { level: number; xp: number; gold: number; streak: number };
+export type PlayerStats = LiveStats;
+
+/** Streak lengths worth a celebration. */
+const STREAK_MILESTONES = [3, 7, 14, 30];
 
 const tierLabel = (tier: Boss["tier"]) => (tier === "epic" ? "Epic boss" : tier === "mid" ? "Boss" : "Minion");
 
@@ -43,8 +47,32 @@ export function BattleScene({
   /** The shop's rewards, for the Gold stat's "N within reach" badge. */
   rewards: Reward[];
 }) {
-  const { party, stage, onBossAnimationEnd, onBossFinished } = useBattleContext();
+  const { party, stage, onBossAnimationEnd, onBossFinished, emit, questsLeftToday } = useBattleContext();
   const stats = usePlayerStats(childId, initialStats);
+
+  // LEVEL UP: announced when the live level rises (not on first load). The
+  // celebration overlay queues it until any hit sequence has finished.
+  const shownLevel = useRef(stats.level);
+  useEffect(() => {
+    if (stats.level > shownLevel.current) emit({ type: "moment", name: "level_up", level: stats.level });
+    shownLevel.current = stats.level;
+  }, [stats.level, emit]);
+
+  // Streak milestones: the nightly reset sets the streak (usually while
+  // he's asleep), so celebrate on the next visit — once per milestone run,
+  // remembered in this browser (keyed by the evaluated day).
+  useEffect(() => {
+    if (!STREAK_MILESTONES.includes(stats.streak) || !stats.streakThrough) return;
+    const key = `fq:streak-milestone:${childId}`;
+    const mark = `${stats.streak}@${stats.streakThrough}`;
+    try {
+      if (window.localStorage.getItem(key) === mark) return;
+      window.localStorage.setItem(key, mark);
+    } catch {
+      // Storage unavailable (private mode): celebrate anyway.
+    }
+    emit({ type: "moment", name: "streak_milestone", days: stats.streak });
+  }, [stats.streak, stats.streakThrough, childId, emit]);
   const shown = stage.shown;
 
   // Hero reactions, straight from the event stream: strike on damage, take
@@ -176,7 +204,11 @@ export function BattleScene({
           )}
         </div>
         <div className="col-span-2 mt-2">
-          <StatsStrip stats={stats} withinReach={shopProgress(rewards, stats.gold).affordable} />
+          <StatsStrip
+            stats={stats}
+            withinReach={shopProgress(rewards, stats.gold).affordable}
+            questsLeftToday={questsLeftToday}
+          />
         </div>
       </div>
     </section>
@@ -251,53 +283,103 @@ function TierCrest({ tier, small = false }: { tier: Boss["tier"]; small?: boolea
  * come live from player_stats as-is (level, XP and streak aren't wired to
  * game logic yet). Numbers use the body font (Stage 1's digit rule).
  */
-function StatsStrip({ stats, withinReach }: { stats: PlayerStats; withinReach: number }) {
-  const items = [
-    { label: "Level", value: stats.level, Icon: ShieldIcon, valueClass: "text-white" },
-    { label: "XP", value: stats.xp, Icon: StarIcon, valueClass: "text-white" },
-    { label: "Gold", value: stats.gold, Icon: CoinIcon, valueClass: "text-gold" },
-    { label: "Streak", value: stats.streak, Icon: FlameIcon, valueClass: "text-white" },
-  ];
+function StatsStrip({
+  stats,
+  withinReach,
+  questsLeftToday,
+}: {
+  stats: PlayerStats;
+  withinReach: number;
+  questsLeftToday: number | null;
+}) {
   const cell =
     "flex min-w-0 flex-col items-center rounded-[3px] border-2 border-stone-edge bg-well px-1 py-1.5 shadow-[inset_2px_2px_0_rgb(0_0_0/0.5)]";
+  const label = "mt-1 font-display text-sm font-semibold uppercase leading-none text-stone-text";
+  const value = "text-lg font-black leading-none tabular-nums";
+  const xp = levelProgress(stats.xp);
+  const nudge = stats.streak > 0 && questsLeftToday !== null && questsLeftToday > 0;
+
   return (
-    <ul className="grid grid-cols-4 gap-1.5" aria-label="Your stats">
-      {items.map(({ label, value, Icon, valueClass }) => {
-        const content = (
-          <>
+    <div>
+      <ul className="grid grid-cols-4 gap-1.5" aria-label="Your stats">
+        <li className="min-w-0">
+          <div className={`${cell} h-full`}>
             <span className="flex items-center gap-1">
-              <Icon className="h-5 w-5 shrink-0" />
-              <span className={`text-lg font-black leading-none tabular-nums ${valueClass}`}>{value}</span>
+              <ShieldIcon className="h-5 w-5 shrink-0" />
+              <span className={`${value} text-white`}>{stats.level}</span>
             </span>
-            <span className="mt-1 font-display text-sm font-semibold uppercase leading-none text-stone-text">
-              {label}
+            <span className={label}>Level</span>
+          </div>
+        </li>
+        <li className="min-w-0">
+          {/* XP toward the next level: "340 / 600" and a small segmented bar. */}
+          <div
+            className={`${cell} h-full`}
+            role="group"
+            aria-label={`${stats.xp} XP; ${xp.to - stats.xp} more to reach level ${xp.level + 1}`}
+          >
+            <span className="flex items-center gap-1">
+              <StarIcon className="h-5 w-5 shrink-0" />
+              <span className="font-black leading-none tabular-nums text-white">
+                <span className="text-base sm:text-lg">{stats.xp}</span>
+                <span className="text-xs text-stone-text sm:text-sm">/{xp.to}</span>
+              </span>
             </span>
-          </>
-        );
-        return (
-          <li key={label} className="min-w-0">
-            {label === "Gold" ? (
-              // Gold opens the shop; the badge says how much he can buy.
-              <Link
-                href="/player/store"
-                aria-label={`${value} gold${withinReach ? `, ${withinReach} reward${withinReach === 1 ? "" : "s"} within reach` : ""}. Open the item shop`}
-                className={`${cell} relative h-full border-[#8a5a00] transition-[filter] hover:brightness-125 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-gold motion-reduce:transition-none`}
-              >
-                {content}
-                {withinReach > 0 && (
-                  // A small tab on the cell's top-right corner (the stats row
-                  // has room above it, so it clears the HP bars).
-                  <span className="absolute -top-2.5 right-1 whitespace-nowrap rounded-t-[3px] rounded-bl-[3px] border-2 border-[#8a5a00] bg-gold px-1 text-[10px] font-black leading-3 text-ink shadow-[1px_1px_0_rgb(0_0_0/0.4)]">
-                    {withinReach} within reach
-                  </span>
-                )}
-              </Link>
-            ) : (
-              <div className={`${cell} h-full`}>{content}</div>
+            <span aria-hidden className="mt-1 flex h-2 w-full max-w-24 gap-px rounded-[2px] border border-stone-edge bg-black/40 p-px">
+              {Array.from({ length: 5 }, (_, i) => (
+                <span key={i} className="relative flex-1 overflow-hidden rounded-[1px] bg-white/[0.07]">
+                  <span
+                    className="absolute inset-y-0 left-0 bg-gold"
+                    style={{ width: `${Math.max(0, Math.min(1, xp.fraction * 5 - i)) * 100}%` }}
+                  />
+                </span>
+              ))}
+            </span>
+            <span className={label}>XP</span>
+          </div>
+        </li>
+        <li className="min-w-0">
+          {/* Gold opens the shop; the tab says how much he can buy. */}
+          <Link
+            href="/player/store"
+            aria-label={`${stats.gold} gold${withinReach ? `, ${withinReach} reward${withinReach === 1 ? "" : "s"} within reach` : ""}. Open the item shop`}
+            className={`${cell} relative h-full border-[#8a5a00] transition-[filter] hover:brightness-125 focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-gold motion-reduce:transition-none`}
+          >
+            <span className="flex items-center gap-1">
+              <CoinIcon className="h-5 w-5 shrink-0" />
+              <span className={`${value} text-gold`}>{stats.gold}</span>
+            </span>
+            <span className={label}>Gold</span>
+            {withinReach > 0 && (
+              // A small tab on the cell's top-right corner (the stats row
+              // has room above it, so it clears the HP bars).
+              <span className="absolute -top-2.5 right-1 whitespace-nowrap rounded-t-[3px] rounded-bl-[3px] border-2 border-[#8a5a00] bg-gold px-1 text-[10px] font-black leading-3 text-ink shadow-[1px_1px_0_rgb(0_0_0/0.4)]">
+                {withinReach} within reach
+              </span>
             )}
-          </li>
-        );
-      })}
-    </ul>
+          </Link>
+        </li>
+        <li className="min-w-0">
+          <div
+            className={`${cell} h-full ${nudge ? "streak-nudge border-gold-deep" : ""}`}
+            aria-label={`${stats.streak}-day streak (best ${stats.bestStreak})`}
+            role="group"
+          >
+            <span className="flex items-center gap-1">
+              <FlameIcon className="h-5 w-5 shrink-0" />
+              <span className={`${value} text-white`}>{stats.streak}</span>
+            </span>
+            <span className={label}>Streak</span>
+          </div>
+        </li>
+      </ul>
+      {nudge && (
+        // A gentle nudge under the row, pointing at the streak cell.
+        <p className="mt-1.5 flex items-center justify-end gap-1.5 text-right text-sm font-bold text-gold text-shadow-pixel">
+          <FlameIcon className="h-4 w-4 shrink-0" />
+          Keep your {stats.streak}-day streak: {questsLeftToday} quest{questsLeftToday === 1 ? "" : "s"} left today
+        </p>
+      )}
+    </div>
   );
 }

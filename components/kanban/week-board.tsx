@@ -114,6 +114,17 @@ export function WeekBoard({
   const days = useMemo(() => weekDays(week), [week]);
   // Past days of a week that includes today (none for past or future weeks).
   const earlierDays = days.includes(today) ? days.filter((d) => d < today) : [];
+
+  // Tell the HUD how many of today's quests are still to do (the streak
+  // nudge) — only while this board is showing the current week.
+  const battle = useOptionalBattleContext();
+  const setQuestsLeftToday = battle?.setQuestsLeftToday;
+  const leftToday = days.includes(today)
+    ? board.slots.filter((s) => s.scheduled_date === today && s.status === "scheduled").length
+    : null;
+  useEffect(() => {
+    if (leftToday !== null) setQuestsLeftToday?.(leftToday);
+  }, [leftToday, setQuestsLeftToday]);
   // Fixed notices per day: recurring events expanded like the calendar does.
   const noticesByDay = useMemo(
     () => occurrencesByDay(calendar.events, days[0], days[6], timeZone, today),
@@ -154,6 +165,7 @@ export function WeekBoard({
       sort_order: 0,
       status: "scheduled",
       applied_to_boss: false,
+      xp_awarded: false,
       completed_at: null,
       // Sorts after existing slots; replaced by the real row moments later.
       created_at: "9999-12-31T00:00:00Z",
@@ -724,8 +736,9 @@ function SlotCardView({
 }) {
   const done = slot.status === "completed";
   const missed = slot.status === "missed";
-  // Completing a slot strikes the boss instantly and locks it (no un-tick).
-  const locked = slot.applied_to_boss;
+  // Completing a slot strikes the boss and/or awards XP instantly, and
+  // either locks it (no un-tick) — even with no boss to hit.
+  const locked = slot.applied_to_boss || slot.xp_awarded;
   const color = poolColor(pool.color);
   const overlayActive = useOptionalBattleContext()?.overlayActive ?? false;
 
