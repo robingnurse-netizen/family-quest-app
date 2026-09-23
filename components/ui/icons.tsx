@@ -204,3 +204,86 @@ const SKULL: PixelArt = {
 };
 /** Boss */
 export const SkullIcon = (p: IconProps) => <PixelIcon art={SKULL} {...p} />;
+
+const HOURGLASS: PixelArt = {
+  colors: { o: "#3b2412", w: "#b89458", g: "#f1e2c0", s: "#f59f00" },
+  rows: [
+    "ooooooooo",
+    ".owwwwwo.",
+    ".og...go.",
+    ".ogsssgo.",
+    "..ogsgo..",
+    "...oso...",
+    "..og.go..",
+    ".og.s.go.",
+    ".ogsssgo.",
+    ".owwwwwo.",
+    "ooooooooo",
+  ],
+};
+/** Time left on a quest */
+export const HourglassIcon = (p: IconProps) => <PixelIcon art={HOURGLASS} {...p} />;
+
+const PADLOCK: PixelArt = {
+  colors: { o: "#12141f", s: "#a9b0c8", f: "#fcc419", d: "#f59f00", k: "#3b2412" },
+  rows: [
+    "...ooooo...",
+    "..os...so..",
+    ".os.....so.",
+    ".os.....so.",
+    "ooooooooooo",
+    "offfkkkfffo",
+    "offfkkkfffo",
+    "offffkffffo",
+    "offffkffffo",
+    "odddddddddo",
+    "ooooooooooo",
+  ],
+};
+/** Fixed, can't be moved */
+export const PadlockIcon = (p: IconProps) => <PixelIcon art={PADLOCK} {...p} />;
+
+const CLOCK: PixelArt = {
+  colors: { o: "#12141f", f: "#f1f3f5", h: "#12141f" },
+  rows: [
+    "...ooooo...",
+    "..offfffo..",
+    ".offfhfffo.",
+    "offffhffffo",
+    "offffhffffo",
+    "offffhhhffo",
+    "offfffffffo",
+    "offfffffffo",
+    ".offfffffo.",
+    "..offfffo..",
+    "...ooooo...",
+  ],
+};
+/** Event time */
+export const ClockIcon = (p: IconProps) => <PixelIcon art={CLOCK} {...p} />;
+
+const PIN: PixelArt = {
+  colors: { o: "#4a0808", r: "#e03131", h: "#ffc9c9", s: "#a51d1d", m: "#adb5bd", k: "#495057" },
+  rows: [".ooo.", "ohrro", "orrso", "ossso", ".ooo.", "..m..", "..k.."],
+};
+/** A pushpin holding a note to the board */
+export const PinIcon = (p: IconProps) => <PixelIcon art={PIN} {...p} />;
+
+const SCROLL: PixelArt = {
+  colors: { o: "#3b2412", p: "#f1e2c0", d: "#d9c9a3", l: "#b89458" },
+  rows: [
+    ".oooooooooo.",
+    "oppppppppppo",
+    "odoooooooodo",
+    ".opppppppo..",
+    ".oplllllpo..",
+    ".opppppppo..",
+    ".oplllllpo..",
+    ".opppppppo..",
+    "odoooooooodo",
+    "oppppppppppo",
+    ".oooooooooo.",
+  ],
+};
+/** An empty quest slot */
+export const ScrollIcon = (p: IconProps) => <PixelIcon art={SCROLL} {...p} />;

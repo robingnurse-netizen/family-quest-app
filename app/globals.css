@@ -451,3 +451,132 @@ body {
 /* Reduced motion: the overlay swaps to this card (no dash, shake or flying). */
 .reduced-card { animation: overlay-fade-in 200ms ease-out both; }
 .reduced-card-out { animation: overlay-fade-out 400ms ease-in forwards; }
+
+/* ---------------------------------------------------------------------------
+   Quest board (components/kanban/week-board.tsx): cork inside a wooden
+   frame, parchment notes, day slots. CSS only.
+   ------------------------------------------------------------------------- */
+.quest-cork {
+  background-color: #a8743f;
+  background-image:
+    radial-gradient(circle at 20% 30%, #8c5a2b 0 1px, transparent 1.6px),
+    radial-gradient(circle at 70% 60%, #c28a52 0 1px, transparent 1.6px),
+    radial-gradient(circle at 45% 85%, #7a4b22 0 1.2px, transparent 1.8px);
+  background-size: 7px 7px, 9px 9px, 13px 13px;
+  box-shadow: inset 3px 3px 0 rgb(0 0 0 / 0.35), inset -2px -2px 0 rgb(255 255 255 / 0.12);
+}
+/* Carved sign: a darker wood plaque, cut into (dark top-left edge). */
+.carved-sign {
+  background: var(--color-wood-shade);
+  border: 3px solid var(--color-wood-edge);
+  box-shadow: inset 2px 2px 0 rgb(0 0 0 / 0.45), inset -2px -2px 0 var(--color-wood-hi);
+}
+/* Small wooden plaques for labels on the cork (7.96:1 parchment text). */
+.plaque {
+  background: var(--color-wood-shade);
+  border: 2px solid var(--color-wood-edge);
+  border-radius: 3px;
+  box-shadow: inset 1px 1px 0 var(--color-wood-hi), 2px 2px 0 rgb(0 0 0 / 0.3);
+}
+
+/* A day's slot on the board: a dark recess in the cork. */
+.day-slot {
+  background: rgb(42 26 12 / 0.82);
+  border: 2px solid var(--color-wood-edge);
+  box-shadow: inset 2px 2px 0 rgb(0 0 0 / 0.45);
+}
+/* Today: a lantern's warm glow, gently flickering. */
+.day-today {
+  border-color: #fcc419;
+  background-image: radial-gradient(ellipse at 50% 0%, rgb(252 196 25 / 0.28), transparent 70%);
+}
+.day-today::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 5px;
+  box-shadow: 0 0 18px 4px rgb(252 196 25 / 0.45);
+  pointer-events: none;
+  animation: lantern 2.8s ease-in-out infinite;
+}
+@keyframes lantern {
+  0%, 100% { opacity: 0.8; }
+  40% { opacity: 1; }
+  55% { opacity: 0.7; }
+}
+.day-past { filter: saturate(0.6) brightness(0.85); }
+
+/* Drop targets: all glow while dragging; the one under the card glows more. */
+.drop-ready {
+  outline: 2px dashed rgb(252 196 25 / 0.7);
+  outline-offset: 1px;
+  background-color: rgb(252 196 25 / 0.08);
+}
+.drop-over {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 1px;
+  background-color: rgb(252 196 25 / 0.2);
+  box-shadow: 0 0 14px 2px rgb(252 196 25 / 0.5);
+}
+
+/* A note pulled off the board: straight, lifted, bigger shadow. */
+.note-lifted {
+  scale: 1.06;
+  box-shadow: 6px 10px 0 rgb(0 0 0 / 0.35);
+}
+/* The quest's colour as a ribbon tab hanging from the note's top edge. */
+.quest-ribbon {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%);
+  box-shadow: inset 1px 0 0 rgb(255 255 255 / 0.3);
+}
+/* Missed: faded, with a torn bottom edge. */
+.quest-missed {
+  opacity: 0.8;
+  clip-path: polygon(0 0, 100% 0, 100% 88%, 92% 100%, 84% 90%, 74% 100%, 62% 91%, 50% 100%, 38% 90%, 26% 100%, 14% 91%, 6% 100%, 0 90%);
+}
+
+/* Ink stamps on placed quests: rotated, bordered, pressed on at the end of
+   the status row. */
+.ink-stamp {
+  display: inline-block;
+  margin-left: auto;
+  rotate: -10deg;
+  padding: 0 0.3rem;
+  border: 2px solid currentColor;
+  border-radius: 3px;
+  font-family: var(--font-pixelify), ui-monospace, monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.15;
+  text-transform: uppercase;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+}
+.ink-stamp-hit { color: #a61e1e; }    /* 6.5:1 on the done tint */
+.ink-stamp-missed { color: #495057; } /* 5.0:1 on faded parchment */
+
+@media (prefers-reduced-motion: reduce) {
+  .day-today::before { animation: none; }
+}
+
+/* The Quest Log page's calendar: an unrolled parchment scroll with wooden
+   rollers top and bottom (calendar theme.ts, player variant). */
+.scroll-sheet {
+  position: relative;
+  margin-block: 14px;
+  background: var(--color-parchment);
+  border-inline: 3px solid var(--color-parchment-edge);
+  box-shadow: inset 0 10px 12px -8px rgb(59 36 18 / 0.35), inset 0 -10px 12px -8px rgb(59 36 18 / 0.35);
+}
+.scroll-sheet::before,
+.scroll-sheet::after {
+  content: "";
+  position: absolute;
+  inset-inline: -10px;
+  height: 16px;
+  border: 3px solid var(--color-wood-edge);
+  border-radius: 8px;
+  background: linear-gradient(to bottom, var(--color-wood-hi), var(--color-wood) 55%, var(--color-wood-shade));
+}
+.scroll-sheet::before { top: -14px; }
+.scroll-sheet::after { bottom: -14px; }

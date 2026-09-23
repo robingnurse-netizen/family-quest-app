@@ -77,26 +77,25 @@ export const calendarThemes: Record<CalendarVariant, CalendarTheme> = {
     toggleOn: "bg-indigo-600 text-white hover:bg-indigo-500",
     toggleOff: "bg-slate-100 text-slate-600 hover:bg-slate-200",
   },
-  // Player: a wood-framed notice board with parchment day cells.
+  // Player (the Quest Log page): an unrolled parchment scroll.
   player: {
-    shell: "panel panel-wood p-3 sm:p-5",
+    shell: "scroll-sheet px-3 pb-5 pt-5 text-ink sm:px-5",
     // One line next to the nav buttons on a phone.
-    title: "font-display text-lg font-semibold text-gold text-shadow-pixel sm:text-xl",
+    title: "font-display text-lg font-semibold text-ink sm:text-xl",
     navButton: "btn-pixel btn-stone btn-sm min-w-9",
-    weekday: "font-display text-sm font-semibold text-parchment",
-    // gap-px lines show the dark edge colour between parchment cells.
-    grid: "rounded-[3px] border-2 border-wood-edge bg-wood-edge",
+    weekday: "bg-parchment-dark font-display text-sm font-semibold text-ink",
+    // gap-px lines show the scroll's inked rules between the cells.
+    grid: "rounded-[2px] border-2 border-parchment-edge bg-parchment-edge",
     dayShape: "rounded-[3px] text-sm font-black tabular-nums",
-    cell: "bg-parchment text-ink",
-    cellOutside: "bg-parchment-dark/60 text-ink-soft",
+    cell: "bg-[#f7ecd3] text-ink",
+    cellOutside: "bg-parchment-dark/70 text-ink-soft",
     cellHover: "",
     dayNumber: "text-ink",
-    today: "bg-gold text-ink ring-2 ring-ink",
+    today: "bg-danger text-white ring-2 ring-ink",
     chip: "bg-stone text-white hover:bg-stone-hi",
     chipAllDay: "bg-gold text-ink hover:brightness-105",
     chipTime: "text-gold",
-    // Seven columns on a phone only fit ~12px chips; revisited in a later
-    // stage's layout pass.
+    // Seven columns on a phone only fit ~12px chips.
     chipShape: "rounded-[2px] text-xs font-bold sm:text-sm",
     chipText: "text-xs font-bold sm:text-sm",
     more: "text-ink-soft hover:text-ink",

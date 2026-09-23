@@ -3,7 +3,7 @@ import { requireRole } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/layout/sign-out-button";
 import { loadCalendar } from "@/lib/calendar/queries";
-import { MonthCalendar } from "@/components/calendar/month-calendar";
+import { monthKeyOf } from "@/lib/calendar/dates";
 import { loadWeekBoard } from "@/lib/backlog/queries";
 import { WeekBoard } from "@/components/kanban/week-board";
 import { createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
@@ -19,16 +19,19 @@ import { GameHeading } from "@/components/ui/game-heading";
 export default async function PlayerDashboard(props: PageProps<"/player">) {
   const profile = await requireRole("child");
   const supabase = await createClient();
-  const { month, week } = await props.searchParams;
+  const { week } = await props.searchParams;
 
-  const [{ data: stats }, calendar, board, battle] = await Promise.all([
+  const [{ data: stats }, [board, calendar], battle] = await Promise.all([
     supabase
       .from("player_stats")
       .select("gold, xp, level, current_streak")
       .eq("child_id", profile.id)
       .maybeSingle(),
-    loadCalendar(profile.family_id, month),
-    loadWeekBoard(profile, week),
+    // The board's day notices come from the calendar for its week's month
+    // (that month's grid always covers the whole week).
+    loadWeekBoard(profile, week).then(
+      async (b) => [b, await loadCalendar(profile.family_id, monthKeyOf(b.week))] as const,
+    ),
     loadBattle(profile.family_id),
   ]);
 
@@ -81,24 +84,10 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
             today={board.today}
             initialPools={board.pools}
             initialSlots={board.slots}
+            timeZone={calendar.timeZone}
+            initialEvents={calendar.events}
             actions={{ createSlot, moveSlot, removeSlot, setSlotStatus }}
           />
-
-          <section>
-            <GameHeading size="sm" className="mb-2 uppercase tracking-wide">
-              Quest log
-            </GameHeading>
-            {/* Read-only: no `actions`, so no edit controls. */}
-            <MonthCalendar
-              variant="player"
-              familyId={calendar.familyId}
-              timeZone={calendar.timeZone}
-              initialMonth={calendar.month}
-              today={calendar.today}
-              initialEvents={calendar.events}
-              members={calendar.members}
-            />
-          </section>
         </div>
       </BattleProvider>
     </main>

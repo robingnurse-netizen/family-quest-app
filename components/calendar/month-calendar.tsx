@@ -4,7 +4,6 @@ import { useCallback, useMemo, useState } from "react";
 import type { CalendarEvent } from "@/lib/supabase/types";
 import type { CalendarActions, CalendarMember } from "@/lib/calendar/types";
 import {
-  addDays,
   addMonths,
   eventDaySpan,
   formatDayLabel,
@@ -14,7 +13,8 @@ import {
   parseDayKey,
   timeOf,
 } from "@/lib/calendar/dates";
-import { expandOccurrences, type CalendarOccurrence } from "@/lib/calendar/recurrence";
+import type { CalendarOccurrence } from "@/lib/calendar/recurrence";
+import { occurrencesByDay } from "@/lib/calendar/by-day";
 import { useCalendarEvents } from "@/lib/hooks/use-calendar-events";
 import { ChevronLeft, ChevronRight } from "@/components/ui/icons";
 import { EventDialog, type DialogState } from "./event-dialog";
@@ -66,33 +66,10 @@ export function MonthCalendar({
 
   // Expand recurring series, then bucket each occurrence onto every day it
   // covers within the visible grid.
-  const byDay = useMemo(() => {
-    const map = new Map<string, CalendarOccurrence[]>();
-    const gridFirst = grid[0];
-    const gridLast = grid[grid.length - 1];
-    for (const event of events) {
-      for (const occ of expandOccurrences(event, gridFirst, gridLast, timeZone, today)) {
-        const span = eventDaySpan(occ, timeZone);
-        let day = span.first < gridFirst ? gridFirst : span.first;
-        const last = span.last > gridLast ? gridLast : span.last;
-        while (day <= last) {
-          const list = map.get(day);
-          if (list) list.push(occ);
-          else map.set(day, [occ]);
-          day = addDays(day, 1);
-        }
-      }
-    }
-    for (const list of map.values()) {
-      list.sort(
-        (a, b) =>
-          Number(b.all_day) - Number(a.all_day) ||
-          Date.parse(a.start_time) - Date.parse(b.start_time) ||
-          a.title.localeCompare(b.title),
-      );
-    }
-    return map;
-  }, [events, grid, timeZone, today]);
+  const byDay = useMemo(
+    () => occurrencesByDay(events, grid[0], grid[grid.length - 1], timeZone, today),
+    [events, grid, timeZone, today],
+  );
 
   const seriesById = useMemo(() => new Map(events.map((e) => [e.id, e])), [events]);
 

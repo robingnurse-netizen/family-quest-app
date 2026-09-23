@@ -10,6 +10,8 @@ export function WeekNav({
   onChange,
   titleClassName,
   buttonClassName,
+  title,
+  extra,
 }: {
   week: string;
   today: string;
@@ -17,32 +19,39 @@ export function WeekNav({
   titleClassName: string;
   /** The nav buttons' full styling (each board has its own look). */
   buttonClassName: string;
+  /** Replaces the plain week label (e.g. a carved sign); keep the week in it. */
+  title?: React.ReactNode;
+  /** More controls after the week buttons (e.g. a link to the month). */
+  extra?: React.ReactNode;
 }) {
   const button = buttonClassName;
   return (
     <div className="flex flex-wrap items-center justify-between gap-2">
-      <h2 className={titleClassName}>{formatWeekLabel(week)}</h2>
-      <nav className="flex items-center gap-1" aria-label="Change week">
-        <button
-          type="button"
-          onClick={() => onChange(addDays(week, -7))}
-          className={button}
-          aria-label="Previous week"
-        >
-          <ChevronLeft />
-        </button>
-        <button type="button" onClick={() => onChange(weekStartOf(today))} className={button}>
-          Today
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange(addDays(week, 7))}
-          className={button}
-          aria-label="Next week"
-        >
-          <ChevronRight />
-        </button>
-      </nav>
+      <h2 className={titleClassName}>{title ?? formatWeekLabel(week)}</h2>
+      <div className="flex flex-wrap items-center gap-2">
+        <nav className="flex items-center gap-1" aria-label="Change week">
+          <button
+            type="button"
+            onClick={() => onChange(addDays(week, -7))}
+            className={button}
+            aria-label="Previous week"
+          >
+            <ChevronLeft />
+          </button>
+          <button type="button" onClick={() => onChange(weekStartOf(today))} className={button}>
+            Today
+          </button>
+          <button
+            type="button"
+            onClick={() => onChange(addDays(week, 7))}
+            className={button}
+            aria-label="Next week"
+          >
+            <ChevronRight />
+          </button>
+        </nav>
+        {extra}
+      </div>
     </div>
   );
 }

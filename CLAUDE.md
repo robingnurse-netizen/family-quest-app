@@ -200,6 +200,48 @@ PROJECT STATUS:
     listen(fn).
   * No pinned/sticky strip: removed along with its pin logic; the scene
     stays in normal flow (see the FUTURE note under Phase B2).
+- Visual overhaul Stage 3 — Quest board (player): COMPLETE. Presentation only: drag-and-drop, slot rules and the
+  damage engine are unchanged.
+  * components/kanban/week-board.tsx: wooden frame around a CSS cork board;
+    carved "Quest Board" sign + week range, stone week nav, "See whole
+    month" → /player/quest-log?month=. Weekly quests are pinned parchment
+    notes (±1.5° tilt from the id, pool colour as a corner ribbon, hourglass
+    + time left); picked up, a note straightens and lifts.
+  * Each day, top to bottom: plaque (weekday + date; today = red wax seal
+    — 40px, embossed inner ring, 14px date ≤ ~55% of its width; every
+    day's date sits in the same 40px box so plaques stay level — with a
+    flickering lantern glow; past days dimmed) → FIXED notices (that
+    day's calendar_events, padlock, read-only, only if any) → "+ Quests"
+    divider → the drop zone and placed quests (tick box; ink stamps HIT! /
+    MISSED; missed cards faded with a torn edge). All drop zones glow while
+    dragging. Phone: days stack; a day with nothing on it collapses to one
+    line and still takes (press-and-hold) drops.
+  * Notices reuse useCalendarEvents (its month grid always covers the week)
+    and lib/calendar/by-day.ts occurrencesByDay (recurrence expansion shared
+    with MonthCalendar), so repeats and Realtime match the calendar.
+  * The month calendar moved off the dashboard to /player/quest-log (player
+    theme = an unrolled parchment scroll, .scroll-sheet). Parent calendar
+    unchanged.
+  * Quest colours (lib/backlog/colors.ts) are stored hex values; nowhere
+    puts text on them any more (Parent HQ only uses them for a dot, the
+    progress bars and the picker), so the palette itself is unchanged.
+  * No automated tests exist in the repo (no recurrence tests, no PGlite);
+    Stage 3 was checked in headless Chromium against the live data.
+
+PARKED — future items, NOT to be built until asked:
+- FUTURE — Evergreen play:
+  * Right now the game ends once every boss is defeated ("All quiet — no
+    boss to fight"). The app needs to keep going indefinitely.
+  * Options to evaluate later: looping the roster in "Acts" with scaling
+    HP/gold and recoloured variants; new bosses from a future art pass.
+  * Seasonal events: e.g. seasonal accessories on existing bosses (Magma
+    Behemoth in a Santa hat) placed via the manifest anchor points, or
+    seasonal bosses tied to calendar dates.
+- FUTURE — Test suite: rebuild the earlier one-off PGlite integrity checks
+  (pools, slot guard, boss engine, instant damage, rewards) as a permanent
+  test suite in the repo before production use. The original one-off
+  scripts aren't in the repo (no test files or test tooling exist today),
+  so this starts from the migrations.
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at
