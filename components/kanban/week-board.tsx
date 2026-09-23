@@ -301,7 +301,7 @@ function PoolTray({
         isOver ? "border-amber-300 bg-amber-300/10" : draggingSlot ? "border-white/40" : "border-transparent bg-black/10"
       }`}
     >
-      <div className="mb-2 flex items-baseline justify-between gap-2">
+      <div className="mb-2 flex items-center justify-between gap-2">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-amber-300">Weekly Pool</h3>
         <p className="text-xs text-indigo-300">
           {draggingSlot ? "Drop here to put the minutes back" : "Drag a card onto a day"}
@@ -354,14 +354,14 @@ function PoolCard({
   const { remaining } = poolTotals(pool, slots);
   return (
     <div
-      className={`rounded-xl p-3 text-white shadow ${overlay ? "rotate-2 scale-105 shadow-2xl" : ""}`}
+      className={`rounded-xl px-4 py-3 text-white shadow ${overlay ? "rotate-2 scale-105 shadow-2xl" : ""}`}
       style={{ backgroundColor: poolColor(pool.color) }}
     >
       <p className="truncate font-black">{pool.title}</p>
       {pool.category && <p className="truncate text-xs opacity-85">{pool.category}</p>}
       <p className="mt-2 text-sm font-bold">
         {remaining === 0 ? (
-          <span className="inline-flex items-center gap-1">
+          <span className="inline-flex items-center gap-1.5">
             <CheckIcon className="h-3.5 w-3.5" /> All scheduled
           </span>
         ) : (

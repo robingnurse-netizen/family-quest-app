@@ -11,6 +11,7 @@ import { loadBattle } from "@/lib/rpg/queries";
 import { BossStatus } from "@/components/rpg/boss/boss-status";
 import { BossHud } from "@/components/rpg/boss/boss-hud";
 import { HeroParty } from "@/components/rpg/hero/hero-party";
+import { ArrowRight } from "@/components/ui/icons";
 
 export default async function PlayerDashboard(props: PageProps<"/player">) {
   const profile = await requireRole("child");
@@ -37,50 +38,44 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
 
   return (
     <main className="flex-1 bg-gradient-to-b from-indigo-950 via-purple-900 to-indigo-950 px-4 pb-40 pt-8 text-white">
-      <div className="mx-auto w-full max-w-3xl">
-        <header className="mb-8 flex items-center justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-amber-300">
-              Hero
-            </p>
-            <h1 className="text-3xl font-black">
-              Welcome back, {profile.display_name}!
-            </h1>
-          </div>
+      {/* One spacing scale: gap-6 between sections, space-y-3 within a group. */}
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+        <header className="flex items-center justify-between gap-4">
+          <h1 className="text-3xl font-black">
+            Welcome back, {profile.display_name}!
+          </h1>
           <SignOutButton className="bg-white/10 text-white hover:bg-white/20" />
         </header>
 
-        <div className="mb-4">
+        <div className="space-y-3">
           <HeroParty heroName={profile.display_name} />
-        </div>
 
-        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {tiles.map((t) => (
-            <div key={t.label} className="rounded-2xl bg-white/10 p-4 text-center">
-              <p className="text-xs font-semibold uppercase tracking-wide text-indigo-200">
-                {t.label}
-              </p>
-              <p className="text-3xl font-black text-amber-300">{t.value}</p>
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {tiles.map((t) => (
+              <div key={t.label} className="rounded-2xl bg-white/10 p-4 text-center">
+                <p className="text-xs font-semibold uppercase tracking-wide text-indigo-200">
+                  {t.label}
+                </p>
+                <p className="text-3xl font-black text-amber-300">{t.value}</p>
+              </div>
+            ))}
+          </section>
+
+          <Link
+            href="/player/store"
+            className="flex items-center justify-between gap-3 rounded-2xl border border-amber-300/40 bg-amber-400/10 p-4 transition hover:bg-amber-400/20"
+          >
+            <div>
+              <h2 className="font-black text-amber-300">Rewards store</h2>
+              <p className="text-sm text-indigo-200">Spend your gold on real-life rewards.</p>
             </div>
-          ))}
-        </section>
-
-        <Link
-          href="/player/store"
-          className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-amber-300/40 bg-amber-400/10 p-4 transition hover:bg-amber-400/20"
-        >
-          <div>
-            <h2 className="font-black text-amber-300">Rewards store</h2>
-            <p className="text-sm text-indigo-200">Spend your gold on real-life rewards.</p>
-          </div>
-          <span aria-hidden className="text-2xl text-amber-300">
-            →
-          </span>
-        </Link>
+            <ArrowRight className="h-6 w-6 shrink-0 text-amber-300" />
+          </Link>
+        </div>
 
         {/* Pins to the bottom of the screen once scrolled away, so the
             boss's reactions stay in view while Reuben ticks off quests. */}
-        <BossHud className="mt-8">
+        <BossHud>
           <BossStatus
             variant="player"
             familyId={battle.familyId}
@@ -89,20 +84,18 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
           />
         </BossHud>
 
-        <div className="mt-8">
-          <WeekBoard
-            familyId={board.familyId}
-            childId={profile.id}
-            initialWeek={board.week}
-            today={board.today}
-            initialPools={board.pools}
-            initialSlots={board.slots}
-            actions={{ createSlot, moveSlot, removeSlot, setSlotStatus }}
-          />
-        </div>
+        <WeekBoard
+          familyId={board.familyId}
+          childId={profile.id}
+          initialWeek={board.week}
+          today={board.today}
+          initialPools={board.pools}
+          initialSlots={board.slots}
+          actions={{ createSlot, moveSlot, removeSlot, setSlotStatus }}
+        />
 
-        <div className="mt-8">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-amber-300">
+        <section>
+          <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-amber-300">
             Quest log
           </h2>
           {/* Read-only: no `actions`, so no edit controls. */}
@@ -115,11 +108,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
             initialEvents={calendar.events}
             members={calendar.members}
           />
-        </div>
-
-        <p className="mt-8 rounded-2xl border border-dashed border-white/30 p-6 text-center text-indigo-200">
-          Boss artwork, battles and your companion are on their way.
-        </p>
+        </section>
       </div>
     </main>
   );
