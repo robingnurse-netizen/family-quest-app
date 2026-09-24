@@ -513,7 +513,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-healing, recap, evening, sun-times (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-healing, recap, evening, sun-times, meadow-key (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
@@ -706,8 +706,11 @@ PARKED — future items, NOT to be built until asked:
     -dusk in globals.css; stackedOpacities() makes each show by its
     weight), stars (faded), the two cloud layers (their art's three tones
     are CSS masks coloured by --cloud-<layer>-<tone>), the meadow
-    (public/backgrounds/meadow-day.png, #a3cddb keyed out at render time
-    by one canvas pass per page → blob URL; a CSS mask can't colour-key),
+    (public/backgrounds/meadow-day.png: its #a3cddb sky already
+    transparent in the file — scripts/key-meadow-sky.mjs cuts it out of
+    assets/bg-meadow-day-final.png once; it used to be a canvas pass in the
+    browser on every load, which left sky-only arenas until it finished;
+    preloaded from the page head),
     tinted by a brightness/saturate filter, and the lit windows
     (meadow-night-windows.png). Art covers the arena anchored bottom-centre
     (phone arenas lose the sides, wide ones ~10 art rows of sky); its feet
@@ -723,8 +726,10 @@ PARKED — future items, NOT to be built until asked:
     than the background (SKY_LOOKS.characters: night 0.75 / 0.8), via
     .arena-party img.sprite-pixelated — the hit overlay and the boss aren't. Dev console: __fqBattle.sky("night" | "dawn" | "day" |
     "dusk" | ISO time | null) and __fqBattle.skyCycle(seconds = 60) (a
-    whole day, then back to the clock). public/backgrounds/ files are
-    copies of assets/bg-meadow-day-final.png and
+    whole day, then back to the clock). public/backgrounds/: meadow-day.png
+    is made by node scripts/key-meadow-sky.mjs (re-run after editing
+    assets/bg-meadow-day-final.png; tests/meadow-key.test.mjs checks it),
+    meadow-night-windows.png is a copy of
     assets/bg-meadow-night-windows.png (made by
     scripts/make-night-windows.py) — re-copy after editing the art.
   * lib/sun-times.ts (NOAA equations, no dependency):

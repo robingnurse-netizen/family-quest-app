@@ -174,7 +174,7 @@ body {
     #2e2c66 0 8%, #3a3170 8% 15%, #48377a 15% 21%, #5a3f82 21% 27%,
     #6e4886 27% 33%, #835386 33% 39%, #9a6284 39% 45%, #ae737f 45%);
 }
-/* The meadow (its sky keyed out) and the night's lit windows: 320×128 art
+/* The meadow (its sky transparent in the file) and the night's lit windows: 320×128 art
    covering the arena, anchored bottom-centre, so narrow arenas lose a bit
    of each side and wide ones some plain sky at the top. The art's feet
    line (14px up) lands within 1–2px of --ground at every arena size. */
