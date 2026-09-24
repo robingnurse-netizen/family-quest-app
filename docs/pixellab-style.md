@@ -372,6 +372,38 @@ Tools (rough helpers in scripts/pixellab-helpers/, inputs git-ignored):
   flat, tentacles splayed (7–8, dropped 4 px onto the line). No ink puddle
   or X eyes; a limp splat is the octopus's "broken", so no re-roll.
 
+### Shogun-Bot record
+
+- Character `1a1a4b4d-65c1-4713-befe-5e3976ebb006`; 124×124 v3 canvas,
+  2 generations each: 5 + 1 re-roll (hurt-v2) = 12 generations.
+- Sheet: assets/shogun-bot-pixellab.png (124px cells). Idle 71×86.
+- Attack (first try): "raises its katana high above its head with both
+  hands, then steps forward toward the left and swings the katana down in
+  a big diagonal slash … a bright cyan energy arc trailing the blade":
+  raised 2–3, arc 4, the blade lands in a cyan flash on contact frame 5.
+- Hurt re-rolled: v1 ("knocked backward … staggering one step back")
+  just turned to face the camera. hurt-v2 ("still facing left the whole
+  time, recoils from a blow to the chest: its upper body jerks sharply
+  backward toward the right and it hunches over … bright sparks bursting
+  off its chest armour") hunches (3–4) and bursts sparks (peak 5–6); it
+  ends with one arm still raised, so it snaps back into the idle — minor
+  for a quick flinch, not worth a third roll.
+- Death (first try): the core flashes, sparks burst, it falls face-down
+  with armour pieces scattered (the dropped katana's tip is the lowest
+  pixel, so lying frames lift 2–4 px).
+- "Keep facing left the whole time" is worth adding to any humanoid
+  flinch: "knocked backward" alone rotated him toward the camera.
+
+### Roster pass totals
+
+Six bosses, 57 generations: goblin 5, spider 8, behemoth 12, sphinx 10,
+kraken 10, shogun 12. Four re-rolls (spider attack, spider death,
+behemoth death, shogun hurt) and one end-frame fallback (the spider's
+death, after browser review). Hand fixes after browser review: the
+goblin's sock drips and ear speck (goblin-fixes.cjs), the kraken's loose
+tentacle piece (kraken-fixes.cjs). Every accepted boss in the database
+is now PixelLab art; the four mid bosses (not seeded) remain.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -390,7 +422,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | animated + integrated (roster pass); very dark: check it at night |
 | Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | animated + integrated (roster pass); hovers via the slicer's `ground` |
 | Abyssal Kraken | epic (88) | ab99db9a-f403-4f91-adcd-b6d77b91260b | 77 × 75 | animated + integrated (roster pass); hovers; dark: check it at night |
-| Shogun-Bot | epic (88) | 1a1a4b4d-65c1-4713-befe-5e3976ebb006 | 68 × 85 | navy/gold more than cyan |
+| Shogun-Bot | epic (88) | 1a1a4b4d-65c1-4713-befe-5e3976ebb006 | 68 × 85 | animated + integrated (roster pass); navy/gold more than cyan |
 
 Batch cost: 22 (11 characters) + 12 (6 re-rolls) generations. Tier 1
 allows 8 PixelLab jobs at once, PixelLab's own follow-up jobs included:

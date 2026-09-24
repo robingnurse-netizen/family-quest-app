@@ -299,20 +299,23 @@ const SHEETS = [
     },
   },
   {
-    file: "Gemini_Generated_Image_5nmbb35nmbb35nmb.jpeg",
-    bg: [[86, 92, 100], [52, 54, 62]],
-    tol: 35,
+    // PixelLab epic (124px v3 canvas), rows idle / attack / hurt / death /
+    // move, facing left, built by build-boss-sheet.cjs.
+    file: "shogun-bot-pixellab.png",
+    grid: { cell: 124 },
     characters: {
       shogun_bot: {
-        // Sheet frames 5 and 7 flash the glowing sword, which flickers in a
-        // loop; they're dropped, leaving the 6-frame steady stance.
-        idle: {
-          y0: 226, y1: 500, splits: [0, 359, 708, 1056, 1409, 1759, 2108, 2457, 2816], fps: 4,
-          dropFrames: [5, 7],
-        },
-        move: { y0: 568, y1: 852, splits: [0, 316, 664, 1040, 1391, 1730, 2082, 2422, 2816], fps: 6 },
-        attack: { y0: 908, y1: 1192, splits: [0, 325, 686, 1061, 1425, 1767, 2085, 2411, 2816] },
-        defeated: { y0: 1254, y1: 1528, splits: [0, 345, 655, 1014, 1387, 1767, 2140, 2478, 2816] },
+        idle: { row: 0 },
+        // Katana raised (2–3), slash arc (4), the blade lands in a cyan flash
+        // on contact (frame 5).
+        attack: { row: 1, contact: 5 },
+        // Hunches back (3–4), sparks burst off its chest (peak 5–6); ends
+        // with an arm still raised (the idle takes over).
+        hurt: { row: 2 },
+        // Core flashes, sparks burst, then it falls face-down with armour
+        // pieces scattered (holds frame 8).
+        death: { row: 3 },
+        move: { row: 4 },
       },
     },
   },
@@ -672,7 +675,7 @@ const FACING = {
   magma_behemoth: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   chronosphinx: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   abyssal_kraken: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  shogun_bot: { idle: "right", move: "right", attack: "right", defeated: "right" },
+  shogun_bot: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
 };
 
 const only = new Set(process.argv.slice(2));

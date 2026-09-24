@@ -54,6 +54,10 @@ const BOSSES = {
     rows: [row('idle'), row('attack'), row('hurt'), row('death'), row('move')],
     fix: require('./kraken-fixes.cjs'), // the loose tentacle piece
   },
+  shogun_bot: {
+    file: 'shogun-bot-pixellab.png', cell: 124,
+    rows: [row('idle'), row('attack'), row('hurt', 'hurt-v2'), row('death'), row('move')],
+  },
 };
 
 const key = process.argv[2];

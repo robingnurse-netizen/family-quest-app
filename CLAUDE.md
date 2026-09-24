@@ -201,8 +201,7 @@ PROJECT STATUS:
     thrust, slash, hurt, ko, victory (fps 6 / 16 / 16 / 16 / 12 / 10 / 10).
     The old Gemini hero sheet (Gemini_Generated_Image_4emgkn…png) and its
     frames are deleted (git history keeps them).
-  * Known art limits: Chronosphinx attack frames 3–4 share an overlapping beam;
-    Shogun-Bot idle drops sheet frames 5 and 7 (sword flash). Lying down,
+  * Known art limits: Lying down,
     the hero's legs overlap Rogue on the same ground line; Rogue is drawn
     in front so his paws show (see ROGUE ART) — real depth needs a ground
     with depth.
@@ -213,7 +212,7 @@ PROJECT STATUS:
     "FUTURE — Battle feedback redesign" under Phase B2).
 - RPG Phase B2 — Boss Battle Rendering: COMPLETE (restyled for the player
   in visual overhaul Stage 2, below). Boss sprites react to battle events:
-  damage → hurt once (epic bosses use the first 3 frames of `defeated`);
+  damage → hurt once;
   miss → the boss's attack once (it hits the party; it used to flinch);
   defeated → death once + hold; escaped → move loop sliding off; then the
   next boss enters. State machine in lib/rpg/boss-stage.ts (pure reducer);
@@ -680,6 +679,11 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   grid), hovers (ground 100, only the death lands), contact 6,
   10 generations, no re-rolls; its loose floating tentacle piece is
   removed by kraken-fixes.cjs.
+  Shogun-Bot — DONE: assets/shogun-bot-pixellab.png (124px grid),
+  contact 5, hurt-v2, 12 generations (1 hurt re-roll). All ten roster
+  bosses in the database are now PixelLab art; the Gemini boss sheets in
+  assets/ are no longer sliced (kept as source history). The four mid
+  bosses are still unanimated (not seeded yet).
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via
