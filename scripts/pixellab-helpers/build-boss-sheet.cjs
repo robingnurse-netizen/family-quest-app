@@ -17,7 +17,10 @@
 //     those inside it go;
 //     except debris reaching below frame 0's lowest row (the ground line:
 //     nothing may sink under the grass);
-//   - `keepAll` frames (hand-drawn end frames) are untouched.
+//   - `keepAll` frames (hand-drawn end frames) are untouched;
+//   - `clip` frames lose every pixel below frame 0's ground row (big
+//     splashes / impact effects that the sheet drew sinking into the
+//     ground, which grounding would otherwise answer by lifting the body).
 // A boss's `fix(px, w, h, row, frame)` then applies its own hand fixes
 // (goblin-fixes.cjs).
 const sharp = require('sharp');
@@ -36,6 +39,11 @@ const BOSSES = {
     // death-v3 animates into a hand-drawn end frame (spider-heap.cjs); its
     // v3 canvas grew to 104×96, so it's placed to line up with the rest.
     rows: [row('idle'), row('attack', 'attack-v2'), row('hurt'), row('death', 'death-v3', { off: [-8, -4], keepAll: [8] }), row('move')],
+  },
+  magma_behemoth: {
+    file: 'magma-behemoth-pixellab.png', cell: 116,
+    // The smash's lava burst (5–7) splashes below his feet.
+    rows: [row('idle'), row('attack', 'attack', { clip: [5, 6, 7] }), row('hurt'), row('death', 'death-v2'), row('move')],
   },
 };
 
@@ -69,6 +77,7 @@ if (!cfg) throw new Error(`Unknown boss ${key}; one of ${Object.keys(BOSSES).joi
           removed++; for (const p of c) px[p * 4 + 3] = 0;
         }
       }
+      if (rw.clip?.includes(f)) for (let y = groundY + 1; y < im.h; y++) for (let x = 0; x < im.w; x++) px[(y * im.w + x) * 4 + 3] = 0;
       if (cfg.fix) { const r = cfg.fix(px, im.w, im.h, rw.name, f); if (r.dripped || r.ear) fixed += ` ${f}:${r.dripped}/${r.ear}`; }
       const [ox, oy] = rw.off;
       for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) {

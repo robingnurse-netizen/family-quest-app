@@ -669,6 +669,9 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   Cable Spider — DONE: assets/cable-spider-pixellab.png (88px grid),
   attack-v2 (pounce) contact 4; death-v3 animates into a hand-drawn end
   frame (spider-heap.cjs) so it collapses onto the floor; 8 generations.
+  Magma Behemoth — DONE: assets/magma-behemoth-pixellab.png (116px
+  grid), contact 4, death-v2, 12 generations (1 death re-roll). Epic
+  bosses now have their own hurt / death rows (no `defeated` strip).
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via

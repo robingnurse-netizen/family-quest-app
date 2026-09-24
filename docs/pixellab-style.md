@@ -299,6 +299,29 @@ Tools (rough helpers in scripts/pixellab-helpers/, inputs git-ignored):
   [-8, -4]; the end frame is exempt from speck cleanup (`keepAll`).
 - Unused: attack (v1), death, death-v2 stay in the PixelLab character.
 
+### Magma Behemoth record
+
+- Character `7f1f6a34-a937-4d44-901b-d41c4c98edce`; the 88px character
+  animates in a 116×116 canvas at 2 generations each: 5 + 1 re-roll
+  (death-v2) = 12 generations.
+- Sheet: assets/magma-behemoth-pixellab.png (116px cells). Idle 77×83.
+- Attack (first try): "raises both giant rocky fists high above its head,
+  then lunges forward … smashes both fists down onto the ground … a burst
+  of orange lava sparks and rock chunks". Fists up 1–3, the whole body
+  flashes white-hot on the smash (contact frame 4), lava bursts 5–7 —
+  the burst splashed below his feet, so the builder clips 5–7 at the
+  ground row (`clip`).
+- Hurt: the lava cracks flare bright and he rocks back (peak 3–4).
+- Death re-rolled: v1 ("cracks go dark … drops to its knees, then … crumbles
+  down into a big heap of broken grey boulders") cooled grey nicely but
+  only sank into a crouch with a few pebbles. death-v2 ("topples over and
+  crashes face-down flat onto the ground, and on impact its body shatters
+  apart into many separate loose grey boulders … ends as a low flat
+  scattered pile … nothing left standing") falls and lands as a flat
+  lumpy rock pile with chunks breaking off (it keeps its lava glow;
+  lying frames 4–8 lifted 3–4 px onto the line). No end-frame fallback
+  needed.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -314,7 +337,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | NEW boss: needs a roster migration |
 | Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 | NEW boss; no limbs: hand-guide its animation |
 | Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | NEW boss: needs a roster migration |
-| Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | very dark: check it at night |
+| Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | animated + integrated (roster pass); very dark: check it at night |
 | Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | four-legged, crouched, near front-facing; make it hover in slicing (airborne) |
 | Abyssal Kraken | epic (88) | ab99db9a-f403-4f91-adcd-b6d77b91260b | 77 × 75 | dark: check it at night; hovers |
 | Shogun-Bot | epic (88) | 1a1a4b4d-65c1-4713-befe-5e3976ebb006 | 68 × 85 | navy/gold more than cyan |

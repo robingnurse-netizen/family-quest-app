@@ -235,24 +235,22 @@ const SHEETS = [
     },
   },
   {
-    file: "Gemini_Generated_Image_e4486e4486e4486e.jpeg",
-    bg: [[78, 84, 92], [86, 86, 94]],
-    tol: 40,
+    // PixelLab epic (88px character; the v3 canvas grew to 116): rows idle /
+    // attack / hurt / death / move, facing left, built by build-boss-sheet.cjs.
+    file: "magma-behemoth-pixellab.png",
+    grid: { cell: 116 },
     characters: {
       magma_behemoth: {
-        idle: {
-          y0: 188, y1: 512, splits: [20, 392, 782, 1181, 1585, 2000],
-          exclude: [{ x: 0, y: 186, w: 200, h: 54 }], // "IDLE"
-        },
-        move: {
-          y0: 522, y1: 832, splits: [20, 402, 770, 1170, 1560, 1980, 2300],
-          exclude: [{ x: 0, y: 518, w: 400, h: 58 }], // "MOVE/WALK"
-        },
-        attack: {
-          y0: 842, y1: 1162, splits: [20, 425, 820, 1310, 1625, 2002, 2380, 2800],
-          exclude: [{ x: 0, y: 838, w: 260, h: 56 }], // "ATTACK"
-        },
-        defeated: { y0: 1216, y1: 1522, splits: [40, 462, 890, 1330, 1800, 2270, 2800] },
+        idle: { row: 0 },
+        // Fists up (1–3), smashes the ground in a white-hot flash on contact
+        // (frame 4), lava bursts up (5–7; clipped at the ground line).
+        attack: { row: 1, contact: 4 },
+        // Lava cracks flare, he rocks back (peak 3–4).
+        hurt: { row: 2 },
+        // Rears up, topples face-down and lands as a lumpy rock pile, chunks
+        // breaking off (holds frame 8).
+        death: { row: 3 },
+        move: { row: 4 },
       },
     },
   },
@@ -684,7 +682,7 @@ const FACING = {
   alarm_clock_swarm: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   laundry_goblin: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   cable_spider: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  magma_behemoth: { idle: "right", move: "right", attack: "right", defeated: "right" },
+  magma_behemoth: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   chronosphinx: { idle: "front", move: "right", attack: "right", defeated: "right" },
   abyssal_kraken: { idle: "front", move: "right", attack: "front", defeated: "front" },
   shogun_bot: { idle: "right", move: "right", attack: "right", defeated: "right" },
