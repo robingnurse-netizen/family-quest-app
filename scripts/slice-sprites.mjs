@@ -142,16 +142,35 @@ const SHEETS = [
     },
   },
   {
+    // PixelLab export (the boss art redo pilot; docs/pixellab-style.md):
+    // 84×84 cells (the v3 animations' canvas around a 64px character),
+    // 9 columns, one row per animation, all facing left (south-west, 3/4
+    // view). Frame 0 of every row is the standing pose.
+    file: "trash-bag-slime-pixellab.png",
+    grid: { cell: 84 },
+    characters: {
+      trash_bag_slime: {
+        idle: { row: 0 },
+        // Rears up, then a hopping lunge with its tongue out: frames 4–5 are
+        // off the ground; contact (furthest reach toward the party) is frame 5.
+        // 16 fps: timed to the blow (bossAttackAnimation), it keeps the
+        // wind-up from frame 2 (10 fps would start at 3).
+        attack: { row: 1, airborne: [4, 5], contact: 5, fps: 16 },
+        // Squashes and squints; peak from frame 3 (held to 7), 8 recovers.
+        hurt: { row: 2 },
+        // Deflates onto its side, the knot flopping over; holds frame 8.
+        death: { row: 3 },
+        // A small squash-and-hop (frame 4 just leaves the ground); the escape
+        // slide does the travelling.
+        move: { row: 4, airborne: [4] },
+      },
+    },
+  },
+  {
     file: "Gemini_Generated_Image_8cf69b8cf69b8cf6.jpeg",
     bg: [[241, 241, 241], [128, 128, 128]],
     tol: 22,
     characters: {
-      trash_bag_slime: {
-        idle: { y0: 185, y1: 418, splits: [600, 852, 1052, 1265], fps: 3 },
-        attack: { y0: 185, y1: 418, splits: [1265, 1470, 1757, 2114], fps: 6 },
-        hurt: { y0: 185, y1: 418, splits: [2114, 2437] },
-        death: { y0: 185, y1: 418, splits: [2437, 2800] },
-      },
       alarm_clock_swarm: {
         idle: { y0: 488, y1: 762, splits: [560, 980] },
         move: { y0: 488, y1: 762, splits: [980, 1450] },
@@ -620,7 +639,7 @@ const FACING = {
     idle: "right", bark: "right", hurt: "right", pounce: "right", ko: "right",
     bark_front: "front", idle_front: "front",
   },
-  trash_bag_slime: { idle: "front", attack: "right", hurt: "front", death: "front" },
+  trash_bag_slime: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   alarm_clock_swarm: { idle: "front", move: "front", attack: "right", hurt: "front", death: "front" },
   laundry_goblin: { idle: "right", move: "right", attack: "right", hurt: "right", death: "front" },
   cable_spider: { idle: "front", move: "front", attack: "front", hurt: "front", death: "front" },
@@ -672,6 +691,8 @@ for (const sheetCfg of SHEETS) {
         ...(bodyHeight ? { bodyHeight } : {}),
         // Frames exempt from grounding (jumps, hovering…): tests/grounding.
         ...(anim.airborne?.length ? { airborne: anim.airborne } : {}),
+        // An attack's contact frame: the game times the blow to it.
+        ...(anim.contact !== undefined ? { contact: anim.contact } : {}),
         ...PLAYBACK[animName],
         ...(anim.fps ? { fps: anim.fps } : {}),
         ...(anim.loop !== undefined ? { loop: anim.loop } : {}),

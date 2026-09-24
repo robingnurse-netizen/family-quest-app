@@ -199,7 +199,7 @@ PROJECT STATUS:
     The old Gemini hero sheet (Gemini_Generated_Image_4emgkn…png) and its
     frames are deleted (git history keeps them).
   * Known art limits: single-frame animations (Cable Spider all; Alarm
-    Clock Swarm idle/move/hurt/death; Slime hurt/death; Goblin death) are
+    Clock Swarm idle/move/hurt/death; Goblin death) are
     static; Chronosphinx attack frames 3–4 share an overlapping beam;
     Shogun-Bot idle drops sheet frames 5 and 7 (sword flash). Lying down,
     the hero's legs overlap Rogue on the same ground line; Rogue is drawn
@@ -645,6 +645,21 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   reduce_colors 0.1; pixelart_workbench, create_talking_gif, get_lip_sync
   free. Check get_balance and confirm cost with the user before any paid
   generation.
+- Boss art redo: docs/pixellab-style.md is the style reference — exact
+  settings, sizes per tier (canvas 64 / 76 / 88 for ~59 / 72 / 84 px tall
+  low / mid / epic, pixel parity with the hero), south-west = facing left,
+  description and animation wording. Pilot: Trash-Bag Slime — DONE:
+  assets/trash-bag-slime-pixellab.png (84px grid, rows idle / attack /
+  hurt / death / move, all facing left; 9 frames each), sliced by the
+  grid entry in scripts/slice-sprites.mjs; idle 51×59 = pixel parity.
+  PixelLab character a380da4d-4c2a-402f-bf6b-f1063c735e15.
+- Boss attack timing: a boss's attack with a `contact` frame (manifest
+  field, set in the slicer config, e.g. attack: { contact: 5 }) is
+  trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via
+  bossAnimations) so that frame is on screen at BOSS_ATTACK_IMPACT_MS
+  (210ms: the CSS lunge's peak, the party's flinch and damage sound).
+  Bosses without one play their attack as drawn. The slime's attack
+  runs at 16 fps so frames 2–8 play (contact 5 at 187–250ms).
 - New art must still go through the manifest pipeline (see Phase B1):
   frames under public/sprites/<key>/<animation>/ + a manifest, FACING set
   per animation — game code never changes for an art swap.

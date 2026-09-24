@@ -25,6 +25,12 @@ export type SpriteAnimation = {
   shadow?: Record<string, [number, number, number, number]>;
   /** Frames exempt from grounding (indices into `frames`): jumps, hovering. */
   airborne?: number[];
+  /**
+   * An attack's contact frame (index into `frames`): where the blow lands.
+   * Bosses' attacks with one are timed so it's on screen as the blow lands
+   * (lib/rpg/strike.ts bossAttackAnimation). Set in the slicer's config.
+   */
+  contact?: number;
   /** Which way this pose faces as drawn (scripts/slice-sprites.mjs FACING). */
   facing: Facing;
 };

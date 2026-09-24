@@ -1,5 +1,6 @@
 import { SPRITES } from "./manifests";
 import type { SpriteAnimation, SpriteManifest } from "./types";
+import { bossAttackAnimation } from "@/lib/rpg/strike";
 
 /** One of a boss's stage poses (each carries its own drawn `facing`). */
 export type BossPose = SpriteAnimation;
@@ -55,7 +56,8 @@ function buildBossAnimations(spriteKey: string): BossAnimations | null {
   return {
     idle: pose(idle, true),
     hurt: pose(hurt, false),
-    attack: pose(a.attack ?? idle, false),
+    // Timed to the blow when the art marks a contact frame.
+    attack: a.attack ? bossAttackAnimation(a.attack) : pose(idle, false),
     death: pose(death, false),
     escape: pose(a.move ?? idle, true),
   };

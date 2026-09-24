@@ -4,6 +4,7 @@
 // strike.test.mjs checks it. No React / browser imports.
 
 import type { SpriteAnimation } from "@/components/rpg/sprites/types";
+import { BOSS_ATTACK_IMPACT_MS } from "./hero-stage";
 
 // --- Hit weight -----------------------------------------------------------------
 
@@ -93,6 +94,18 @@ export function contactAnimation(anim: SpriteAnimation, contact: number, leadMs:
       ? windUp.slice(windUp.length - before)
       : [...Array(before - windUp.length).fill(windUp[0] ?? anim.frames[contact]), ...windUp];
   return { ...anim, frames: [...lead, ...anim.frames.slice(contact)], loop: false };
+}
+
+/**
+ * A boss's attack as played when a missed quest lets it hit the party: with a
+ * `contact` frame (its manifest), timed so the blow is on screen at
+ * BOSS_ATTACK_IMPACT_MS — with the CSS lunge's peak, the party's flinch,
+ * flash and the damage sound. Without one (older art), played as drawn.
+ */
+export function bossAttackAnimation(attack: SpriteAnimation): SpriteAnimation {
+  return attack.contact === undefined
+    ? { ...attack, loop: false }
+    : contactAnimation(attack, attack.contact, BOSS_ATTACK_IMPACT_MS);
 }
 
 /** Motion needs a run-up: below this lead (combo hits) the hero just swings. */

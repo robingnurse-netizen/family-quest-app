@@ -140,3 +140,24 @@ test("motion only with a run-up, and it lands on contact", () => {
   const offsets = lunge.keyframes.map((k) => k.offset).filter((o) => o !== undefined);
   assert.deepEqual(offsets, [...offsets].sort((a, b) => a - b), "offsets in order");
 });
+
+// --- Boss attacks -------------------------------------------------------------------
+
+test("a boss attack with a contact frame lands its blow as the lunge peaks", () => {
+  const slime = JSON.parse(
+    readFileSync(fileURLToPath(new URL("../components/rpg/sprites/manifests/trash_bag_slime.json", import.meta.url)), "utf8"),
+  ).animations.attack;
+  assert.equal(slime.contact, 5, "the slime's manifest marks its contact frame");
+  const played = strike.bossAttackAnimation(slime);
+  assert.equal(frameAt(played, BOSS_ATTACK_IMPACT_MS), slime.frames[slime.contact], "contact on screen at the impact");
+  assert.equal(played.loop, false);
+  // Everything from contact on still plays (the recovery isn't cut).
+  assert.deepEqual(played.frames.slice(-(slime.frames.length - slime.contact)), slime.frames.slice(slime.contact));
+});
+
+test("a boss attack without a contact frame plays as drawn", () => {
+  const anim = { frames: ["a", "b", "c"], fps: 6, loop: true, width: 1, height: 1, anchor: { x: 0, y: 0 }, facing: "left" };
+  const played = strike.bossAttackAnimation(anim);
+  assert.deepEqual(played.frames, anim.frames);
+  assert.equal(played.loop, false);
+});

@@ -59,6 +59,8 @@ test("the airborne exemptions are the deliberate ones", () => {
     "hero/victory": [3, 4, 5], // the hop
     "rogue/pounce": [3, 4, 5, 6, 7], // the leap
     "rogue/bark_front": [1, 2, 3, 4, 5], // a hop while barking (not used yet)
+    "trash_bag_slime/attack": [4, 5], // the hopping lunge
+    "trash_bag_slime/move": [4], // a small hop
     "alarm_clock_swarm/attack": [0], // a clock flying at the party
     "chronosphinx/idle": [0, 1, 2, 3], // hovers; the scythe swings below it
     "abyssal_kraken/move": [0, 1, 2, 3, 4, 5], // hovers

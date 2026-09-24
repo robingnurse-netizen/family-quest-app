@@ -3,117 +3,404 @@
   "animations": {
     "idle": {
       "frames": [
-        "/sprites/trash_bag_slime/idle/frame-01.png?v=6b263e47d1",
-        "/sprites/trash_bag_slime/idle/frame-02.png?v=b63240640b",
-        "/sprites/trash_bag_slime/idle/frame-03.png?v=3e2af1afce"
+        "/sprites/trash_bag_slime/idle/frame-01.png?v=689faccf4d",
+        "/sprites/trash_bag_slime/idle/frame-02.png?v=894d781195",
+        "/sprites/trash_bag_slime/idle/frame-03.png?v=737d133811",
+        "/sprites/trash_bag_slime/idle/frame-04.png?v=ea8696e7fc",
+        "/sprites/trash_bag_slime/idle/frame-05.png?v=dcd96f4de3",
+        "/sprites/trash_bag_slime/idle/frame-06.png?v=9a9151dbeb",
+        "/sprites/trash_bag_slime/idle/frame-07.png?v=f375ff33ce",
+        "/sprites/trash_bag_slime/idle/frame-08.png?v=bfc4bd2611",
+        "/sprites/trash_bag_slime/idle/frame-09.png?v=714c278dac"
       ],
-      "width": 194,
-      "height": 194,
+      "width": 51,
+      "height": 59,
       "anchor": {
-        "x": 97,
-        "y": 189
+        "x": 26,
+        "y": 58
       },
-      "fps": 3,
+      "bodyHeight": 59,
+      "fps": 6,
       "loop": true,
-      "facing": "front",
+      "facing": "left",
       "shadow": {
-        "/sprites/trash_bag_slime/idle/frame-01.png?v=6b263e47d1": [
-          96,
-          191.4,
+        "/sprites/trash_bag_slime/idle/frame-01.png?v=689faccf4d": [
+          26.5,
+          53.9,
           0,
-          12
+          7
         ],
-        "/sprites/trash_bag_slime/idle/frame-02.png?v=b63240640b": [
-          98,
-          202.4,
+        "/sprites/trash_bag_slime/idle/frame-02.png?v=894d781195": [
+          26,
+          55,
           0,
-          17
+          7
         ],
-        "/sprites/trash_bag_slime/idle/frame-03.png?v=3e2af1afce": [
-          94.5,
-          199.1,
+        "/sprites/trash_bag_slime/idle/frame-03.png?v=737d133811": [
+          26,
+          55,
           0,
-          13
+          7
+        ],
+        "/sprites/trash_bag_slime/idle/frame-04.png?v=ea8696e7fc": [
+          26,
+          55,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/idle/frame-05.png?v=dcd96f4de3": [
+          26,
+          55,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/idle/frame-06.png?v=9a9151dbeb": [
+          26,
+          55,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/idle/frame-07.png?v=f375ff33ce": [
+          26.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/idle/frame-08.png?v=bfc4bd2611": [
+          26.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/idle/frame-09.png?v=714c278dac": [
+          26,
+          55,
+          0,
+          7
         ]
       }
     },
     "attack": {
       "frames": [
-        "/sprites/trash_bag_slime/attack/frame-01.png?v=564f9f334f",
-        "/sprites/trash_bag_slime/attack/frame-02.png?v=386a81745b",
-        "/sprites/trash_bag_slime/attack/frame-03.png?v=10a8e55033"
+        "/sprites/trash_bag_slime/attack/frame-01.png?v=61a7fa75e1",
+        "/sprites/trash_bag_slime/attack/frame-02.png?v=59b8c0bd98",
+        "/sprites/trash_bag_slime/attack/frame-03.png?v=5db7177f4c",
+        "/sprites/trash_bag_slime/attack/frame-04.png?v=d01945733d",
+        "/sprites/trash_bag_slime/attack/frame-05.png?v=9c6c01217d",
+        "/sprites/trash_bag_slime/attack/frame-06.png?v=436ecb193b",
+        "/sprites/trash_bag_slime/attack/frame-07.png?v=137288fe1a",
+        "/sprites/trash_bag_slime/attack/frame-08.png?v=a0af758663",
+        "/sprites/trash_bag_slime/attack/frame-09.png?v=89dd92018b"
       ],
-      "width": 374,
-      "height": 195,
+      "width": 57,
+      "height": 59,
       "anchor": {
-        "x": 137,
-        "y": 190
+        "x": 30,
+        "y": 58
       },
-      "fps": 6,
+      "bodyHeight": 59,
+      "airborne": [
+        4,
+        5
+      ],
+      "contact": 5,
+      "fps": 16,
       "loop": false,
-      "facing": "right",
+      "facing": "left",
       "shadow": {
-        "/sprites/trash_bag_slime/attack/frame-01.png?v=564f9f334f": [
-          137,
-          191.4,
+        "/sprites/trash_bag_slime/attack/frame-01.png?v=61a7fa75e1": [
+          30.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/attack/frame-02.png?v=59b8c0bd98": [
+          30,
+          52.8,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/attack/frame-03.png?v=5db7177f4c": [
+          30.5,
+          49.5,
           0,
           6
         ],
-        "/sprites/trash_bag_slime/attack/frame-02.png?v=386a81745b": [
-          139,
-          297,
+        "/sprites/trash_bag_slime/attack/frame-04.png?v=d01945733d": [
+          33,
+          46.2,
           0,
-          6
+          7
         ],
-        "/sprites/trash_bag_slime/attack/frame-03.png?v=10a8e55033": [
-          137,
-          224.4,
+        "/sprites/trash_bag_slime/attack/frame-05.png?v=9c6c01217d": [
+          31.5,
+          49.5,
+          2,
+          7
+        ],
+        "/sprites/trash_bag_slime/attack/frame-06.png?v=436ecb193b": [
+          30,
+          48.4,
+          3,
+          7
+        ],
+        "/sprites/trash_bag_slime/attack/frame-07.png?v=137288fe1a": [
+          32.5,
+          40.7,
           0,
-          6
+          7
+        ],
+        "/sprites/trash_bag_slime/attack/frame-08.png?v=a0af758663": [
+          33,
+          50.6,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/attack/frame-09.png?v=89dd92018b": [
+          30.5,
+          56.1,
+          0,
+          7
         ]
       }
     },
     "hurt": {
       "frames": [
-        "/sprites/trash_bag_slime/hurt/frame-01.png?v=fb4d756651"
+        "/sprites/trash_bag_slime/hurt/frame-01.png?v=bba6105b43",
+        "/sprites/trash_bag_slime/hurt/frame-02.png?v=a38f1c2a36",
+        "/sprites/trash_bag_slime/hurt/frame-03.png?v=1ce190c1ee",
+        "/sprites/trash_bag_slime/hurt/frame-04.png?v=7b8eb6d3cf",
+        "/sprites/trash_bag_slime/hurt/frame-05.png?v=098c8aab61",
+        "/sprites/trash_bag_slime/hurt/frame-06.png?v=3d0a4a3d21",
+        "/sprites/trash_bag_slime/hurt/frame-07.png?v=929bce7b4c",
+        "/sprites/trash_bag_slime/hurt/frame-08.png?v=c55bd4f276",
+        "/sprites/trash_bag_slime/hurt/frame-09.png?v=08782a14f5"
       ],
-      "width": 297,
-      "height": 76,
+      "width": 52,
+      "height": 59,
       "anchor": {
-        "x": 150,
-        "y": 71
+        "x": 26,
+        "y": 58
       },
+      "bodyHeight": 59,
       "fps": 8,
       "loop": false,
-      "facing": "front",
+      "facing": "left",
       "shadow": {
-        "/sprites/trash_bag_slime/hurt/frame-01.png?v=fb4d756651": [
-          150.5,
-          313.5,
+        "/sprites/trash_bag_slime/hurt/frame-01.png?v=bba6105b43": [
+          26.5,
+          53.9,
           0,
-          9
+          7
+        ],
+        "/sprites/trash_bag_slime/hurt/frame-02.png?v=a38f1c2a36": [
+          26.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/hurt/frame-03.png?v=1ce190c1ee": [
+          26.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/hurt/frame-04.png?v=7b8eb6d3cf": [
+          27,
+          52.8,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/hurt/frame-05.png?v=098c8aab61": [
+          26.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/hurt/frame-06.png?v=3d0a4a3d21": [
+          26.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/hurt/frame-07.png?v=929bce7b4c": [
+          27.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/hurt/frame-08.png?v=c55bd4f276": [
+          26.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/hurt/frame-09.png?v=08782a14f5": [
+          26.5,
+          53.9,
+          0,
+          7
         ]
       }
     },
     "death": {
       "frames": [
-        "/sprites/trash_bag_slime/death/frame-01.png?v=790c525d62"
+        "/sprites/trash_bag_slime/death/frame-01.png?v=5b9bc2c919",
+        "/sprites/trash_bag_slime/death/frame-02.png?v=f59a0b1a83",
+        "/sprites/trash_bag_slime/death/frame-03.png?v=9ccaad3c1a",
+        "/sprites/trash_bag_slime/death/frame-04.png?v=f02b11c2e6",
+        "/sprites/trash_bag_slime/death/frame-05.png?v=c678d9dceb",
+        "/sprites/trash_bag_slime/death/frame-06.png?v=928abca49d",
+        "/sprites/trash_bag_slime/death/frame-07.png?v=0fcefc4dfb",
+        "/sprites/trash_bag_slime/death/frame-08.png?v=d4c3f5e5d6",
+        "/sprites/trash_bag_slime/death/frame-09.png?v=da9a1e9afe"
       ],
-      "width": 300,
-      "height": 173,
+      "width": 64,
+      "height": 59,
       "anchor": {
-        "x": 167,
-        "y": 168
+        "x": 32,
+        "y": 58
       },
+      "bodyHeight": 59,
       "fps": 6,
       "loop": false,
-      "facing": "front",
+      "facing": "left",
       "shadow": {
-        "/sprites/trash_bag_slime/death/frame-01.png?v=790c525d62": [
-          150,
-          321.2,
+        "/sprites/trash_bag_slime/death/frame-01.png?v=5b9bc2c919": [
+          32.5,
+          53.9,
           0,
-          21
+          7
+        ],
+        "/sprites/trash_bag_slime/death/frame-02.png?v=f59a0b1a83": [
+          32.5,
+          56.1,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/death/frame-03.png?v=9ccaad3c1a": [
+          32,
+          57.2,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/death/frame-04.png?v=f02b11c2e6": [
+          32,
+          59.4,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/death/frame-05.png?v=c678d9dceb": [
+          33.5,
+          58.3,
+          0,
+          6
+        ],
+        "/sprites/trash_bag_slime/death/frame-06.png?v=928abca49d": [
+          34,
+          61.6,
+          0,
+          6
+        ],
+        "/sprites/trash_bag_slime/death/frame-07.png?v=0fcefc4dfb": [
+          34,
+          63.8,
+          0,
+          6
+        ],
+        "/sprites/trash_bag_slime/death/frame-08.png?v=d4c3f5e5d6": [
+          34,
+          63.8,
+          0,
+          6
+        ],
+        "/sprites/trash_bag_slime/death/frame-09.png?v=da9a1e9afe": [
+          34,
+          66,
+          0,
+          6
+        ]
+      }
+    },
+    "move": {
+      "frames": [
+        "/sprites/trash_bag_slime/move/frame-01.png?v=c32acee7b0",
+        "/sprites/trash_bag_slime/move/frame-02.png?v=7849435290",
+        "/sprites/trash_bag_slime/move/frame-03.png?v=76dcb9391b",
+        "/sprites/trash_bag_slime/move/frame-04.png?v=b3d700ec21",
+        "/sprites/trash_bag_slime/move/frame-05.png?v=01c8bceb04",
+        "/sprites/trash_bag_slime/move/frame-06.png?v=2d5c9478d7",
+        "/sprites/trash_bag_slime/move/frame-07.png?v=35a68051d4",
+        "/sprites/trash_bag_slime/move/frame-08.png?v=8b70213ade",
+        "/sprites/trash_bag_slime/move/frame-09.png?v=857a883695"
+      ],
+      "width": 57,
+      "height": 59,
+      "anchor": {
+        "x": 28,
+        "y": 58
+      },
+      "bodyHeight": 59,
+      "airborne": [
+        4
+      ],
+      "fps": 8,
+      "loop": true,
+      "facing": "left",
+      "shadow": {
+        "/sprites/trash_bag_slime/move/frame-01.png?v=c32acee7b0": [
+          28.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/move/frame-02.png?v=7849435290": [
+          28.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/move/frame-03.png?v=76dcb9391b": [
+          28.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/move/frame-04.png?v=b3d700ec21": [
+          28.5,
+          53.9,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/move/frame-05.png?v=01c8bceb04": [
+          26.5,
+          45.1,
+          1,
+          7
+        ],
+        "/sprites/trash_bag_slime/move/frame-06.png?v=2d5c9478d7": [
+          26.5,
+          45.1,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/move/frame-07.png?v=35a68051d4": [
+          28.5,
+          51.7,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/move/frame-08.png?v=8b70213ade": [
+          29,
+          55,
+          0,
+          7
+        ],
+        "/sprites/trash_bag_slime/move/frame-09.png?v=857a883695": [
+          28.5,
+          53.9,
+          0,
+          7
         ]
       }
     }
