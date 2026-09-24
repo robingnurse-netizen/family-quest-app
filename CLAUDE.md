@@ -284,8 +284,8 @@ PROJECT STATUS:
     and routes still say pool).
 - Visual overhaul Stage 2 — Battle scene (player dashboard): COMPLETE.
   * components/rpg/battle/: BattleScene replaces the hero box, stat tiles
-    and boss panel on /player — one stone-framed arena (CSS night sky,
-    pixel hills, ground) with hero + Rogue on the left facing the boss on
+    and boss panel on /player — one stone-framed arena (now the day/night
+    meadow backdrop — see "Day/night cycle") with hero + Rogue on the left facing the boss on
     the right, a pulsing aura, event captions as a parchment banner,
     segmented HudBars (damage trail; boss 10/15/20 chunks by tier, party
     10) and the Level/XP/Gold/Streak strip. Sizes come from --arena (container
@@ -519,7 +519,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-healing, recap, evening (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-healing, recap, evening, sun-times (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
@@ -662,6 +662,42 @@ PARKED — future items, NOT to be built until asked:
   with depth — a floor band seen slightly from above, matching the
   characters' three-quarter view — not today's thin side-on ground line
   (the ground shadows are a stopgap for that mismatch).
+  * BUILT: the arena backdrop (components/rpg/battle/arena-backdrop.tsx,
+    re-exported as ArenaBackdrop from arena-parts — battle scene + recap).
+    Layers: four skies stacked (night = .arena-sky, .sky-dawn / -day /
+    -dusk in globals.css; stackedOpacities() makes each show by its
+    weight), stars (faded), the two cloud layers (their art's three tones
+    are CSS masks coloured by --cloud-<layer>-<tone>), the meadow
+    (public/backgrounds/meadow-day.png, #a3cddb keyed out at render time
+    by one canvas pass per page → blob URL; a CSS mask can't colour-key),
+    tinted by a brightness/saturate filter, and the lit windows
+    (meadow-night-windows.png). Art covers the arena anchored bottom-centre
+    (phone arenas lose the sides, wide ones ~10 art rows of sky); its feet
+    line (14px up) lands within ~3px of --ground. lib/rpg/sky.ts (pure,
+    tests/sky.test.mjs): skyWeights() crossfades night→dawn (dawn window
+    start → sunrise), dawn→day (→ window end), day→dusk, dusk→night the
+    same way; SKY_LOOKS holds every period's colours / filter / stars /
+    windows (tune there). Time-based values are CSS variables from
+    useArenaSky(timeZone), spread onto the arena box
+    (suppressHydrationWarning), re-checked every minute; 2s CSS
+    transitions. Both the scene and the recap get families.timezone
+    (RecapHost's timeZone prop). The hero and Rogue are dimmed too, less
+    than the background (SKY_LOOKS.characters: night 0.75 / 0.8), via
+    .arena-party img.sprite-pixelated — the hit overlay and the boss aren't. Dev console: __fqBattle.sky("night" | "dawn" | "day" |
+    "dusk" | ISO time | null) and __fqBattle.skyCycle(seconds = 60) (a
+    whole day, then back to the clock). public/backgrounds/ files are
+    copies of assets/bg-meadow-day-final.png and
+    assets/bg-meadow-night-windows.png (made by
+    scripts/make-night-windows.py) — re-copy after editing the art.
+  * lib/sun-times.ts (NOAA equations, no dependency):
+    sunTimes(date, timeZone) → that family day's sunrise / sunset for
+    SUN_LOCATION (hardcoded Aberdeen 57.15, -2.09; a family setting later);
+    skyPeriod(now, timeZone) → "dawn" | "day" | "dusk" | "night" with
+    DAWN_WINDOW / DUSK_WINDOW (45 min either side; tune there). Check:
+    node scripts/sun-times-check.mjs [ISO time] [timezone]. Background art
+    so far: assets/bg-meadow-day.png (344×192 source) and
+    assets/bg-meadow-day-final.png (320×128 battle crop; sky is exactly
+    #a3cddb, safe to colour-key).
 - FUTURE — Test suite: STARTED (npm test; tests/, see "XP, Level &
   Streak"). Covered so far: slot guard, XP, levels, streaks, the boss
   engine + instant damage (roster, activation order, strike, defeat, gold

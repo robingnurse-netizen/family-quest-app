@@ -20,6 +20,7 @@ import { createNoRepeatPicker } from "@/lib/random";
 import { STRIKE_VARIANTS } from "@/lib/rpg/strike";
 import { BOSS_ATTACK_IMPACT_MS, DOWN_HOLD_MS, heroReducer, initialHero, roguePoseFor } from "@/lib/rpg/hero-stage";
 import { ArenaBackdrop, HERO_POSES, RogueSprite } from "./arena-parts";
+import { previewSky, previewSkyCycle, useArenaSky } from "./arena-backdrop";
 import {
   ARENA_CLASS,
   ARENA_STYLE,
@@ -101,6 +102,10 @@ export function BattleScene({
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
     return registerDevTools({
+      /** The arena sky: "night" | "dawn" | "day" | "dusk", a time (Date / ISO string), or null (the clock). */
+      sky: previewSky,
+      /** Play today's sky from midnight to midnight in `seconds`, then follow the clock. */
+      skyCycle: (seconds = 60) => previewSkyCycle(seconds, timeZone),
       /** Force evening on / off (null: follow the clock). Pass `stakes` to preview without the database. */
       evening: (on: boolean | null = true, stakes?: Partial<TonightStakes>) =>
         setEveningDev({
@@ -146,6 +151,8 @@ export function BattleScene({
   // (and back up when it refills), a victory pose when a boss falls.
   const { hero, partyRef } = useHero(party?.current_hp ?? null, shown?.id ?? null);
   useDevicePixelStep();
+  // The day/night sky (and the party's night tint), in the family's timezone.
+  const sky = useArenaSky(timeZone);
 
   return (
     <section
@@ -153,7 +160,11 @@ export function BattleScene({
       // Thick bevel; the container for the arena's cqw sizing.
       className="panel panel-stone border-4 p-2 shadow-[inset_3px_3px_0_var(--panel-hi),inset_-3px_-3px_0_var(--panel-shade)] [container-type:inline-size] sm:p-3"
     >
-      <div className={`relative overflow-hidden rounded-[2px] border-2 border-stone-edge ${ARENA_CLASS}`} style={ARENA_STYLE}>
+      <div
+        className={`relative overflow-hidden rounded-[2px] border-2 border-stone-edge ${ARENA_CLASS}`}
+        style={{ ...ARENA_STYLE, ...sky }}
+        suppressHydrationWarning
+      >
         <ArenaBackdrop />
 
         {/* The party: Rogue just behind the hero, both facing right. A
@@ -161,7 +172,7 @@ export function BattleScene({
             blow lands. */}
         <div
           ref={partyRef}
-          className="absolute inset-x-0 bottom-(--ground) top-0 z-10"
+          className="arena-party absolute inset-x-0 bottom-(--ground) top-0 z-10"
           style={{ "--impact": `${BOSS_ATTACK_IMPACT_MS}ms` } as React.CSSProperties}
           onAnimationEnd={(e) => {
             if (e.target === e.currentTarget) e.currentTarget.classList.remove("hero-hit");

@@ -16,6 +16,7 @@ import {
 } from "@/lib/rpg/recap";
 import { registerDevTools, useBattleContext } from "./battle-provider";
 import { ArenaBackdrop, HERO_POSES, RogueSprite } from "./arena-parts";
+import { useArenaSky } from "./arena-backdrop";
 import { HudBar } from "./hud-bar";
 import {
   ARENA_CLASS,
@@ -44,11 +45,14 @@ import {
 export function RecapHost({
   initial,
   acknowledge,
+  timeZone,
 }: {
   /** The recap to play on load (unseen rows, summarized server-side), or null. */
   initial: RecapSummary | null;
   /** Marks his recaps up to `through` seen (server action). */
   acknowledge: (through: string) => Promise<void>;
+  /** The family's timezone: the arena's day/night sky, as in the battle scene. */
+  timeZone: string;
 }) {
   const { setRecapActive } = useBattleContext();
   const [playing, setPlaying] = useState<{ summary: RecapSummary; preview: boolean; key: number } | null>(
@@ -82,14 +86,23 @@ export function RecapHost({
 
   const close = useCallback(() => setPlaying(null), []);
   if (!playing) return null;
-  return <Recap key={playing.key} summary={playing.summary} onClose={close} />;
+  return <Recap key={playing.key} summary={playing.summary} onClose={close} timeZone={timeZone} />;
 }
 
 type Pose = "idle" | "hurt" | "ko" | "down" | "rise";
 type BossOnStage = { boss: RecapBoss; mode: "idle" | "attack" | "escape" | "enter" } | null;
 
-function Recap({ summary: s, onClose }: { summary: RecapSummary; onClose: () => void }) {
+function Recap({
+  summary: s,
+  onClose,
+  timeZone,
+}: {
+  summary: RecapSummary;
+  onClose: () => void;
+  timeZone: string;
+}) {
   const { emit } = useBattleContext();
+  const sky = useArenaSky(timeZone);
   const reduced = usePrefersReducedMotion();
   useDevicePixelStep();
 
@@ -222,10 +235,14 @@ function Recap({ summary: s, onClose }: { summary: RecapSummary; onClose: () => 
         </h2>
 
         {showArena && (
-          <div className={`relative overflow-hidden rounded-[2px] border-2 border-stone-edge ${ARENA_CLASS}`} style={ARENA_STYLE}>
+          <div
+            className={`relative overflow-hidden rounded-[2px] border-2 border-stone-edge ${ARENA_CLASS}`}
+            style={{ ...ARENA_STYLE, ...sky }}
+            suppressHydrationWarning
+          >
             <ArenaBackdrop />
             <div
-              className={`absolute inset-x-0 bottom-(--ground) top-0 z-10 ${hit ? "hero-hit" : ""}`}
+              className={`arena-party absolute inset-x-0 bottom-(--ground) top-0 z-10 ${hit ? "hero-hit" : ""}`}
               style={{ "--impact": `${BOSS_ATTACK_IMPACT_MS}ms` } as React.CSSProperties}
             >
               {/* Rogue flinches, falls and gets up with the hero. */}

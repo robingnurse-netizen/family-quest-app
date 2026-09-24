@@ -80,7 +80,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
           />
           {/* "While you were away": the nights since his last visit, before
               anything else (the celebration cards wait for it). */}
-          <RecapHost initial={recap} acknowledge={acknowledgeRecaps} />
+          <RecapHost initial={recap} acknowledge={acknowledgeRecaps} timeZone={calendar.timeZone} />
           {/* Centre-screen replay of Reuben's own hits, wherever he's scrolled. */}
           <HitOverlay childId={profile.id} />
           {/* LEVEL UP! and streak milestones, after any hit sequence. */}

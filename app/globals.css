@@ -150,14 +150,51 @@ body {
     radial-gradient(1px 1px at 6% 52%, #fff8 50%, transparent 51%),
     linear-gradient(to bottom, #120e26, var(--color-world) 70%, #3b2a6e);
 }
-/* Stepped silhouettes read as pixel hills. */
-.arena-hills-far {
-  background: #2b2058;
-  clip-path: polygon(0 60%, 8% 60%, 8% 45%, 16% 45%, 16% 30%, 26% 30%, 26% 45%, 34% 45%, 34% 58%, 44% 58%, 44% 40%, 52% 40%, 52% 22%, 62% 22%, 62% 38%, 72% 38%, 72% 52%, 82% 52%, 82% 34%, 92% 34%, 92% 50%, 100% 50%, 100% 100%, 0 100%);
+/* Day/night sky (components/rpg/battle/arena-backdrop.tsx): .arena-sky above
+   is night; dawn, day and dusk stack over it, each layer's opacity set from
+   lib/rpg/sky.ts (--sky-*). Dawn and dusk are 8 hard-stopped bands, like
+   the pixel art: small, even steps in brightness, fitted into the sky the
+   hills leave visible (top ~45% of the arena at every size), narrowing
+   toward the horizon; the last band fills behind the hills. The warm
+   bands stay muted to sit with the rest of the scene. Day is the art's own
+   sky colour. */
+.sky-layer {
+  position: absolute;
+  inset: 0;
+  transition: opacity 2s linear;
 }
-.arena-hills-near {
-  background: #1d173f;
-  clip-path: polygon(0 45%, 10% 45%, 10% 62%, 22% 62%, 22% 40%, 30% 40%, 30% 55%, 42% 55%, 42% 70%, 58% 70%, 58% 50%, 68% 50%, 68% 36%, 78% 36%, 78% 58%, 90% 58%, 90% 44%, 100% 44%, 100% 100%, 0 100%);
+.sky-dawn {
+  background: linear-gradient(to bottom,
+    #5d6fae 0 8%, #6b77b4 8% 15%, #7c80b9 15% 21%, #9089bb 21% 27%,
+    #a693b9 27% 33%, #b99db2 33% 39%, #c9a9aa 39% 45%, #d8b8a6 45%);
+}
+.sky-day { background: #a3cddb; }
+.sky-dusk {
+  background: linear-gradient(to bottom,
+    #2e2c66 0 8%, #3a3170 8% 15%, #48377a 15% 21%, #5a3f82 21% 27%,
+    #6e4886 27% 33%, #835386 33% 39%, #9a6284 39% 45%, #ae737f 45%);
+}
+/* The meadow (its sky keyed out) and the night's lit windows: 320×128 art
+   covering the arena, anchored bottom-centre, so narrow arenas lose a bit
+   of each side and wide ones some plain sky at the top. The art's feet
+   line (14px up) lands within 1–2px of --ground at every arena size. */
+.arena-fg {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: 50% 100%;
+  image-rendering: pixelated;
+  transition: filter 2s linear, opacity 2s linear;
+}
+.arena-fg-meadow { filter: var(--fg-filter); }
+.arena-fg-windows { opacity: var(--windows); }
+/* The hero and Rogue dimmed with the sky (lib/rpg/sky.ts: less than the
+   background). On the sprite images, so the party's own filter animations
+   (.hero-hit's red flash) still play on top. The hit overlay isn't dimmed. */
+.arena-party img.sprite-pixelated {
+  filter: var(--char-filter, none);
+  transition: filter 2s linear;
 }
 
 /* Boss aura: a soft glow behind the boss, slowly pulsing. */
@@ -823,31 +860,59 @@ img.sprite-pixelated { color: transparent; font-size: 0; }
   0%, 100% { opacity: 0.35; }
   50% { opacity: 1; }
 }
-/* Pixel clouds: stepped silhouettes (layered blobs of crisp rectangles),
-   a little lighter than the sky, in two sizes. Each layer is a strip one
-   tile wider than the arena that slides left by exactly one tile (--tile),
-   so the loop is seamless at any width; two speeds give parallax. */
+/* Pixel clouds: stepped silhouettes (layered blobs of crisp rectangles), in
+   two sizes. Each layer is a strip one tile wider than the arena that slides
+   left by exactly one tile (--tile), so the loop is seamless at any width;
+   two speeds give parallax. The art's three tones (body, top highlight,
+   underside) are masks coloured by --cloud-<layer>-<tone>, which the
+   day/night sky sets (lib/rpg/sky.ts; night = the original purple). */
 .arena-clouds {
   position: absolute;
   left: 0;
   width: calc(100% + var(--tile));
-  background-repeat: repeat-x;
-  background-size: var(--tile) 100%;
-  image-rendering: pixelated;
   animation: clouds-drift linear infinite;
+}
+.cloud-tone {
+  position: absolute;
+  inset: 0;
+  mask-repeat: repeat-x;
+  mask-size: var(--tile) 100%;
+  transition: background-color 2s linear;
 }
 .arena-clouds-far {
   --tile: 360px; /* 180×20 art at 2× */
   height: 40px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='20' shape-rendering='crispEdges'%3E%3Crect x='20' y='12' width='48' height='6' fill='%235b4da0'/%3E%3Crect x='18' y='14' width='2' height='3' fill='%235b4da0'/%3E%3Crect x='68' y='14' width='2' height='3' fill='%235b4da0'/%3E%3Crect x='24' y='8' width='16' height='4' fill='%235b4da0'/%3E%3Crect x='28' y='6' width='8' height='2' fill='%235b4da0'/%3E%3Crect x='38' y='5' width='18' height='7' fill='%235b4da0'/%3E%3Crect x='41' y='3' width='12' height='2' fill='%235b4da0'/%3E%3Crect x='54' y='9' width='10' height='3' fill='%235b4da0'/%3E%3Crect x='28' y='6' width='8' height='1' fill='%237d70c4'/%3E%3Crect x='41' y='3' width='12' height='1' fill='%237d70c4'/%3E%3Crect x='24' y='8' width='4' height='1' fill='%237d70c4'/%3E%3Crect x='56' y='9' width='6' height='1' fill='%237d70c4'/%3E%3Crect x='20' y='17' width='48' height='1' fill='%23463a85'/%3E%3Crect x='110' y='13' width='30' height='4' fill='%235b4da0'/%3E%3Crect x='108' y='14' width='2' height='2' fill='%235b4da0'/%3E%3Crect x='140' y='14' width='2' height='2' fill='%235b4da0'/%3E%3Crect x='116' y='9' width='12' height='4' fill='%235b4da0'/%3E%3Crect x='119' y='7' width='6' height='2' fill='%235b4da0'/%3E%3Crect x='119' y='7' width='6' height='1' fill='%237d70c4'/%3E%3Crect x='116' y='9' width='3' height='1' fill='%237d70c4'/%3E%3Crect x='110' y='16' width='30' height='1' fill='%23463a85'/%3E%3C/svg%3E");
   animation-duration: 150s;
 }
 .arena-clouds-near {
   --tile: 330px; /* 110×16 art at 3× */
   height: 48px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='16' shape-rendering='crispEdges'%3E%3Crect x='10' y='10' width='36' height='5' fill='%237466b8'/%3E%3Crect x='8' y='11' width='2' height='3' fill='%237466b8'/%3E%3Crect x='46' y='11' width='2' height='3' fill='%237466b8'/%3E%3Crect x='14' y='6' width='12' height='4' fill='%237466b8'/%3E%3Crect x='17' y='4' width='6' height='2' fill='%237466b8'/%3E%3Crect x='26' y='5' width='14' height='5' fill='%237466b8'/%3E%3Crect x='29' y='3' width='8' height='2' fill='%237466b8'/%3E%3Crect x='17' y='4' width='6' height='1' fill='%239a8fd6'/%3E%3Crect x='29' y='3' width='8' height='1' fill='%239a8fd6'/%3E%3Crect x='14' y='6' width='3' height='1' fill='%239a8fd6'/%3E%3Crect x='10' y='14' width='36' height='1' fill='%235b4da0'/%3E%3C/svg%3E");
   opacity: 0.9;
   animation-duration: 85s;
+}
+.cloud-far-body {
+  background-color: var(--cloud-far-body);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='20' shape-rendering='crispEdges'%3E%3Crect x='20' y='12' width='48' height='6' fill='%23000'/%3E%3Crect x='18' y='14' width='2' height='3' fill='%23000'/%3E%3Crect x='68' y='14' width='2' height='3' fill='%23000'/%3E%3Crect x='24' y='8' width='16' height='4' fill='%23000'/%3E%3Crect x='28' y='6' width='8' height='2' fill='%23000'/%3E%3Crect x='38' y='5' width='18' height='7' fill='%23000'/%3E%3Crect x='41' y='3' width='12' height='2' fill='%23000'/%3E%3Crect x='54' y='9' width='10' height='3' fill='%23000'/%3E%3Crect x='110' y='13' width='30' height='4' fill='%23000'/%3E%3Crect x='108' y='14' width='2' height='2' fill='%23000'/%3E%3Crect x='140' y='14' width='2' height='2' fill='%23000'/%3E%3Crect x='116' y='9' width='12' height='4' fill='%23000'/%3E%3Crect x='119' y='7' width='6' height='2' fill='%23000'/%3E%3C/svg%3E");
+}
+.cloud-far-light {
+  background-color: var(--cloud-far-light);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='20' shape-rendering='crispEdges'%3E%3Crect x='28' y='6' width='8' height='1' fill='%23000'/%3E%3Crect x='41' y='3' width='12' height='1' fill='%23000'/%3E%3Crect x='24' y='8' width='4' height='1' fill='%23000'/%3E%3Crect x='56' y='9' width='6' height='1' fill='%23000'/%3E%3Crect x='119' y='7' width='6' height='1' fill='%23000'/%3E%3Crect x='116' y='9' width='3' height='1' fill='%23000'/%3E%3C/svg%3E");
+}
+.cloud-far-shade {
+  background-color: var(--cloud-far-shade);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='20' shape-rendering='crispEdges'%3E%3Crect x='20' y='17' width='48' height='1' fill='%23000'/%3E%3Crect x='110' y='16' width='30' height='1' fill='%23000'/%3E%3C/svg%3E");
+}
+.cloud-near-body {
+  background-color: var(--cloud-near-body);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='16' shape-rendering='crispEdges'%3E%3Crect x='10' y='10' width='36' height='5' fill='%23000'/%3E%3Crect x='8' y='11' width='2' height='3' fill='%23000'/%3E%3Crect x='46' y='11' width='2' height='3' fill='%23000'/%3E%3Crect x='14' y='6' width='12' height='4' fill='%23000'/%3E%3Crect x='17' y='4' width='6' height='2' fill='%23000'/%3E%3Crect x='26' y='5' width='14' height='5' fill='%23000'/%3E%3Crect x='29' y='3' width='8' height='2' fill='%23000'/%3E%3C/svg%3E");
+}
+.cloud-near-light {
+  background-color: var(--cloud-near-light);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='16' shape-rendering='crispEdges'%3E%3Crect x='17' y='4' width='6' height='1' fill='%23000'/%3E%3Crect x='29' y='3' width='8' height='1' fill='%23000'/%3E%3Crect x='14' y='6' width='3' height='1' fill='%23000'/%3E%3C/svg%3E");
+}
+.cloud-near-shade {
+  background-color: var(--cloud-near-shade);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='16' shape-rendering='crispEdges'%3E%3Crect x='10' y='14' width='36' height='1' fill='%23000'/%3E%3C/svg%3E");
 }
 @keyframes clouds-drift {
   from { translate: 0 0; }
