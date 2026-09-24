@@ -14,7 +14,21 @@
       },
       "fps": 2,
       "loop": true,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/laundry_goblin/idle/frame-01.png": [
+          98,
+          94.6,
+          0,
+          20
+        ],
+        "/sprites/laundry_goblin/idle/frame-02.png": [
+          100,
+          132,
+          0,
+          23
+        ]
+      }
     },
     "move": {
       "frames": [
@@ -30,7 +44,27 @@
       },
       "fps": 8,
       "loop": true,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/laundry_goblin/move/frame-01.png": [
+          85.5,
+          128.7,
+          0,
+          27
+        ],
+        "/sprites/laundry_goblin/move/frame-02.png": [
+          90.5,
+          104.5,
+          0,
+          26
+        ],
+        "/sprites/laundry_goblin/move/frame-03.png": [
+          80.5,
+          135.3,
+          0,
+          26
+        ]
+      }
     },
     "attack": {
       "frames": [
@@ -45,7 +79,21 @@
       },
       "fps": 4,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/laundry_goblin/attack/frame-01.png": [
+          141.5,
+          218.9,
+          0,
+          31
+        ],
+        "/sprites/laundry_goblin/attack/frame-02.png": [
+          119.5,
+          124.3,
+          0,
+          29
+        ]
+      }
     },
     "hurt": {
       "frames": [
@@ -60,7 +108,21 @@
       },
       "fps": 4,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/laundry_goblin/hurt/frame-01.png": [
+          117.5,
+          133.1,
+          0,
+          24
+        ],
+        "/sprites/laundry_goblin/hurt/frame-02.png": [
+          117.5,
+          104.5,
+          0,
+          5
+        ]
+      }
     },
     "death": {
       "frames": [
@@ -74,7 +136,15 @@
       },
       "fps": 6,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/laundry_goblin/death/frame-01.png": [
+          150,
+          321.2,
+          0,
+          11
+        ]
+      }
     }
   }
 }

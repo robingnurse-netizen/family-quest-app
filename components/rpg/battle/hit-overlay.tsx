@@ -6,6 +6,7 @@ import type { OverlayMoment } from "@/lib/rpg/battle-events";
 import { createNoRepeatPicker } from "@/lib/random";
 import {
   HIT_TIERS,
+  ROGUE_POUNCE_CONTACT,
   STRIKE_VARIANTS,
   contactAnimation,
   hitTier,
@@ -24,12 +25,12 @@ import {
   ARENA_VARS,
   FEET_X,
   FeetSpot,
-  HEIGHT,
   STRIKE_X,
   arenaHeight,
   bossHeight,
   heroHeight,
   impactPoint,
+  rogueHeight,
   useDevicePixelStep,
 } from "./stage-layout";
 
@@ -279,7 +280,8 @@ export function HitOverlay({ childId }: { childId: string }) {
   // Preload what the overlay draws, so the first hit doesn't stutter.
   useEffect(() => {
     const hero = SPRITES.hero.animations;
-    preload([...STRIKE_VARIANTS.map((v) => hero[v.animation]), hero.victory, SPRITES.rogue.animations.pouncing]);
+    const rogue = SPRITES.rogue.animations;
+    preload([...STRIKE_VARIANTS.map((v) => hero[v.animation]), hero.victory, rogue.pounce, rogue.bark]);
   }, []);
   const shownKey = stage.shown?.sprite_key;
   useEffect(() => {
@@ -397,10 +399,15 @@ function Theatre({ show }: { show: Show }) {
   return <Teaser next={show.next} />;
 }
 
-/** The hero cheering under the K.O. / victory card: starts after the slam. */
+/** The hero cheering under the K.O. / victory card, Rogue barking behind him:
+ *  both start after the slam. */
 function HeroVictory() {
   const victory = SPRITES.hero.animations.victory;
+  const rogue = SPRITES.rogue.animations;
   const [started, setStarted] = useState(false);
+  // One bark, then back to breathing.
+  const [barked, setBarked] = useState(false);
+  const rogueAnim = barked ? rogue.idle : rogue.bark;
   useEffect(() => {
     const t = setTimeout(() => setStarted(true), T.heroVictory);
     return () => clearTimeout(t);
@@ -408,6 +415,17 @@ function HeroVictory() {
   return (
     <div className="relative mt-2 h-[calc(var(--arena)*0.66)] w-full">
       <div className="overlay-ground absolute inset-x-[30%] bottom-[-3%] h-[6%] rounded-[50%]" />
+      <FeetSpot x="calc(50% - var(--arena) * 0.3)">
+        <AnchoredSprite
+          key={barked ? "idle" : "bark"}
+          animation={rogueAnim}
+          height={rogueHeight(rogueAnim)}
+          mirror={needsMirror(rogueAnim.facing, "right")}
+          paused={!started}
+          onComplete={barked ? undefined : () => setBarked(true)}
+          alt=""
+        />
+      </FeetSpot>
       <FeetSpot x="50%">
         {/* Paused shows frame 1 (standing) until the slam lands. */}
         <AnchoredSprite animation={victory} height={heroHeight(victory)} paused={!started} alt="" />
@@ -419,7 +437,6 @@ function HeroVictory() {
 /** Hero and Rogue dash in and strike; the boss flinches; impact effects. */
 function Strike({ show }: { show: Show }) {
   const { boss, struck, frozen, impactKey, phase, tier } = show;
-  const rogue = SPRITES.rogue.animations;
   const weight = HIT_TIERS[tier];
   const anims = bossAnimations(boss.sprite_key);
   const bossAnim = anims ? (struck ? anims.hurt : anims.idle) : null;
@@ -435,13 +452,11 @@ function Strike({ show }: { show: Show }) {
 
         <div className="overlay-dash absolute inset-0">
           <FeetSpot x={STRIKE_X.rogue}>
-            <AnchoredSprite
+            <RoguePounce
               key={`rogue-${impactKey}`}
-              animation={rogue.pouncing}
-              height={arenaHeight(HEIGHT.rogue * (rogue.pouncing.height / rogue.idle.height))}
-              mirror={needsMirror(rogue.pouncing.facing, "right")}
+              // Same lead as the hero: his paws land with the swing.
+              leadMs={impactKey === 1 ? T.dash : 0}
               frozen={frozen}
-              alt=""
             />
           </FeetSpot>
           <FeetSpot x={STRIKE_X.hero}>
@@ -515,13 +530,21 @@ function HeroStrike({
   const attack = SPRITES.hero.animations[v.animation];
   const animation = useMemo(() => contactAnimation(attack, v.contact, leadMs), [attack, v.contact, leadMs]);
   const ref = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const shadowRef = useRef<HTMLDivElement>(null);
   // Mount only (the component is keyed per hit): the motion lands on contact.
+  // The sprite moves; his shadow stays on the ground (shrinking under a
+  // leap) or comes along (a lunge).
   useLayoutEffect(() => {
     const el = ref.current;
     const motion = el && strikeMotion(v.motion, leadMs, hitStopMs, el.offsetHeight);
     if (!el || !motion) return;
-    const run = el.animate(motion.keyframes, { duration: motion.duration, fill: "none" });
-    return () => run.cancel();
+    const timing = { duration: motion.duration, fill: "none" } as const;
+    const runs = [
+      bodyRef.current?.animate(motion.keyframes, timing),
+      shadowRef.current?.animate(motion.shadow, timing),
+    ];
+    return () => runs.forEach((run) => run?.cancel());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
@@ -532,9 +555,26 @@ function HeroStrike({
         height={heroHeight(animation)}
         mirror={needsMirror(animation.facing, "right")}
         frozen={frozen}
+        bodyRef={bodyRef}
+        shadowRef={shadowRef}
         alt=""
       />
     </div>
+  );
+}
+
+/** Rogue's pounce for one hit, timed so his paws (contact frame) land at impact. */
+function RoguePounce({ leadMs, frozen }: { leadMs: number; frozen: boolean }) {
+  const pounce = SPRITES.rogue.animations.pounce;
+  const animation = useMemo(() => contactAnimation(pounce, ROGUE_POUNCE_CONTACT, leadMs), [pounce, leadMs]);
+  return (
+    <AnchoredSprite
+      animation={animation}
+      height={rogueHeight(animation)}
+      mirror={needsMirror(animation.facing, "right")}
+      frozen={frozen}
+      alt=""
+    />
   );
 }
 
@@ -634,6 +674,7 @@ function Teaser({ next }: { next: Boss | null | undefined }) {
                 height={`min(104px, ${(150 / (anims.idle.width / anims.idle.height)).toFixed(1)}px)`}
                 mirror={needsMirror(anims.idle.facing, "left")}
                 alt=""
+                shadow={false}
                 className="teaser-silhouette"
               />
             </div>

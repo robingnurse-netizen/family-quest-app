@@ -20,6 +20,8 @@ type Props = {
   frozen?: boolean;
   /** Called when a non-looping animation reaches its last frame. */
   onComplete?: () => void;
+  /** Called with each frame's src as it's shown (the first one included). */
+  onFrame?: (src: string) => void;
   /**
    * Non-looping animations (attack, hurt, death…) play once and hold their
    * last frame. Set this to replay them after holding the last frame for
@@ -43,6 +45,7 @@ export function SpriteAnimator({
   paused = false,
   frozen = false,
   onComplete,
+  onFrame,
   replayDelayMs,
 }: Props) {
   const imgRef = useRef<HTMLImageElement>(null);
@@ -54,12 +57,17 @@ export function SpriteAnimator({
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
+  const onFrameRef = useRef(onFrame);
+  useEffect(() => {
+    onFrameRef.current = onFrame;
+  }, [onFrame]);
 
   useEffect(() => {
     const img = imgRef.current;
     const { frames, fps, loop } = animation;
     if (!img || frames.length === 0) return;
     img.src = frames[0];
+    onFrameRef.current?.(frames[0]);
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (paused) return;
@@ -97,6 +105,7 @@ export function SpriteAnimator({
         last = null;
         shown = 0;
         img.src = frames[0];
+        onFrameRef.current?.(frames[0]);
         raf = requestAnimationFrame(tick);
       };
       const tick = (now: number) => {
@@ -110,6 +119,7 @@ export function SpriteAnimator({
         if (index !== shown) {
           shown = index;
           img.src = frames[index];
+          onFrameRef.current?.(frames[index]);
         }
         if (!loop && index === frames.length - 1) {
           onCompleteRef.current?.();

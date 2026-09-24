@@ -147,3 +147,26 @@ export function heroReducer(state: HeroState, action: HeroAction): HeroState {
       });
   }
 }
+
+// --- Rogue ------------------------------------------------------------------------
+
+/** Rogue's hurt flinch peak (rogue manifest `hurt`, sheet frame 5). */
+export const ROGUE_HURT_PEAK_FRAME = 5;
+
+/** Rogue's poses: his own animations, following the hero's. */
+export type RoguePose = "idle" | "hurt" | "ko" | "down" | "rise" | "bark";
+
+/**
+ * Rogue reacts with the hero, driven by the same pose machine: he flinches
+ * on the same blow, falls, lies and gets up with him, and barks through the
+ * hero's victory. The hero's attacks are his alone (Rogue pounces only in
+ * the hit overlay).
+ */
+export function roguePoseFor(pose: HeroPose): RoguePose {
+  if (pose === "attack") return "idle";
+  if (pose === "victory") return "bark";
+  return pose;
+}
+
+/** Knocked out: falling, lying down or getting up. */
+export const isDownPose = (pose: HeroPose | RoguePose) => pose === "ko" || pose === "down" || pose === "rise";

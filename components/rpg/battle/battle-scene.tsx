@@ -18,15 +18,13 @@ import { shopProgress } from "@/lib/rewards/progress";
 import type { Reward } from "@/lib/supabase/types";
 import { createNoRepeatPicker } from "@/lib/random";
 import { STRIKE_VARIANTS } from "@/lib/rpg/strike";
-import { BOSS_ATTACK_IMPACT_MS, DOWN_HOLD_MS, heroReducer, initialHero } from "@/lib/rpg/hero-stage";
-import { ArenaBackdrop, HERO_POSES } from "./arena-parts";
+import { BOSS_ATTACK_IMPACT_MS, DOWN_HOLD_MS, heroReducer, initialHero, roguePoseFor } from "@/lib/rpg/hero-stage";
+import { ArenaBackdrop, HERO_POSES, RogueSprite } from "./arena-parts";
 import {
   ARENA_CLASS,
   ARENA_STYLE,
   FEET_X,
   FeetSpot,
-  HEIGHT,
-  arenaHeight,
   bossHeight,
   heroHeight,
   useDevicePixelStep,
@@ -169,14 +167,8 @@ export function BattleScene({
             if (e.target === e.currentTarget) e.currentTarget.classList.remove("hero-hit");
           }}
         >
-          <FeetSpot x={FEET_X.rogue}>
-            <AnchoredSprite
-              animation={SPRITES.rogue.animations.idle}
-              height={arenaHeight(HEIGHT.rogue)}
-              mirror={needsMirror(SPRITES.rogue.animations.idle.facing, "right")}
-              alt="Rogue the dog"
-            />
-          </FeetSpot>
+          {/* Rogue reacts with the hero: same pose machine, same key. */}
+          <RogueSprite pose={roguePoseFor(hero.state.pose)} playKey={hero.state.key} />
           <FeetSpot x={FEET_X.hero}>
             {healPop && (
               <p

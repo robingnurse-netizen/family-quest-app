@@ -55,11 +55,12 @@ PROJECT STATUS:
     up later. (Reward gold is now enforced — see Rewards Store.)
 - RPG Phase B1 — Sprite Pipeline: COMPLETE.
   * scripts/slice-sprites.mjs (sharp) slices /assets into
-    public/sprites/<key>/<animation>/frame-NN.png (218 frames, 10
+    public/sprites/<key>/<animation>/frame-NN.png (254 frames, 10
     characters) and writes components/rpg/sprites/manifests/<key>.json.
     Boss keys = bosses.sprite_key; hero = "hero", dog companion = "rogue".
     Background removed by flood fill; crop coordinates, per-animation fps,
-    alignment ("feet" default, "mass" for Rogue's run) and dropFrames live
+    alignment ("feet" default; "mass" was for the old Rogue run, now
+    unused) and dropFrames live
     in the script's SHEETS config. Re-run per character after any change:
     node scripts/slice-sprites.mjs <key>
   * Grid sheets (`grid: { cell }` in SHEETS — transparent, one frame per
@@ -71,6 +72,46 @@ PROJECT STATUS:
     frame may sink below the ground line (lifted onto it; logged). Canvas =
     the frames' union, no padding (so hero idle height = his body height).
     Written as lossless PNGs (palette PNGs would change the colours).
+  * GROUNDING (scripts/slice-sprites.mjs, both sheet kinds): every frame's
+    lowest opaque pixel is put exactly on its ground line (the anchor y,
+    drawn on the top of the grass), frame by frame — dropped if the sheet
+    drew it floating, lifted if it sank — except frames an animation lists
+    as `airborne` (written into the manifest): hero ko [5] (mid-fall),
+    hero victory [3–5] (hop), rogue pounce [3–7], rogue bark_front [1–5],
+    alarm_clock_swarm attack [0] (flying clock), chronosphinx idle (all:
+    it hovers, and its lowest pixel is the swinging scythe — grounding it
+    would bob it ~30px), abyssal_kraken move (all: hovers), attack [3],
+    defeated [1]. Biggest fixes: Magma Behemoth's defeat (18–26px) and
+    attack (9px) frames, Kraken attack/defeat, the slime's idle; many 1px
+    jitters. tests/grounding.test.mjs checks every frame of every
+    character. Measured in the browser at 390px / 820px × 1x / 2x: each
+    character's lowest pixel lands exactly on the grass top (0.00px).
+    ART LIMITS the rule can't fix (only redrawing can): in three-quarter
+    view Rogue's far (hind) paws end ~5 art px above his near paw, and the
+    lying hero rests on his hand and bat tip with his torso ~3–4 art px
+    higher. Re-slicing is deterministic (verified: unchanged config →
+    byte-identical frames).
+  * GROUND SHADOWS: scripts/sprite-shadows.mjs measures every frame PNG
+    and writes each animation's `shadow` map (frame path → [centreX, width,
+    lift, band]) into the manifests — for all characters, without
+    re-slicing anything. Footprint = every column whose lowest pixel is in
+    the bottom ~12% of the canvas (all feet, the far ones included, or a
+    lying body); band = its height, from the highest of those column
+    bottoms down to the lowest pixel; lift = height off the ground line.
+    Airborne frames keep the first frame's band. The slicer runs it after
+    slicing; run it by hand after hand-editing frames:
+    node scripts/sprite-shadows.mjs [key…]. AnchoredSprite draws a soft
+    dark ellipse (.sprite-shadow) CENTRED ON THE CONTACT BAND (so the feet —
+    near and far — or a lying body visibly meet it, not below the feet),
+    updated per frame (SpriteAnimator onFrame): wide and flat lying down,
+    smaller and fainter while airborne (hero's victory jump, Rogue's
+    pounce, hovering bosses). It's inside the sprite's positioning wrapper,
+    so slides (escape), shakes and Rogue's down-shift carry it; body motion
+    that leaves the ground animates `bodyRef` only (the hit overlay's
+    leap: the shadow shrinks via strikeMotion().shadow; a lunge carries it
+    along). `shadow={false}` turns it off (the next-foe silhouette). Why:
+    three-quarter feet (far feet higher) looked like they floated above
+    the flat ground line.
   * Sprites are fully decoupled behind the manifests: art can be swapped
     later (new sheets → re-slice, or hand-made frames + a manifest) without
     touching game logic. Components only know manifest keys + animation
@@ -78,6 +119,46 @@ PROJECT STATUS:
   * SpriteAnimator.tsx plays a manifest animation (rAF, preloads frames,
     reduced-motion safe). One-shot animations play once and hold the last
     frame; replayDelayMs replays them (previews only).
+  * ROGUE ART = assets/rogue-pixellab.png (PixelLab, 864×768, 96px cells,
+    9×8; keep it as the source; the old Gemini Rogue sheet and frames are
+    deleted). Row 0 rotations (unused); 1 bark (South-East, his victory
+    cheer); 2 bark_front (South, 6 frames, NOT USED YET — kept); 3 hurt
+    (peak 5, 6–8 recover); 4 idle_front (South, NOT USED YET — kept);
+    5 idle (South-East, 9-frame loop: breathing + a slow tail wag, the
+    tail up in frames 4–5; replaced the old squashed 8-frame idle);
+    6 pounce (contact 6, paws furthest forward; frames 3–6 airborne);
+    7 ko (ends flat on his belly; frames 6–8 lifted 1px onto the ground).
+    In-game rows face right (3/4 view).
+    fps: idle 6 (= the hero's idle), bark 10, hurt 12, pounce 12, ko 10
+    (= the hero's K.O., so they fall together; bark = the victory pose's
+    length).
+    * Size: ROGUE_BODY (0.2822 × arena = the old placeholder's body height,
+      76px at a 270px arena) is his STANDING BODY: the manifest's
+      bodyHeight (52 art px — the slicer records each grid row's first-frame
+      height, because the tail wag makes the idle canvas taller than him).
+      rogueHeight(anim), one scale for every pose (~1.47 CSS px per art px
+      at 270px), NOT snapped to device pixels (snapping would change his
+      size up to ~15% on a phone). No height jump between idle and actions:
+      the idle's frame 0 is pixel for pixel every action row's frame 0 on
+      the same feet (tested).
+    * Polish later: his bark's teeth could use a pixel touch-up.
+    * He follows the hero's pose machine (roguePoseFor in
+      lib/rpg/hero-stage.ts: attack → idle, victory → bark, the rest the
+      same) via RogueSprite (components/rpg/battle/arena-parts.tsx), in the
+      scene and the recap: hurt peaks (ROGUE_HURT_PEAK_FRAME 5) on the same
+      blow (contactAnimation, BOSS_ATTACK_IMPACT_MS), falls / lies / gets
+      up (K.O. reversed) with the hero, barks once then breathes. The red
+      flash + shove already covered the whole party.
+    * Knocked out, he lies on the SAME ground line as the hero (no offset;
+      the old lowered "in front" spot is gone), drawn over the hero (z) so
+      his paws stay visible. Proper front/back depth waits for a ground
+      with depth (the day/night background note).
+    * Hit overlay: his pounce is timed like the hero's swing
+      (contactAnimation(pounce, ROGUE_POUNCE_CONTACT 6, lead) — the 280ms
+      dash, or 0 for combo hits); after a final blow he barks (then
+      breathes) beside the hero's victory pose, from the same start.
+    * Dev hooks show him too: hit / combo / finalBlow (pounce, bark), hurt,
+      knockOut, standUp, victory, recap. No bark sound (none exists yet).
   * HERO ART = assets/hero-pixellab.png (PixelLab, 1008×896, 112px cells,
     9×8; keep it as the source). Row 0 static rotations (unused); 1 chop
     (contact 6); 2 thrust (contact 6; columns 1–2 dropped); 3 K.O. (falls
@@ -92,10 +173,10 @@ PROJECT STATUS:
   * Known art limits: single-frame animations (Cable Spider all; Alarm
     Clock Swarm idle/move/hurt/death; Slime hurt/death; Goblin death) are
     static; Chronosphinx attack frames 3–4 share an overlapping beam;
-    Shogun-Bot idle drops sheet frames 5 and 7 (sword flash). Lying down
-    (K.O. frames 6–9 / "down"), the hero's legs overlap Rogue's front paws
-    (Rogue stands a dog-length behind him) — to be handled when Rogue gets
-    new art and his own hurt / knocked-out reactions.
+    Shogun-Bot idle drops sheet frames 5 and 7 (sword flash). Lying down,
+    the hero's legs overlap Rogue on the same ground line; Rogue is drawn
+    in front so his paws show (see ROGUE ART) — real depth needs a ground
+    with depth.
   * Future art requirement (not built): when the sprite art is redone,
     boss idle should reflect current_hp — pristine above ~66%, worn at
     ~33–66%, heavily damaged below ~33% — instead of one idle loop at
@@ -217,7 +298,7 @@ PROJECT STATUS:
     whole pixel could be ~20% off). Checked in headless Chromium.
   * Hit overlay (components/rpg/battle/hit-overlay.tsx): COMPLETE. Fires only for damage events whose childId is the
     signed-in player; a fixed pointer-events:none layer centred in the
-    viewport. Hero (attack) + Rogue (pouncing) dash in, boss (hurt), pixel
+    viewport. Hero (attack) + Rogue (pounce) dash in, boss (hurt), pixel
     ~150ms hit-stop freeze on impact (SpriteAnimator `frozen`), then
     starburst, slash, debris, damage number, layer shake (Web Animations,
     never the page), then fly up and fade (~2.5s). More hits during the hold
@@ -410,7 +491,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike, hero-stage, recap-healing, recap, evening (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage, rogue, grounding, recap-healing, recap, evening (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
@@ -549,7 +630,10 @@ PARKED — future items, NOT to be built until asked:
 - FUTURE — Day/night cycle for the battle background: dawn / day / dusk /
   night variants crossfading, generated with PixelLab environment
   generation. Undecided: follow the family's timezone (families.timezone)
-  or the device's clock.
+  or the device's clock. REQUIREMENT: the new backgrounds need a ground
+  with depth — a floor band seen slightly from above, matching the
+  characters' three-quarter view — not today's thin side-on ground line
+  (the ground shadows are a stopgap for that mismatch).
 - FUTURE — Test suite: STARTED (npm test; tests/, see "XP, Level &
   Streak"). Covered so far: slot guard, XP, levels, streaks, the boss
   engine + instant damage (roster, activation order, strike, defeat, gold

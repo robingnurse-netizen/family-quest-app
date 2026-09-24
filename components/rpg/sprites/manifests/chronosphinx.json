@@ -14,9 +14,41 @@
         "x": 184,
         "y": 307
       },
+      "airborne": [
+        0,
+        1,
+        2,
+        3
+      ],
       "fps": 3,
       "loop": true,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/chronosphinx/idle/frame-01.png": [
+          190.5,
+          229.9,
+          19,
+          36
+        ],
+        "/sprites/chronosphinx/idle/frame-02.png": [
+          180,
+          217.8,
+          33,
+          36
+        ],
+        "/sprites/chronosphinx/idle/frame-03.png": [
+          175.5,
+          262.9,
+          18,
+          36
+        ],
+        "/sprites/chronosphinx/idle/frame-04.png": [
+          199.5,
+          194.7,
+          0,
+          36
+        ]
+      }
     },
     "move": {
       "frames": [
@@ -35,7 +67,45 @@
       },
       "fps": 8,
       "loop": true,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/chronosphinx/move/frame-01.png": [
+          223,
+          244.2,
+          0,
+          38
+        ],
+        "/sprites/chronosphinx/move/frame-02.png": [
+          223,
+          246.4,
+          0,
+          41
+        ],
+        "/sprites/chronosphinx/move/frame-03.png": [
+          187,
+          319,
+          0,
+          42
+        ],
+        "/sprites/chronosphinx/move/frame-04.png": [
+          228,
+          244.2,
+          0,
+          42
+        ],
+        "/sprites/chronosphinx/move/frame-05.png": [
+          225,
+          246.4,
+          0,
+          38
+        ],
+        "/sprites/chronosphinx/move/frame-06.png": [
+          223.5,
+          245.3,
+          0,
+          39
+        ]
+      }
     },
     "attack": {
       "frames": [
@@ -56,7 +126,57 @@
       },
       "fps": 10,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/chronosphinx/attack/frame-01.png": [
+          192,
+          173.8,
+          0,
+          18
+        ],
+        "/sprites/chronosphinx/attack/frame-02.png": [
+          175,
+          237.6,
+          0,
+          35
+        ],
+        "/sprites/chronosphinx/attack/frame-03.png": [
+          178.5,
+          227.7,
+          0,
+          35
+        ],
+        "/sprites/chronosphinx/attack/frame-04.png": [
+          202,
+          303.6,
+          0,
+          35
+        ],
+        "/sprites/chronosphinx/attack/frame-05.png": [
+          185.5,
+          304.7,
+          0,
+          35
+        ],
+        "/sprites/chronosphinx/attack/frame-06.png": [
+          192,
+          182.6,
+          0,
+          21
+        ],
+        "/sprites/chronosphinx/attack/frame-07.png": [
+          184.5,
+          291.5,
+          0,
+          35
+        ],
+        "/sprites/chronosphinx/attack/frame-08.png": [
+          179.5,
+          254.1,
+          0,
+          35
+        ]
+      }
     },
     "defeated": {
       "frames": [
@@ -78,7 +198,63 @@
       },
       "fps": 8,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/chronosphinx/defeated/frame-01.png": [
+          166,
+          281.6,
+          0,
+          36
+        ],
+        "/sprites/chronosphinx/defeated/frame-02.png": [
+          166.5,
+          282.7,
+          0,
+          36
+        ],
+        "/sprites/chronosphinx/defeated/frame-03.png": [
+          166,
+          268.4,
+          0,
+          35
+        ],
+        "/sprites/chronosphinx/defeated/frame-04.png": [
+          157,
+          257.4,
+          0,
+          36
+        ],
+        "/sprites/chronosphinx/defeated/frame-05.png": [
+          158.5,
+          280.5,
+          0,
+          36
+        ],
+        "/sprites/chronosphinx/defeated/frame-06.png": [
+          168.5,
+          322.3,
+          0,
+          36
+        ],
+        "/sprites/chronosphinx/defeated/frame-07.png": [
+          171.5,
+          355.3,
+          0,
+          20
+        ],
+        "/sprites/chronosphinx/defeated/frame-08.png": [
+          175,
+          305.8,
+          0,
+          35
+        ],
+        "/sprites/chronosphinx/defeated/frame-09.png": [
+          194.5,
+          284.9,
+          0,
+          36
+        ]
+      }
     }
   }
 }

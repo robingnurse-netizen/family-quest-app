@@ -18,7 +18,45 @@
       },
       "fps": 6,
       "loop": true,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/abyssal_kraken/idle/frame-01.png": [
+          166.5,
+          273.9,
+          0,
+          43
+        ],
+        "/sprites/abyssal_kraken/idle/frame-02.png": [
+          167,
+          275,
+          0,
+          44
+        ],
+        "/sprites/abyssal_kraken/idle/frame-03.png": [
+          168,
+          275,
+          0,
+          43
+        ],
+        "/sprites/abyssal_kraken/idle/frame-04.png": [
+          166,
+          275,
+          0,
+          44
+        ],
+        "/sprites/abyssal_kraken/idle/frame-05.png": [
+          167,
+          275,
+          0,
+          44
+        ],
+        "/sprites/abyssal_kraken/idle/frame-06.png": [
+          169.5,
+          273.9,
+          0,
+          44
+        ]
+      }
     },
     "move": {
       "frames": [
@@ -35,9 +73,55 @@
         "x": 250,
         "y": 258
       },
+      "airborne": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
       "fps": 8,
       "loop": true,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/abyssal_kraken/move/frame-01.png": [
+          238.5,
+          245.3,
+          0,
+          32
+        ],
+        "/sprites/abyssal_kraken/move/frame-02.png": [
+          243.5,
+          289.3,
+          7,
+          32
+        ],
+        "/sprites/abyssal_kraken/move/frame-03.png": [
+          231.5,
+          293.7,
+          11,
+          32
+        ],
+        "/sprites/abyssal_kraken/move/frame-04.png": [
+          255,
+          277.2,
+          10,
+          32
+        ],
+        "/sprites/abyssal_kraken/move/frame-05.png": [
+          194.5,
+          361.9,
+          21,
+          32
+        ],
+        "/sprites/abyssal_kraken/move/frame-06.png": [
+          243.5,
+          236.5,
+          0,
+          32
+        ]
+      }
     },
     "attack": {
       "frames": [
@@ -56,9 +140,62 @@
         "x": 176,
         "y": 330
       },
+      "airborne": [
+        3
+      ],
       "fps": 10,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/abyssal_kraken/attack/frame-01.png": [
+          171,
+          143,
+          0,
+          40
+        ],
+        "/sprites/abyssal_kraken/attack/frame-02.png": [
+          172.5,
+          141.9,
+          0,
+          40
+        ],
+        "/sprites/abyssal_kraken/attack/frame-03.png": [
+          173.5,
+          159.5,
+          0,
+          40
+        ],
+        "/sprites/abyssal_kraken/attack/frame-04.png": [
+          189,
+          178.2,
+          26,
+          40
+        ],
+        "/sprites/abyssal_kraken/attack/frame-05.png": [
+          182.5,
+          320.1,
+          0,
+          40
+        ],
+        "/sprites/abyssal_kraken/attack/frame-06.png": [
+          171.5,
+          309.1,
+          0,
+          32
+        ],
+        "/sprites/abyssal_kraken/attack/frame-07.png": [
+          176,
+          345.4,
+          0,
+          31
+        ],
+        "/sprites/abyssal_kraken/attack/frame-08.png": [
+          172.5,
+          346.5,
+          0,
+          30
+        ]
+      }
     },
     "defeated": {
       "frames": [
@@ -76,9 +213,56 @@
         "x": 219,
         "y": 310
       },
+      "airborne": [
+        1
+      ],
       "fps": 8,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/abyssal_kraken/defeated/frame-01.png": [
+          215,
+          145.2,
+          0,
+          37
+        ],
+        "/sprites/abyssal_kraken/defeated/frame-02.png": [
+          218.5,
+          139.7,
+          22,
+          37
+        ],
+        "/sprites/abyssal_kraken/defeated/frame-03.png": [
+          232.5,
+          265.1,
+          0,
+          38
+        ],
+        "/sprites/abyssal_kraken/defeated/frame-04.png": [
+          237,
+          407,
+          0,
+          36
+        ],
+        "/sprites/abyssal_kraken/defeated/frame-05.png": [
+          243.5,
+          471.9,
+          0,
+          38
+        ],
+        "/sprites/abyssal_kraken/defeated/frame-06.png": [
+          211,
+          424.6,
+          0,
+          38
+        ],
+        "/sprites/abyssal_kraken/defeated/frame-07.png": [
+          197,
+          424.6,
+          0,
+          38
+        ]
+      }
     }
   }
 }

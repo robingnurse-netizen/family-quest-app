@@ -13,7 +13,15 @@
       },
       "fps": 6,
       "loop": true,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/cable_spider/idle/frame-01.png": [
+          198.5,
+          344.3,
+          0,
+          30
+        ]
+      }
     },
     "move": {
       "frames": [
@@ -27,7 +35,15 @@
       },
       "fps": 8,
       "loop": true,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/cable_spider/move/frame-01.png": [
+          213.5,
+          51.7,
+          0,
+          26
+        ]
+      }
     },
     "attack": {
       "frames": [
@@ -41,7 +57,15 @@
       },
       "fps": 10,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/cable_spider/attack/frame-01.png": [
+          92.5,
+          111.1,
+          0,
+          31
+        ]
+      }
     },
     "hurt": {
       "frames": [
@@ -55,7 +79,15 @@
       },
       "fps": 8,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/cable_spider/hurt/frame-01.png": [
+          182,
+          316.8,
+          0,
+          30
+        ]
+      }
     },
     "death": {
       "frames": [
@@ -69,7 +101,15 @@
       },
       "fps": 6,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/cable_spider/death/frame-01.png": [
+          183.5,
+          394.9,
+          0,
+          29
+        ]
+      }
     }
   }
 }

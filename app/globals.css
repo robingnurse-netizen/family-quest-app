@@ -384,6 +384,16 @@ body {
 /* Sprites are pixel art: never smooth them when scaled (SpriteAnimator). */
 .sprite-pixelated { image-rendering: pixelated; }
 
+/* Ground shadow under every character (AnchoredSprite): a soft dark ellipse
+   on the ground line, so feet drawn in three-quarter view (far feet higher)
+   don't look like they float. Size / position / fade are set per frame. */
+.sprite-shadow {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgb(8 6 20 / 0.5), rgb(8 6 20 / 0.25) 60%, transparent);
+}
+
 /* Battle arenas (components/rpg/battle/stage-layout.tsx): --hero-px is the
    screen size of one of the hero's art pixels, --hero-k × the arena height.
    Where the browser can round, it snaps to a whole number of device pixels

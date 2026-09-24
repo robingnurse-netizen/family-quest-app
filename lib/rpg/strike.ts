@@ -73,6 +73,10 @@ export const STRIKE_VARIANTS: StrikeVariant[] = [
   { name: "horizontal slash", animation: "slash", contact: 5, motion: "none" },
 ];
 
+/** Rogue's pounce (rogue manifest `pounce`, sheet frame 6): paws furthest
+ *  forward, on screen at impact alongside the hero's swing. */
+export const ROGUE_POUNCE_CONTACT = 6;
+
 /**
  * A one-shot animation timed so its `contact` frame is the one on screen
  * `leadMs` after it starts: a swing's contact at the impact (the dash for a
@@ -94,12 +98,19 @@ export function contactAnimation(anim: SpriteAnimation, contact: number, leadMs:
 /** Motion needs a run-up: below this lead (combo hits) the hero just swings. */
 export const MOTION_MIN_LEAD_MS = 150;
 
-export type StrikeMotion = { keyframes: Keyframe[]; duration: number };
+export type StrikeMotion = {
+  /** The sprite's motion (CSS `translate`, px). */
+  keyframes: Keyframe[];
+  /** His ground shadow's: it stays on the ground under a leap (shrinking
+   *  and fading while he's up) and moves along with a lunge. */
+  shadow: Keyframe[];
+  duration: number;
+};
 
 /**
- * Web Animations keyframes (CSS `translate`, px) for a variant's body motion,
- * landing on contact at `leadMs`. `size` is the stage height in px (the
- * hero's feet spot), so distances scale with the arena. Null: stand still.
+ * Web Animations keyframes for a variant's body motion, landing on contact
+ * at `leadMs`. `size` is the stage height in px (the hero's feet spot), so
+ * distances scale with the arena. Null: stand still.
  */
 export function strikeMotion(
   motion: StrikeVariant["motion"],
@@ -118,20 +129,24 @@ export function strikeMotion(
         { translate: `0 -${px(0.16)}`, offset: 0.55, easing: "cubic-bezier(0.6, 0, 0.9, 0.4)" },
         { translate: "0 0" },
       ],
+      shadow: [
+        { scale: "1", opacity: 1, easing: "cubic-bezier(0.2, 0.8, 0.4, 1)" },
+        { scale: "0.7", opacity: 0.5, offset: 0.55, easing: "cubic-bezier(0.6, 0, 0.9, 0.4)" },
+        { scale: "1", opacity: 1 },
+      ],
     };
   }
   // Lunge: a small draw back, drive forward into contact, hold through the
   // hit-stop, then settle back.
   const duration = leadMs + hitStopMs + 220;
   const contact = leadMs / duration;
-  return {
-    duration,
-    keyframes: [
-      { translate: "0 0" },
-      { translate: `-${px(0.03)} 0`, offset: contact * 0.5 },
-      { translate: `${px(0.09)} 0`, offset: contact },
-      { translate: `${px(0.09)} 0`, offset: (leadMs + hitStopMs) / duration },
-      { translate: "0 0" },
-    ],
-  };
+  const keyframes = [
+    { translate: "0 0" },
+    { translate: `-${px(0.03)} 0`, offset: contact * 0.5 },
+    { translate: `${px(0.09)} 0`, offset: contact },
+    { translate: `${px(0.09)} 0`, offset: (leadMs + hitStopMs) / duration },
+    { translate: "0 0" },
+  ];
+  // Horizontal only, so the shadow simply comes along.
+  return { duration, keyframes, shadow: keyframes };
 }

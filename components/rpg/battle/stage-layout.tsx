@@ -28,9 +28,15 @@ export const GROUND = 0.12;
  */
 export const HERO_BODY = 0.56 * (382 / 390);
 
+/**
+ * Rogue's standing body (ears to paws, curled tail included), as a share of
+ * the arena height. Kept from the old placeholder art: its 290px body in a
+ * 298px canvas drawn at 0.29.
+ */
+export const ROGUE_BODY = 0.29 * (290 / 298);
+
 /** Idle heights, as a share of the arena height. Epic bosses tower. */
 export const HEIGHT = {
-  rogue: 0.29,
   // Epic stops short of the arena top so tall idles (the Kraken) aren't clipped.
   boss: { low: 0.52, mid: 0.64, epic: 0.74 } satisfies Record<Boss["tier"], number>,
 };
@@ -56,9 +62,14 @@ export const STRIKE_X = {
   rogue: "calc(46% - var(--arena) * 0.3)",
 } as const;
 
-// The slicer crops the hero's canvases to the art with no padding, so his
-// idle canvas height is his standing body height in art pixels.
+// The slicer crops grid sheets' canvases to the art with no padding, so an
+// idle canvas height is that character's standing body height in art pixels.
 const heroIdle = SPRITES.hero.animations.idle;
+const rogueIdle = SPRITES.rogue.animations.idle;
+// His idle's tail wag makes its canvas taller than him: size from the
+// standing body (the slicer's bodyHeight — his idle frame 0, which is also
+// every action row's frame 0).
+const rogueBodyPx = rogueIdle.bodyHeight ?? rogueIdle.height;
 
 /**
  * An arena's sizing variables, for any box that draws battle characters:
@@ -86,6 +97,15 @@ export const ARENA_CLASS = "battle-arena";
  * (see useDevicePixelStep).
  */
 export const heroHeight = (anim: SpriteAnimation) => `calc(var(--hero-px) * ${anim.height})`;
+
+/**
+ * Display height of one of Rogue's animations: one scale for every pose,
+ * his standing body ROGUE_BODY of the arena tall. His art pixels come out
+ * finer than the hero's and aren't snapped to whole device pixels — at his
+ * size that would change it noticeably (up to ~15% on a phone).
+ */
+export const rogueHeight = (anim: SpriteAnimation) =>
+  `calc(var(--arena) * ${((ROGUE_BODY / rogueBodyPx) * anim.height).toFixed(5)})`;
 
 /**
  * Publishes the screen's device pixel (--device-px on :root) on 2×+
@@ -126,9 +146,19 @@ export function bossHeight(boss: Pick<Boss, "sprite_key" | "tier">) {
  * Children that stand at "bottom centre" — AnchoredSprite, BossSprite, the
  * aura — land with their anchor exactly on that spot.
  */
-export function FeetSpot({ x, className = "", children }: { x: string; className?: string; children: React.ReactNode }) {
+export function FeetSpot({
+  x,
+  className = "",
+  style,
+  children,
+}: {
+  x: string;
+  className?: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
   return (
-    <div className={`absolute inset-y-0 w-0 ${className}`} style={{ left: x }}>
+    <div className={`absolute inset-y-0 w-0 ${className}`} style={{ ...style, left: x }}>
       {children}
     </div>
   );

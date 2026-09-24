@@ -29,10 +29,16 @@
 // Coordinates are in source-sheet pixels and were measured from the sheets;
 // they're the thing to tweak if a crop looks wrong.
 //
+// GROUNDING (both kinds of sheet): every frame's lowest opaque pixel is put
+// exactly on the ground line, frame by frame, except frames an animation
+// lists as `airborne` (indices into its sliced frames: jumps, leaps,
+// flying, hovering) — tests/grounding.test.mjs checks every manifest.
+//
 // Grid sheets (`grid: { cell }`: transparent, one frame per cell, e.g. the
 // PixelLab hero) skip all of the above: see sliceGridAnimation.
 
 import sharp from "sharp";
+import { writeManifestShadows } from "./sprite-shadows.mjs";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -50,11 +56,12 @@ const CUT_SHARE = 0.2; // a component with ≥20% of its pixels on each side of 
 // Playback defaults per animation name (overridable per animation).
 const PLAYBACK = {
   idle: { fps: 6, loop: true },
-  running: { fps: 12, loop: true },
   move: { fps: 8, loop: true },
   attack: { fps: 10, loop: false },
-  pouncing: { fps: 8, loop: false },
-  barking: { fps: 8, loop: false },
+  bark: { fps: 10, loop: false },
+  bark_front: { fps: 10, loop: false },
+  pounce: { fps: 12, loop: false },
+  idle_front: { fps: 4, loop: true },
   hurt: { fps: 8, loop: false },
   chop: { fps: 10, loop: false },
   thrust: { fps: 10, loop: false },
@@ -97,40 +104,38 @@ const SHEETS = [
         thrust: { row: 2, frames: [0, 3, 4, 5, 6, 7, 8], fps: 16 },
         slash: { row: 4, frames: [0, 3, 4, 5, 6, 7, 8], fps: 16 },
         hurt: { row: 5, fps: 12 },
-        // Falls forward onto his face; the last frames lie flat.
-        ko: { row: 3, fps: 10 },
-        victory: { row: 6, fps: 10 },
+        // Falls forward onto his face; the last frames lie flat. Frame 5 is
+        // mid-fall (off the ground).
+        ko: { row: 3, fps: 10, airborne: [5] },
+        // The victory hop: frames 3–5 in the air.
+        victory: { row: 6, fps: 10, airborne: [3, 4, 5] },
       },
     },
   },
   {
-    file: "Gemini_Generated_Image_tccey0tccey0tcce.jpeg",
-    bg: [[196, 200, 212], [124, 132, 148]],
-    tol: 38,
+    // PixelLab export: 96×96 cells, 9 columns × 8 rows, transparent. Row 0
+    // (static rotations) isn't used in game. The in-game rows face right
+    // (three-quarter view); the "_front" rows face the viewer and aren't
+    // used yet (kept for later).
+    file: "rogue-pixellab.png",
+    grid: { cell: 96 },
     characters: {
       rogue: {
-        idle: { y0: 100, y1: 412, splits: [30, 380, 722, 1050, 1378, 1700, 2030] },
-        running: {
-          align: "mass",
-          rows: [
-            { y0: 503, y1: 782, splits: [60, 540, 1060, 1535, 2040] },
-            { y0: 786, y1: 1066, splits: [40, 565, 1035, 1550, 2040] },
-          ],
-        },
-        pouncing: {
-          y0: 1110, y1: 1548, splits: [30, 490, 1010, 1610, 2040],
-          exclude: [{ x: 0, y: 1105, w: 680, h: 68 }], // "POUNCING ANIMATION"
-        },
-        barking: {
-          y0: 1600, y1: 2046, splits: [20, 435, 870, 1245, 1640, 2040],
-          exclude: [
-            { x: 0, y: 1596, w: 640, h: 68 }, // "BARKING ANIMATION"
-            { x: 1950, y: 1870, w: 98, h: 178 }, // palette swatches
-          ],
-          // "WOOF" (separate letters) belongs to frame 2's bark but sits over
-          // frame 3's column.
-          assign: [{ x: 770, y: 1640, w: 190, h: 75, frame: 1 }],
-        },
+        // Breathing and a slow tail wag (the tail rises in frames 4–5), at
+        // the hero's idle pace. Same proportions as the action rows (its
+        // frame 0 is their frame 0).
+        idle: { row: 5, fps: 6 },
+        // His victory cheer.
+        bark: { row: 1, fps: 10 },
+        hurt: { row: 3, fps: 12 },
+        // Contact frame 6 (paws furthest forward): see ROGUE_POUNCE_CONTACT.
+        // Frames 3–7 are the leap.
+        pounce: { row: 6, fps: 12, airborne: [3, 4, 5, 6, 7] },
+        // Ends lying flat on his belly, chin down (frames 6–8 lifted 1px).
+        ko: { row: 7, fps: 10 },
+        // A little hop while barking (frames 1–5 rise off the ground).
+        bark_front: { row: 2, fps: 10, airborne: [1, 2, 3, 4, 5] },
+        idle_front: { row: 4, fps: 4 },
       },
     },
   },
@@ -148,7 +153,8 @@ const SHEETS = [
       alarm_clock_swarm: {
         idle: { y0: 488, y1: 762, splits: [560, 980] },
         move: { y0: 488, y1: 762, splits: [980, 1450] },
-        attack: { y0: 488, y1: 762, splits: [1450, 1668, 2035], fps: 3 },
+        // Frame 0 is a single clock flying at the party.
+        attack: { y0: 488, y1: 762, splits: [1450, 1668, 2035], fps: 3, airborne: [0] },
         hurt: { y0: 488, y1: 762, splits: [2035, 2420] },
         death: { y0: 488, y1: 762, splits: [2420, 2800] },
       },
@@ -200,6 +206,9 @@ const SHEETS = [
           y0: 62, y1: 372, splits: [40, 410, 760, 1117, 1560], fps: 3,
           dropBottom: { height: 40, maxArea: 1500 }, // frame numbers
           exclude: [{ x: 1273, y: 345, w: 24, h: 24 }], // "4" touching the scythe tip
+          // Hovers: the body stays at one height while the scythe swings
+          // below it — grounding by the lowest pixel would bob it ~30px.
+          airborne: [0, 1, 2, 3],
         },
         move: {
           y0: 376, y1: 758, splits: [0, 430, 916, 1395, 1865, 2322, 2800],
@@ -228,15 +237,18 @@ const SHEETS = [
         move: {
           y0: 508, y1: 776, splits: [0, 463, 922, 1389, 1848, 2325, 2816],
           exclude: [{ x: 0, y: 506, w: 235, h: 44 }], // "MOVE/HOVER"
+          airborne: [0, 1, 2, 3, 4, 5], // it hovers (the sheet's label)
         },
         attack: {
           y0: 810, y1: 1160, splits: [0, 355, 710, 1071, 1405, 1760, 2113, 2463, 2816],
           exclude: [{ x: 0, y: 806, w: 170, h: 42 }], // "ATTACK"
+          airborne: [3], // springs up before the splash
         },
         // 7 frames, not aligned to the drawn cell lines.
         defeated: {
           y0: 1181, y1: 1522, splits: [0, 340, 700, 1040, 1490, 1960, 2375, 2816],
           exclude: [{ x: 0, y: 1179, w: 320, h: 40 }], // "HURT/DEFEATED"
+          airborne: [1], // blown up off the ground by the hit
         },
       },
     },
@@ -482,11 +494,24 @@ async function sliceAnimation(sheet, isBg, name, anim) {
   const originX = -minX + PAD; // canvas x of the foot anchor
   const originY = -minY + PAD;
 
-  const buffers = frames.map((f) => {
+  // Grounding: every frame not listed in `airborne` is moved down so its
+  // lowest pixel sits on the ground line (the lowest pixel across frames),
+  // instead of floating where the sheet happened to draw it.
+  const ground = height - PAD - 1;
+  const airborne = new Set(anim.airborne ?? []);
+  const drop = frames.map((f, i) => {
+    if (airborne.has(i)) return 0;
+    let low = -Infinity;
+    for (const q of f.px) low = Math.max(low, Math.floor(q / f.W) - f.anchorY + originY);
+    return ground - low;
+  });
+  drop.forEach((d, i) => d && console.log(`  ${name}: frame ${i} grounded (${d}px down)`));
+
+  const buffers = frames.map((f, i) => {
     const out = Buffer.alloc(width * height * 4);
     for (const q of f.px) {
       const bx = q % f.W, by = Math.floor(q / f.W);
-      const cx = Math.round(bx - f.anchorX + originX), cy = by - f.anchorY + originY;
+      const cx = Math.round(bx - f.anchorX + originX), cy = by - f.anchorY + originY + drop[i];
       if (cx < 0 || cx >= width || cy < 0 || cy >= height) continue;
       const si = ((f.y0 + by) * sheet.W + bx) * 3, di = (cy * width + cx) * 4;
       out[di] = sheet.data[si];
@@ -499,7 +524,7 @@ async function sliceAnimation(sheet, isBg, name, anim) {
 
   // Foot anchor: horizontally the aligned feet; vertically the lowest body
   // pixel across frames (the "ground" line).
-  return { buffers, width, height, anchor: { x: Math.round(originX), y: height - PAD - 1 } };
+  return { buffers, width, height, anchor: { x: Math.round(originX), y: ground } };
 }
 
 // ---------------------------------------------------------------------------
@@ -534,11 +559,12 @@ function gridCell(sheet, cell, row, col) {
  * feet don't sit on the same line in every row, so each row is anchored on
  * its first frame (column 0 is the idle pose on every action row): feet x
  * from the bottom of its main body, the ground line at its lowest pixel.
- * Every other frame keeps its drawn position relative to that anchor, so
- * lunges, hops and falls move as drawn — except that no frame may sink
- * below the ground line: one whose lowest pixel is below it (a body lying
- * flat) is lifted to rest on it. The canvas is the frames' union, no
- * padding, so the idle canvas is exactly the standing body's height.
+ * Frames keep their drawn horizontal position (lunges move as drawn), and
+ * every grounded frame is moved so its lowest pixel sits exactly on the
+ * ground line — lifted if the sheet drew it lower (a body lying flat),
+ * dropped if it floats. Frames listed in `airborne` (indices into the
+ * sliced frames: jumps, a pounce, a fall) keep their height, but still may
+ * not sink below the line. The canvas is the frames' union, no padding.
  */
 function sliceGridAnimation(sheet, cell, name, anim) {
   const cols = anim.frames ?? Array.from({ length: Math.floor(sheet.W / cell) }, (_, c) => c);
@@ -549,10 +575,11 @@ function sliceGridAnimation(sheet, cell, name, anim) {
   const main = components({ mask: ref.mask, W: cell, h: cell }).reduce((a, b) => (b.px.length > a.px.length ? b : a));
   const footX = footAnchorX({ comps: [main.px] }, cell);
   const ground = ref.maxY;
-  const frames = cells.map((c) => {
-    const lift = Math.max(0, c.maxY - ground);
-    if (lift) console.log(`  ${name}: column ${c.col} lifted ${lift}px onto the ground line`);
-    return { ...c, dy: -lift };
+  const airborne = new Set(anim.airborne ?? []);
+  const frames = cells.map((c, i) => {
+    const dy = airborne.has(i) ? -Math.max(0, c.maxY - ground) : ground - c.maxY;
+    if (dy) console.log(`  ${name}: column ${c.col} ${dy < 0 ? `lifted ${-dy}` : `dropped ${dy}`}px onto the ground line`);
+    return { ...c, dy };
   });
 
   const ax = Math.round(footX);
@@ -572,7 +599,9 @@ function sliceGridAnimation(sheet, cell, name, anim) {
     }
     return out;
   });
-  return { buffers, width, height, anchor: { x: ax - minX, y: ground - minY } };
+  // The reference frame's height: the standing body (a tail wag or a raised
+  // sword in later frames makes the canvas taller than the character).
+  return { buffers, width, height, anchor: { x: ax - minX, y: ground - minY }, bodyHeight: ref.maxY - ref.minY + 1 };
 }
 
 // ---------------------------------------------------------------------------
@@ -585,7 +614,10 @@ function sliceGridAnimation(sheet, cell, name, anim) {
 // animation must be listed here.
 const FACING = {
   hero: { idle: "right", chop: "right", thrust: "right", slash: "right", hurt: "right", ko: "right", victory: "right" },
-  rogue: { idle: "right", running: "right", pouncing: "right", barking: "right" },
+  rogue: {
+    idle: "right", bark: "right", hurt: "right", pounce: "right", ko: "right",
+    bark_front: "front", idle_front: "front",
+  },
   trash_bag_slime: { idle: "front", attack: "right", hurt: "front", death: "front" },
   alarm_clock_swarm: { idle: "front", move: "front", attack: "right", hurt: "front", death: "front" },
   laundry_goblin: { idle: "right", move: "right", attack: "right", hurt: "right", death: "front" },
@@ -615,7 +647,7 @@ for (const sheetCfg of SHEETS) {
       const facing = FACING[character]?.[animName];
       if (!facing) throw new Error(`No FACING entry for ${character}/${animName}`);
       const label = `${character}/${animName}`;
-      const { buffers, width, height, anchor } = grid
+      const { buffers, width, height, anchor, bodyHeight } = grid
         ? sliceGridAnimation(sheet, grid.cell, label, anim)
         : await sliceAnimation(sheet, isBg, label, anim);
       const dir = join(charDir, animName);
@@ -635,6 +667,9 @@ for (const sheetCfg of SHEETS) {
         width,
         height,
         anchor,
+        ...(bodyHeight ? { bodyHeight } : {}),
+        // Frames exempt from grounding (jumps, hovering…): tests/grounding.
+        ...(anim.airborne?.length ? { airborne: anim.airborne } : {}),
         ...PLAYBACK[animName],
         ...(anim.fps ? { fps: anim.fps } : {}),
         ...(anim.loop !== undefined ? { loop: anim.loop } : {}),
@@ -643,5 +678,7 @@ for (const sheetCfg of SHEETS) {
       console.log(`${character}/${animName}: ${paths.length} frames, ${width}x${height}`);
     }
     writeFileSync(join(OUT_MANIFESTS, `${character}.json`), JSON.stringify(manifest, null, 2) + "\n");
+    // Ground shadows from the frames just written (scripts/sprite-shadows.mjs).
+    await writeManifestShadows(character);
   }
 }

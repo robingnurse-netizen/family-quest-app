@@ -13,7 +13,15 @@
       },
       "fps": 6,
       "loop": true,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/alarm_clock_swarm/idle/frame-01.png": [
+          152,
+          202.4,
+          0,
+          31
+        ]
+      }
     },
     "move": {
       "frames": [
@@ -27,7 +35,15 @@
       },
       "fps": 8,
       "loop": true,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/alarm_clock_swarm/move/frame-01.png": [
+          229,
+          77,
+          0,
+          25
+        ]
+      }
     },
     "attack": {
       "frames": [
@@ -40,9 +56,26 @@
         "x": 81,
         "y": 221
       },
+      "airborne": [
+        0
+      ],
       "fps": 3,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/alarm_clock_swarm/attack/frame-01.png": [
+          112.5,
+          141.9,
+          47,
+          27
+        ],
+        "/sprites/alarm_clock_swarm/attack/frame-02.png": [
+          108,
+          138.6,
+          0,
+          27
+        ]
+      }
     },
     "hurt": {
       "frames": [
@@ -56,7 +89,15 @@
       },
       "fps": 8,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/alarm_clock_swarm/hurt/frame-01.png": [
+          163.5,
+          75.9,
+          0,
+          22
+        ]
+      }
     },
     "death": {
       "frames": [
@@ -70,7 +111,15 @@
       },
       "fps": 6,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/alarm_clock_swarm/death/frame-01.png": [
+          165.5,
+          278.3,
+          0,
+          33
+        ]
+      }
     }
   }
 }

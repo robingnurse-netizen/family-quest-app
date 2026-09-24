@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { SPRITES } from "@/components/rpg/sprites/manifests";
 import { AnchoredSprite, needsMirror } from "@/components/rpg/sprites/anchored-sprite";
 import { bossAnimations } from "@/components/rpg/sprites/boss-animations";
 import { HeartIcon } from "@/components/ui/icons";
@@ -16,15 +15,13 @@ import {
   type RecapSummary,
 } from "@/lib/rpg/recap";
 import { registerDevTools, useBattleContext } from "./battle-provider";
-import { ArenaBackdrop, HERO_POSES } from "./arena-parts";
+import { ArenaBackdrop, HERO_POSES, RogueSprite } from "./arena-parts";
 import { HudBar } from "./hud-bar";
 import {
   ARENA_CLASS,
   ARENA_STYLE,
   FEET_X,
   FeetSpot,
-  HEIGHT,
-  arenaHeight,
   bossHeight,
   heroHeight,
   useDevicePixelStep,
@@ -231,14 +228,8 @@ function Recap({ summary: s, onClose }: { summary: RecapSummary; onClose: () => 
               className={`absolute inset-x-0 bottom-(--ground) top-0 z-10 ${hit ? "hero-hit" : ""}`}
               style={{ "--impact": `${BOSS_ATTACK_IMPACT_MS}ms` } as React.CSSProperties}
             >
-              <FeetSpot x={FEET_X.rogue}>
-                <AnchoredSprite
-                  animation={SPRITES.rogue.animations.idle}
-                  height={arenaHeight(HEIGHT.rogue)}
-                  mirror={needsMirror(SPRITES.rogue.animations.idle.facing, "right")}
-                  alt=""
-                />
-              </FeetSpot>
+              {/* Rogue flinches, falls and gets up with the hero. */}
+              <RogueSprite pose={shown.hero.pose} playKey={shown.hero.key} />
               <FeetSpot x={FEET_X.hero}>
                 <AnchoredSprite
                   key={shown.hero.key}

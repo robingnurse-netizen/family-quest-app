@@ -15,7 +15,27 @@
       },
       "fps": 3,
       "loop": true,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/trash_bag_slime/idle/frame-01.png": [
+          96,
+          191.4,
+          0,
+          12
+        ],
+        "/sprites/trash_bag_slime/idle/frame-02.png": [
+          98,
+          202.4,
+          0,
+          17
+        ],
+        "/sprites/trash_bag_slime/idle/frame-03.png": [
+          94.5,
+          199.1,
+          0,
+          13
+        ]
+      }
     },
     "attack": {
       "frames": [
@@ -31,7 +51,27 @@
       },
       "fps": 6,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/trash_bag_slime/attack/frame-01.png": [
+          137,
+          191.4,
+          0,
+          6
+        ],
+        "/sprites/trash_bag_slime/attack/frame-02.png": [
+          139,
+          297,
+          0,
+          6
+        ],
+        "/sprites/trash_bag_slime/attack/frame-03.png": [
+          137,
+          224.4,
+          0,
+          6
+        ]
+      }
     },
     "hurt": {
       "frames": [
@@ -45,7 +85,15 @@
       },
       "fps": 8,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/trash_bag_slime/hurt/frame-01.png": [
+          150.5,
+          313.5,
+          0,
+          9
+        ]
+      }
     },
     "death": {
       "frames": [
@@ -59,7 +107,15 @@
       },
       "fps": 6,
       "loop": false,
-      "facing": "front"
+      "facing": "front",
+      "shadow": {
+        "/sprites/trash_bag_slime/death/frame-01.png": [
+          150,
+          321.2,
+          0,
+          21
+        ]
+      }
     }
   }
 }

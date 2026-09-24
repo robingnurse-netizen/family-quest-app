@@ -18,9 +18,60 @@
         "x": 16,
         "y": 61
       },
+      "bodyHeight": 60,
       "fps": 6,
       "loop": true,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/hero/idle/frame-01.png": [
+          17,
+          26.4,
+          0,
+          7
+        ],
+        "/sprites/hero/idle/frame-02.png": [
+          17,
+          26.4,
+          0,
+          7
+        ],
+        "/sprites/hero/idle/frame-03.png": [
+          18,
+          24.2,
+          0,
+          4
+        ],
+        "/sprites/hero/idle/frame-04.png": [
+          17.5,
+          25.3,
+          0,
+          7
+        ],
+        "/sprites/hero/idle/frame-05.png": [
+          18,
+          24.2,
+          0,
+          4
+        ],
+        "/sprites/hero/idle/frame-06.png": [
+          18,
+          24.2,
+          0,
+          4
+        ],
+        "/sprites/hero/idle/frame-07.png": [
+          18,
+          24.2,
+          0,
+          4
+        ],
+        "/sprites/hero/idle/frame-08.png": [
+          17.5,
+          25.3,
+          0,
+          7
+        ]
+      }
     },
     "chop": {
       "frames": [
@@ -40,9 +91,66 @@
         "x": 36,
         "y": 66
       },
+      "bodyHeight": 60,
       "fps": 16,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/hero/chop/frame-01.png": [
+          37,
+          24.2,
+          0,
+          3
+        ],
+        "/sprites/hero/chop/frame-02.png": [
+          32.5,
+          34.1,
+          0,
+          8
+        ],
+        "/sprites/hero/chop/frame-03.png": [
+          35,
+          28.6,
+          0,
+          7
+        ],
+        "/sprites/hero/chop/frame-04.png": [
+          36,
+          33,
+          0,
+          8
+        ],
+        "/sprites/hero/chop/frame-05.png": [
+          37,
+          35.2,
+          0,
+          8
+        ],
+        "/sprites/hero/chop/frame-06.png": [
+          36,
+          37.4,
+          0,
+          8
+        ],
+        "/sprites/hero/chop/frame-07.png": [
+          35.5,
+          38.5,
+          0,
+          8
+        ],
+        "/sprites/hero/chop/frame-08.png": [
+          35.5,
+          38.5,
+          0,
+          8
+        ],
+        "/sprites/hero/chop/frame-09.png": [
+          35.5,
+          38.5,
+          0,
+          8
+        ]
+      }
     },
     "thrust": {
       "frames": [
@@ -60,9 +168,54 @@
         "x": 19,
         "y": 59
       },
+      "bodyHeight": 60,
       "fps": 16,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/hero/thrust/frame-01.png": [
+          20,
+          24.2,
+          0,
+          3
+        ],
+        "/sprites/hero/thrust/frame-02.png": [
+          16.5,
+          31.9,
+          0,
+          7
+        ],
+        "/sprites/hero/thrust/frame-03.png": [
+          17,
+          37.4,
+          0,
+          7
+        ],
+        "/sprites/hero/thrust/frame-04.png": [
+          17.5,
+          38.5,
+          0,
+          7
+        ],
+        "/sprites/hero/thrust/frame-05.png": [
+          17.5,
+          38.5,
+          0,
+          7
+        ],
+        "/sprites/hero/thrust/frame-06.png": [
+          17.5,
+          38.5,
+          0,
+          7
+        ],
+        "/sprites/hero/thrust/frame-07.png": [
+          17.5,
+          38.5,
+          0,
+          7
+        ]
+      }
     },
     "slash": {
       "frames": [
@@ -80,9 +233,54 @@
         "x": 33,
         "y": 59
       },
+      "bodyHeight": 60,
       "fps": 16,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/hero/slash/frame-01.png": [
+          34,
+          24.2,
+          0,
+          3
+        ],
+        "/sprites/hero/slash/frame-02.png": [
+          32.5,
+          29.7,
+          0,
+          7
+        ],
+        "/sprites/hero/slash/frame-03.png": [
+          31,
+          33,
+          0,
+          7
+        ],
+        "/sprites/hero/slash/frame-04.png": [
+          31,
+          33,
+          0,
+          7
+        ],
+        "/sprites/hero/slash/frame-05.png": [
+          32,
+          33,
+          0,
+          7
+        ],
+        "/sprites/hero/slash/frame-06.png": [
+          32,
+          33,
+          0,
+          7
+        ],
+        "/sprites/hero/slash/frame-07.png": [
+          32,
+          33,
+          0,
+          6
+        ]
+      }
     },
     "hurt": {
       "frames": [
@@ -102,9 +300,66 @@
         "x": 24,
         "y": 59
       },
+      "bodyHeight": 60,
       "fps": 12,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/hero/hurt/frame-01.png": [
+          25,
+          24.2,
+          0,
+          3
+        ],
+        "/sprites/hero/hurt/frame-02.png": [
+          24.5,
+          25.3,
+          0,
+          7
+        ],
+        "/sprites/hero/hurt/frame-03.png": [
+          24,
+          26.4,
+          0,
+          7
+        ],
+        "/sprites/hero/hurt/frame-04.png": [
+          24.5,
+          27.5,
+          0,
+          4
+        ],
+        "/sprites/hero/hurt/frame-05.png": [
+          24.5,
+          27.5,
+          0,
+          4
+        ],
+        "/sprites/hero/hurt/frame-06.png": [
+          24.5,
+          27.5,
+          0,
+          4
+        ],
+        "/sprites/hero/hurt/frame-07.png": [
+          24.5,
+          27.5,
+          0,
+          4
+        ],
+        "/sprites/hero/hurt/frame-08.png": [
+          23.5,
+          29.7,
+          0,
+          7
+        ],
+        "/sprites/hero/hurt/frame-09.png": [
+          24.5,
+          27.5,
+          0,
+          4
+        ]
+      }
     },
     "ko": {
       "frames": [
@@ -124,9 +379,69 @@
         "x": 39,
         "y": 59
       },
+      "bodyHeight": 60,
+      "airborne": [
+        5
+      ],
       "fps": 10,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/hero/ko/frame-01.png": [
+          40,
+          24.2,
+          0,
+          3
+        ],
+        "/sprites/hero/ko/frame-02.png": [
+          40,
+          24.2,
+          0,
+          4
+        ],
+        "/sprites/hero/ko/frame-03.png": [
+          39,
+          26.4,
+          0,
+          7
+        ],
+        "/sprites/hero/ko/frame-04.png": [
+          36,
+          24.2,
+          0,
+          7
+        ],
+        "/sprites/hero/ko/frame-05.png": [
+          29,
+          26.4,
+          0,
+          7
+        ],
+        "/sprites/hero/ko/frame-06.png": [
+          31,
+          39.6,
+          2,
+          3
+        ],
+        "/sprites/hero/ko/frame-07.png": [
+          40.5,
+          64.9,
+          0,
+          5
+        ],
+        "/sprites/hero/ko/frame-08.png": [
+          35.5,
+          75.9,
+          0,
+          7
+        ],
+        "/sprites/hero/ko/frame-09.png": [
+          35,
+          77,
+          0,
+          5
+        ]
+      }
     },
     "victory": {
       "frames": [
@@ -146,9 +461,71 @@
         "x": 30,
         "y": 62
       },
+      "bodyHeight": 60,
+      "airborne": [
+        3,
+        4,
+        5
+      ],
       "fps": 10,
       "loop": false,
-      "facing": "right"
+      "facing": "right",
+      "shadow": {
+        "/sprites/hero/victory/frame-01.png": [
+          31,
+          24.2,
+          0,
+          3
+        ],
+        "/sprites/hero/victory/frame-02.png": [
+          30.5,
+          23.1,
+          0,
+          4
+        ],
+        "/sprites/hero/victory/frame-03.png": [
+          30,
+          24.2,
+          0,
+          6
+        ],
+        "/sprites/hero/victory/frame-04.png": [
+          31,
+          35.2,
+          7,
+          3
+        ],
+        "/sprites/hero/victory/frame-05.png": [
+          29,
+          41.8,
+          12,
+          3
+        ],
+        "/sprites/hero/victory/frame-06.png": [
+          29,
+          41.8,
+          9,
+          3
+        ],
+        "/sprites/hero/victory/frame-07.png": [
+          29,
+          35.2,
+          0,
+          8
+        ],
+        "/sprites/hero/victory/frame-08.png": [
+          29.5,
+          34.1,
+          0,
+          8
+        ],
+        "/sprites/hero/victory/frame-09.png": [
+          29.5,
+          34.1,
+          0,
+          7
+        ]
+      }
     }
   }
 }
