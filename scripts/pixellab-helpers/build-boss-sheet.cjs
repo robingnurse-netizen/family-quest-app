@@ -22,7 +22,7 @@
 //     splashes / impact effects that the sheet drew sinking into the
 //     ground, which grounding would otherwise answer by lifting the body).
 // A boss's `fix(px, w, h, row, frame)` then applies its own hand fixes
-// (goblin-fixes.cjs).
+// (goblin-fixes.cjs, kraken-fixes.cjs), returning px counts to log.
 const sharp = require('sharp');
 const path = require('node:path');
 const { load, clusters, MIN, S } = require('./specks.cjs');
@@ -48,6 +48,11 @@ const BOSSES = {
   chronosphinx: {
     file: 'chronosphinx-pixellab.png', cell: 124,
     rows: [row('idle'), row('attack'), row('hurt'), row('death'), row('move')],
+  },
+  abyssal_kraken: {
+    file: 'abyssal-kraken-pixellab.png', cell: 112,
+    rows: [row('idle'), row('attack'), row('hurt'), row('death'), row('move')],
+    fix: require('./kraken-fixes.cjs'), // the loose tentacle piece
   },
 };
 
@@ -82,7 +87,7 @@ if (!cfg) throw new Error(`Unknown boss ${key}; one of ${Object.keys(BOSSES).joi
         }
       }
       if (rw.clip?.includes(f)) for (let y = groundY + 1; y < im.h; y++) for (let x = 0; x < im.w; x++) px[(y * im.w + x) * 4 + 3] = 0;
-      if (cfg.fix) { const r = cfg.fix(px, im.w, im.h, rw.name, f); if (r.dripped || r.ear) fixed += ` ${f}:${r.dripped}/${r.ear}`; }
+      if (cfg.fix) { const r = cfg.fix(px, im.w, im.h, rw.name, f); if (Object.values(r).some(Boolean)) fixed += ` ${f}:${Object.values(r).join('/')}`; }
       const [ox, oy] = rw.off;
       for (let y = 0; y < im.h; y++) for (let x = 0; x < im.w; x++) {
         const si = (y * im.w + x) * 4; if (!px[si + 3]) continue;
@@ -91,7 +96,7 @@ if (!cfg) throw new Error(`Unknown boss ${key}; one of ${Object.keys(BOSSES).joi
         px.copy(sheet, (dy * SW + dx) * 4, si, si + 4);
       }
     }
-    console.log(`${rw.name} (${rw.dir}): removed ${removed} specks, kept ${kept} debris clusters${fixed ? `; fix (frame:drip px/ear px)${fixed}` : ''}`);
+    console.log(`${rw.name} (${rw.dir}): removed ${removed} specks, kept ${kept} debris clusters${fixed ? `; fix (frame:px per fix)${fixed}` : ''}`);
   }
   const out = path.join(__dirname, '..', '..', 'assets', cfg.file);
   await sharp(sheet, { raw: { width: SW, height: CELL * ROWS.length, channels: 4 } }).png({ compressionLevel: 9 }).toFile(out);

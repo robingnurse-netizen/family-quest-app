@@ -277,31 +277,24 @@ const SHEETS = [
     },
   },
   {
-    file: "Gemini_Generated_Image_hgc2iehgc2iehgc2.jpeg",
-    bg: [[77, 86, 101], [158, 176, 190]],
-    tol: 30,
+    // PixelLab epic (112px v3 canvas), rows idle / attack / hurt / death /
+    // move, facing left. The octopus floats like the Chronosphinx: one
+    // shared ground line (cell row 100: frame 0 8px up, clear of the
+    // attack's splash); only the death's sprawl lands.
+    file: "abyssal-kraken-pixellab.png",
+    grid: { cell: 112 },
     characters: {
       abyssal_kraken: {
-        idle: {
-          y0: 92, y1: 478, splits: [0, 475, 940, 1407, 1875, 2340, 2816],
-          exclude: [{ x: 0, y: 90, w: 120, h: 40 }], // "IDLE"
-        },
-        move: {
-          y0: 508, y1: 776, splits: [0, 463, 922, 1389, 1848, 2325, 2816],
-          exclude: [{ x: 0, y: 506, w: 235, h: 44 }], // "MOVE/HOVER"
-          airborne: [0, 1, 2, 3, 4, 5], // it hovers (the sheet's label)
-        },
-        attack: {
-          y0: 810, y1: 1160, splits: [0, 355, 710, 1071, 1405, 1760, 2113, 2463, 2816],
-          exclude: [{ x: 0, y: 806, w: 170, h: 42 }], // "ATTACK"
-          airborne: [3], // springs up before the splash
-        },
-        // 7 frames, not aligned to the drawn cell lines.
-        defeated: {
-          y0: 1181, y1: 1522, splits: [0, 340, 700, 1040, 1490, 1960, 2375, 2816],
-          exclude: [{ x: 0, y: 1179, w: 320, h: 40 }], // "HURT/DEFEATED"
-          airborne: [1], // blown up off the ground by the hit
-        },
+        idle: { row: 0, ground: 100, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        // Coils its tentacles (1–4), lashes out in a glowing splash: contact
+        // frame 6 (the biggest spray).
+        attack: { row: 1, ground: 100, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8], contact: 6 },
+        // Knocked back, tentacles flailing (peak 4–5).
+        hurt: { row: 2, ground: 100, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        // The spiral glow flashes out (1–2), it sags and drops (3–6, still
+        // in the air), then lies sprawled flat on the ground (7–8).
+        death: { row: 3, ground: 100, airborne: [0, 1, 2, 3, 4, 5, 6] },
+        move: { row: 4, ground: 100, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
       },
     },
   },
@@ -678,7 +671,7 @@ const FACING = {
   cable_spider: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   magma_behemoth: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   chronosphinx: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  abyssal_kraken: { idle: "front", move: "right", attack: "front", defeated: "front" },
+  abyssal_kraken: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   shogun_bot: { idle: "right", move: "right", attack: "right", defeated: "right" },
 };
 

@@ -82,9 +82,9 @@ PROJECT STATUS:
     death [0–6] — its heap lands; every row shares one `ground` line, the
     idle bob's lowest point), chronosphinx (hovers the same way: idle /
     attack / hurt / move all, death [0–6]; ground = its slash arc's lowest
-    point), laundry_goblin attack [5–7] / hurt [3–7] (hops), cable_spider
-    attack [3–7] (pounce), abyssal_kraken move (all: hovers), attack [3],
-    defeated [1]. Biggest fixes: Magma Behemoth's defeat (18–26px) and
+    point), abyssal_kraken (the same: all but death [7–8]),
+    laundry_goblin attack [5–7] / hurt [3–7] (hops), cable_spider
+    attack [3–7] (pounce). Biggest fixes: Magma Behemoth's defeat (18–26px) and
     attack (9px) frames, Kraken attack/defeat, the slime's idle; many 1px
     jitters. tests/grounding.test.mjs checks every frame of every
     character. Measured in the browser at 390px / 820px × 1x / 2x: each
@@ -676,6 +676,10 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   Chronosphinx — DONE: assets/chronosphinx-pixellab.png (124px grid),
   hovers (ground 106: frame 0 8px up, only the death lands), contact 5,
   10 generations, no re-rolls.
+  Abyssal Kraken — DONE: assets/abyssal-kraken-pixellab.png (112px
+  grid), hovers (ground 100, only the death lands), contact 6,
+  10 generations, no re-rolls; its loose floating tentacle piece is
+  removed by kraken-fixes.cjs.
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via

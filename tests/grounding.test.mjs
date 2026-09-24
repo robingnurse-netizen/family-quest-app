@@ -78,8 +78,12 @@ test("the airborne exemptions are the deliberate ones", () => {
     "chronosphinx/hurt": [0, 1, 2, 3, 4, 5, 6, 7, 8],
     "chronosphinx/death": [0, 1, 2, 3, 4, 5, 6],
     "chronosphinx/move": [0, 1, 2, 3, 4, 5, 6, 7, 8],
-    "abyssal_kraken/move": [0, 1, 2, 3, 4, 5], // hovers
-    "abyssal_kraken/attack": [3], // springs up
-    "abyssal_kraken/defeated": [1], // blown off the ground
+    // The octopus floats the same way (frame 0 8px up); the death's
+    // sprawl (7–8) lands.
+    "abyssal_kraken/idle": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "abyssal_kraken/attack": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "abyssal_kraken/hurt": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "abyssal_kraken/death": [0, 1, 2, 3, 4, 5, 6],
+    "abyssal_kraken/move": [0, 1, 2, 3, 4, 5, 6, 7, 8],
   });
 });

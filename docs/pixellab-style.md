@@ -345,6 +345,33 @@ Tools (rough helpers in scripts/pixellab-helpers/, inputs git-ignored):
   3–6 (still hovering), then it lies slumped with its wings draped (7–8,
   dropped 5 px onto the line: the crash). X eyes skipped again.
 
+### Abyssal Kraken record
+
+- Character `ab99db9a-f403-4f91-adcd-b6d77b91260b`; 112×112 v3 canvas,
+  2 generations each: 10 generations, no re-rolls.
+- Sheet: assets/abyssal-kraken-pixellab.png (112px cells). Idle 79×79.
+- Loose tentacle removed (after browser review): the rotation has a
+  tentacle piece floating free below-left of the body, carried into the
+  early frames of every animation. kraken-fixes.cjs (the builder's `fix`
+  hook) deletes it — any small non-body piece in that corner, counted
+  4-connected since it touches a tentacle only at a corner in idle 3 / 6.
+  Where it merges into a real curling tentacle (hurt 5–8, the death's
+  sprawl) it stays.
+- Wording: every prompt opens with "the giant dark octopus with a glowing
+  blue whirlpool spiral on its round head, not a person, no legs, only
+  eight curling tentacles" plus "floating in mid-air as if underwater with
+  empty air below its tentacle tips" / "staying afloat" / "swims through
+  the air in place like a squid, never touching the ground". No humanoid
+  drift.
+- Hover like the Chronosphinx: `ground` cell row 100 (frame 0 8 px up,
+  clear of the attack splash's lowest pixel, 98); only the death lands.
+- Attack: coils (1–4), then a big glowing water splash (contact frame 6);
+  the tentacle lash itself is small — the CSS lunge carries the forward
+  motion, as with the swarm. Hurt peak 4–5. Death: the spiral glow
+  flashes out (1–2), the head goes dull and sags, it sinks and sprawls
+  flat, tentacles splayed (7–8, dropped 4 px onto the line). No ink puddle
+  or X eyes; a limp splat is the octopus's "broken", so no re-roll.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -362,7 +389,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | NEW boss: needs a roster migration |
 | Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | animated + integrated (roster pass); very dark: check it at night |
 | Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | animated + integrated (roster pass); hovers via the slicer's `ground` |
-| Abyssal Kraken | epic (88) | ab99db9a-f403-4f91-adcd-b6d77b91260b | 77 × 75 | dark: check it at night; hovers |
+| Abyssal Kraken | epic (88) | ab99db9a-f403-4f91-adcd-b6d77b91260b | 77 × 75 | animated + integrated (roster pass); hovers; dark: check it at night |
 | Shogun-Bot | epic (88) | 1a1a4b4d-65c1-4713-befe-5e3976ebb006 | 68 × 85 | navy/gold more than cyan |
 
 Batch cost: 22 (11 characters) + 12 (6 re-rolls) generations. Tier 1
