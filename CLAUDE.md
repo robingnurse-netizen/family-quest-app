@@ -78,7 +78,9 @@ PROJECT STATUS:
     drew it floating, lifted if it sank — except frames an animation lists
     as `airborne` (written into the manifest): hero ko [5] (mid-fall),
     hero victory [3–5] (hop), rogue pounce [3–7], rogue bark_front [1–5],
-    alarm_clock_swarm attack [0] (flying clock), chronosphinx idle (all:
+    alarm_clock_swarm (a hovering ring: idle / attack / hurt / move all,
+    death [0–6] — its heap lands; every row shares one `ground` line, the
+    idle bob's lowest point), chronosphinx idle (all:
     it hovers, and its lowest pixel is the swinging scythe — grounding it
     would bob it ~30px), abyssal_kraken move (all: hovers), attack [3],
     defeated [1]. Biggest fixes: Magma Behemoth's defeat (18–26px) and
@@ -198,8 +200,8 @@ PROJECT STATUS:
     thrust, slash, hurt, ko, victory (fps 6 / 16 / 16 / 16 / 12 / 10 / 10).
     The old Gemini hero sheet (Gemini_Generated_Image_4emgkn…png) and its
     frames are deleted (git history keeps them).
-  * Known art limits: single-frame animations (Cable Spider all; Alarm
-    Clock Swarm idle/move/hurt/death; Goblin death) are
+  * Known art limits: single-frame animations (Cable Spider all;
+    Goblin death) are
     static; Chronosphinx attack frames 3–4 share an overlapping beam;
     Shogun-Bot idle drops sheet frames 5 and 7 (sword flash). Lying down,
     the hero's legs overlap Rogue on the same ground line; Rogue is drawn
@@ -305,7 +307,9 @@ PROJECT STATUS:
     (jumpToBoss("cable_spider" | 4 | null): a roster boss by sprite_key or
     1-based activation position, full HP, this tab only — no writes;
     bosses() prints the roster with positions)
-    (stripped from production builds).
+    (stripped from production builds). Previewing each boss animation,
+    including the escape (emit "escaped" with the row jumpToBoss put on
+    stage): docs/pixellab-style.md, "Checking a boss in the browser".
   * Sprites: every animation carries its own `facing` (right/left/front),
     set per animation in scripts/slice-sprites.mjs FACING — judged by where
     the face/eyes point and which way attacks/projectiles travel; the
@@ -653,6 +657,11 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   hurt / death / move, all facing left; 9 frames each), sliced by the
   grid entry in scripts/slice-sprites.mjs; idle 51×59 = pixel parity.
   PixelLab character a380da4d-4c2a-402f-bf6b-f1063c735e15.
+  Alarm Clock Swarm — DONE: assets/alarm-clock-swarm-pixellab.png (96px
+  grid, same rows; assembled + speck-cleaned from the PixelLab frames),
+  attack contact 4, death guided by a hand-drawn end frame; grid entries
+  take an optional `ground` (cell row) for hovering bosses. Details in the
+  style guide's swarm record.
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via

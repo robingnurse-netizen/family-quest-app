@@ -167,18 +167,35 @@ const SHEETS = [
     },
   },
   {
+    // PixelLab (docs/pixellab-style.md): 96×96 cells, 9 columns, rows idle /
+    // attack / hurt / death / move, facing left (south-west). Assembled from
+    // the PixelLab frames with the south-west rotation at the same spot in
+    // every cell (frame 0 of every row is that rotation) and stray specks
+    // cleaned (see the style guide's record). A ring of six flying clocks:
+    // it hovers, so every row shares one ground line, `ground` (cell row 78,
+    // the idle bob's lowest point) — each row's frame 0 floats 4px above it.
+    file: "alarm-clock-swarm-pixellab.png",
+    grid: { cell: 96 },
+    characters: {
+      alarm_clock_swarm: {
+        idle: { row: 0, ground: 78, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        // Bunches up tight (frame 3), bursts ringing on contact (frame 4),
+        // spreads back out.
+        attack: { row: 1, ground: 78, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8], contact: 4 },
+        // Scatters apart and snaps back together; peak spread frame 4.
+        hurt: { row: 2, ground: 78, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        // Collapses out of the air (frames 0–6 still hovering) and lands as
+        // a heap of broken clocks on the ground (7–8; 8 is hand-drawn).
+        death: { row: 3, ground: 78, airborne: [0, 1, 2, 3, 4, 5, 6] },
+        move: { row: 4, ground: 78, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+      },
+    },
+  },
+  {
     file: "Gemini_Generated_Image_8cf69b8cf69b8cf6.jpeg",
     bg: [[241, 241, 241], [128, 128, 128]],
     tol: 22,
     characters: {
-      alarm_clock_swarm: {
-        idle: { y0: 488, y1: 762, splits: [560, 980] },
-        move: { y0: 488, y1: 762, splits: [980, 1450] },
-        // Frame 0 is a single clock flying at the party.
-        attack: { y0: 488, y1: 762, splits: [1450, 1668, 2035], fps: 3, airborne: [0] },
-        hurt: { y0: 488, y1: 762, splits: [2035, 2420] },
-        death: { y0: 488, y1: 762, splits: [2420, 2800] },
-      },
       laundry_goblin: {
         idle: { y0: 859, y1: 1126, splits: [565, 768, 983], fps: 2 },
         move: { y0: 859, y1: 1126, splits: [983, 1178, 1336, 1505] },
@@ -586,6 +603,8 @@ function gridCell(sheet, cell, row, col) {
  * dropped if it floats. Frames listed in `airborne` (indices into the
  * sliced frames: jumps, a pounce, a fall) keep their height, but still may
  * not sink below the line. The canvas is the frames' union, no padding.
+ * `ground` (a cell row) overrides the ground line for a hovering character
+ * whose frame 0 floats: every row of it then shares that line.
  */
 function sliceGridAnimation(sheet, cell, name, anim) {
   const cols = anim.frames ?? Array.from({ length: Math.floor(sheet.W / cell) }, (_, c) => c);
@@ -595,7 +614,7 @@ function sliceGridAnimation(sheet, cell, name, anim) {
   const ref = cells[0];
   const main = components({ mask: ref.mask, W: cell, h: cell }).reduce((a, b) => (b.px.length > a.px.length ? b : a));
   const footX = footAnchorX({ comps: [main.px] }, cell);
-  const ground = ref.maxY;
+  const ground = anim.ground ?? ref.maxY;
   const airborne = new Set(anim.airborne ?? []);
   const frames = cells.map((c, i) => {
     const dy = airborne.has(i) ? -Math.max(0, c.maxY - ground) : ground - c.maxY;
@@ -640,7 +659,7 @@ const FACING = {
     bark_front: "front", idle_front: "front",
   },
   trash_bag_slime: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  alarm_clock_swarm: { idle: "front", move: "front", attack: "right", hurt: "front", death: "front" },
+  alarm_clock_swarm: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   laundry_goblin: { idle: "right", move: "right", attack: "right", hurt: "right", death: "front" },
   cable_spider: { idle: "front", move: "front", attack: "front", hurt: "front", death: "front" },
   magma_behemoth: { idle: "right", move: "right", attack: "right", defeated: "right" },

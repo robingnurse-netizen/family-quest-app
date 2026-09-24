@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Boss } from "@/lib/supabase/types";
 import type { OverlayMoment } from "@/lib/rpg/battle-events";
-import { createNoRepeatPicker } from "@/lib/random";
+import { createNoRepeatPicker, uuidV4 } from "@/lib/random";
 import {
   HIT_TIERS,
   ROGUE_POUNCE_CONTACT,
@@ -784,7 +784,7 @@ function devNextBoss(boss: Boss): Boss {
   const [sprite_key, name, tier] = DEV_ROSTER[(i + 1) % DEV_ROSTER.length];
   return {
     ...boss,
-    id: crypto.randomUUID(),
+    id: uuidV4(),
     name,
     tier,
     sprite_key,

@@ -139,6 +139,44 @@ as the blow lands (BOSS_ATTACK_IMPACT_MS, 210ms; lib/rpg/strike.ts
 bossAttackAnimation). At 10 fps that drops the first 3 frames, so put the
 wind-up's key pose within ~2 frames of contact.
 
+## Checking a boss in the browser (dev console)
+
+`next dev` only (`window.__fqBattle`, on /player). Nothing is written to the
+database. First put the boss on stage in this tab:
+
+```js
+await __fqBattle.jumpToBoss("alarm_clock_swarm"); // any sprite_key, or a 1-based roster position
+```
+
+| Animation | Command |
+|-----------|---------|
+| idle   | plays on its own once the boss is on stage |
+| attack | `__fqBattle.hurt(10)` (a missed quest: the boss hits the party) |
+| hurt   | `__fqBattle.hit(15)` (a quest strikes it; also the hit overlay) |
+| death  | `__fqBattle.finalBlow()` |
+| move (escape) | the snippet below |
+
+The escape needs the real boss row: `escaped` events for any other `id`
+than the boss on stage are ignored, and `bosses()` only prints a table (it
+returns nothing). `jumpToBoss` emits an `activated` event carrying exactly
+the boss it put on stage, so catch it with `listen()` (which returns its
+unsubscribe function):
+
+```js
+// Swap in any boss's sprite_key.
+let boss;
+const stop = __fqBattle.listen((e) => { if (e.type === "activated") boss = e.boss; });
+await __fqBattle.jumpToBoss("alarm_clock_swarm");
+stop();
+__fqBattle.emit({ type: "escaped", boss: { ...boss, status: "escaped" } });
+```
+
+The boss plays `move`, slides off to the right (mirrored to face the way it
+flees), the banner says "<Boss> escaped!", then the tab's active boss (the
+same dev boss) re-enters. `__fqBattle.jumpToBoss(null)` goes back to the
+database's boss. (`knockOut()` only empties the party; the escape itself
+happens in the nightly reset.)
+
 ## Pilot record: Trash-Bag Slime
 
 - Character `a380da4d-4c2a-402f-bf6b-f1063c735e15` (v3, 64, side, 8 dirs);
@@ -148,6 +186,41 @@ wind-up's key pose within ~2 frames of contact.
   3), move, attack-v2 (contact frame 5), death-v2. The first attack / death
   remain in the PixelLab character, unused.
 
+## Alarm Clock Swarm record
+
+- Character `fa3bd6fe-c464-43f2-bea0-24618512c504` (a ring of six winged
+  clocks). Chosen animations: idle, attack (contact frame 4: the ring
+  bunches up in frame 3, bursts in 4), hurt (peak spread frame 4), move,
+  death-v3. The unused death / death-v2 remain in the PixelLab character.
+- Cost: 2 generations per animation, not 1 — the swarm's silhouette grew
+  the v3 canvas to 92×92. 5 + 1 re-roll (death-v2) at 2 each, death-v3 at 1
+  (with an end frame the canvas stayed 64): 13 generations.
+- Wording: every prompt restates the body plan ("a loose flock of six small
+  separate alarm clocks with tiny bat-like wings … Not a creature with a
+  body: no legs, no feet, only flying clocks"). The attack stayed in place
+  (bunch up, burst) instead of diving left; the CSS lunge supplies the
+  forward motion. Deaths without an end frame either fell into a tidy
+  intact pile (v1) or shattered but kept floating (v2).
+- What worked for the death: a hand-assembled END FRAME
+  (`end_frame_base64`, same 64×64 canvas as the rotation): the six clocks
+  cut from the rotation and rearranged into a low heap on the rotation's
+  bottom row (on their sides / upside down, one split in half, blacked-out
+  cracked faces, springs, bent hammers, shards, wings underneath). v3
+  interpolates the ring into it and ends on it pixel for pixel. The
+  weakness: little shattering in the air — breakage shows from the landing.
+- Sheet: assets/alarm-clock-swarm-pixellab.png, assembled from the
+  PixelLab frames (96px cells; v3 canvases differ per animation — 92×92,
+  96×80 for the end-frame death — so each frame is placed with the
+  rotation at the same spot in every cell). Speck cleanup, 8-connected:
+  frame 0 of every row and all of idle / move lose every cluster under
+  10 px; attack / hurt / death frames 1–7 keep their outer debris (sparks,
+  scatter, shards) and lose only the specks inside the ring (under 20 px);
+  the hand-drawn last death frame is untouched.
+- Hovering: the slicer's `ground` option gives every row one shared ground
+  line (the idle bob's lowest point); idle / attack / hurt / move are
+  airborne throughout (frame 0 hovers 4 px up), the death's heap lands on
+  the line.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -156,7 +229,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Boss | Tier (canvas) | PixelLab character | Size | Notes |
 |------|---------------|--------------------|------|-------|
 | Trash-Bag Slime | low (64) | a380da4d-4c2a-402f-bf6b-f1063c735e15 | 51 × 59 | animated + integrated (pilot) |
-| Alarm Clock Swarm | low (64) | fa3bd6fe-c464-43f2-bea0-24618512c504 ("v3") | 62 × 55 | ring of flying clocks; 9 stray specks inside the ring to clean from its frames; hovers |
+| Alarm Clock Swarm | low (64) | fa3bd6fe-c464-43f2-bea0-24618512c504 ("v3") | 62 × 55 | animated + integrated (see its record above) |
 | Laundry Goblin | low (64) | 6319df54-b5d0-4fb3-9a43-bb8adcb345d5 | 49 × 61 | the wet sock reads as a hook/rope |
 | Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | |
 | Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | NEW boss: needs a roster migration |

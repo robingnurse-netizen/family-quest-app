@@ -61,7 +61,13 @@ test("the airborne exemptions are the deliberate ones", () => {
     "rogue/bark_front": [1, 2, 3, 4, 5], // a hop while barking (not used yet)
     "trash_bag_slime/attack": [4, 5], // the hopping lunge
     "trash_bag_slime/move": [4], // a small hop
-    "alarm_clock_swarm/attack": [0], // a clock flying at the party
+    // A ring of flying clocks: hovers above its shared ground line
+    // (frame 0 of every row 4px up); only the death's heap lands (7–8).
+    "alarm_clock_swarm/idle": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "alarm_clock_swarm/attack": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "alarm_clock_swarm/hurt": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "alarm_clock_swarm/death": [0, 1, 2, 3, 4, 5, 6],
+    "alarm_clock_swarm/move": [0, 1, 2, 3, 4, 5, 6, 7, 8],
     "chronosphinx/idle": [0, 1, 2, 3], // hovers; the scythe swings below it
     "abyssal_kraken/move": [0, 1, 2, 3, 4, 5], // hovers
     "abyssal_kraken/attack": [3], // springs up

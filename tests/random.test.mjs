@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { importTs } from "./helpers/load-ts.mjs";
 
-const { createNoRepeatPicker } = await importTs(fileURLToPath(new URL("../lib/random.ts", import.meta.url)));
+const { createNoRepeatPicker, uuidV4 } = await importTs(fileURLToPath(new URL("../lib/random.ts", import.meta.url)));
 
 test("the picker never picks the same index twice in a row, and uses the whole pool", () => {
   const pick = createNoRepeatPicker(8);
@@ -35,4 +35,14 @@ test("even a stuck random source can't repeat or overflow", () => {
 test("a single-file sound always picks index 0", () => {
   const pick = createNoRepeatPicker(1);
   assert.deepEqual([pick(), pick(), pick()], [0, 0, 0]);
+});
+
+test("uuidV4 makes distinct, well-formed v4 UUIDs (no secure context needed)", () => {
+  const seen = new Set();
+  for (let i = 0; i < 500; i++) {
+    const id = uuidV4();
+    assert.match(id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    seen.add(id);
+  }
+  assert.equal(seen.size, 500);
 });
