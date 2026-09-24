@@ -31,6 +31,12 @@ const BOSSES = {
     rows: [row('idle'), row('attack'), row('hurt'), row('death'), row('move')],
     fix: require('./goblin-fixes.cjs'), // sock drips, ear speck
   },
+  cable_spider: {
+    file: 'cable-spider-pixellab.png', cell: 88,
+    // death-v3 animates into a hand-drawn end frame (spider-heap.cjs); its
+    // v3 canvas grew to 104×96, so it's placed to line up with the rest.
+    rows: [row('idle'), row('attack', 'attack-v2'), row('hurt'), row('death', 'death-v3', { off: [-8, -4], keepAll: [8] }), row('move')],
+  },
 };
 
 const key = process.argv[2];

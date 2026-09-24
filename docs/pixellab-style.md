@@ -268,6 +268,37 @@ Tools (rough helpers in scripts/pixellab-helpers/, inputs git-ignored):
   knock-back hop (airborne), peak frame 4. Death ends flat on his back
   (the hat stayed on; no X eyes — as with the slime, details get skipped).
 
+### Cable Spider record
+
+- Character `66d961db-4910-4fd5-a730-d7204ec457bc`; 88×88 canvas, 1
+  generation each: 5 + 1 re-roll (attack-v2) + 2 deaths (death-v2,
+  death-v3 with the end frame) = 8 generations.
+- Sheet: assets/cable-spider-pixellab.png (88px cells). Idle 55×63.
+- Every prompt restates the body plan up front: "the spider made of a green
+  circuit-board body on eight tangled cable legs with plug connector feet,
+  not a person" — no humanoid drift in any of the six.
+- Attack re-rolled: v1 ("rears back … stabs both front plug legs down")
+  barely moved and its ground sparks sank under the line. attack-v2
+  ("crouches low, then springs forward toward the left in a big pouncing
+  leap, its whole body shifting far to the left, front cable legs
+  stretched out ahead … crackling with blue electric sparks") pounces:
+  contact frame 4 (furthest reach), the leap 3–7 airborne (up to 8 px).
+- Hurt peak 4–5 (legs splayed, sparks).
+- Death needed the END-FRAME fallback (after browser review: the first
+  death never reached the floor). v1 (a white short-circuit flash, then a
+  splayed heap) and death-v2 ("all its cable legs give way at once and
+  the body drops straight down and slams flat onto the ground … lying
+  directly on the ground with no gap underneath") both ended standing on
+  splayed legs with the body ~15 px up — v3 keeps the legs' pose. death-v3
+  animates into a hand-drawn end frame (scripts/pixellab-helpers/
+  spider-heap.cjs, 64×64 like the rotation): the body cut from the
+  rotation dropped onto the ground row, cracked, eyes dark, a smoke wisp,
+  eight cable legs drawn sprawled flat with plugs on their sides. The legs
+  buckle and splay (4–6) and the body lands (6–8), ending on the drawn
+  frame. Its canvas grew to 104×96, so the builder places it at off
+  [-8, -4]; the end frame is exempt from speck cleanup (`keepAll`).
+- Unused: attack (v1), death, death-v2 stay in the PixelLab character.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -278,7 +309,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Trash-Bag Slime | low (64) | a380da4d-4c2a-402f-bf6b-f1063c735e15 | 51 × 59 | animated + integrated (pilot) |
 | Alarm Clock Swarm | low (64) | fa3bd6fe-c464-43f2-bea0-24618512c504 ("v3") | 62 × 55 | animated + integrated (see its record above) |
 | Laundry Goblin | low (64) | 6319df54-b5d0-4fb3-9a43-bb8adcb345d5 | 49 × 61 | animated + integrated (roster pass); the wet sock reads as a hook/rope |
-| Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | |
+| Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | animated + integrated (roster pass) |
 | Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | NEW boss: needs a roster migration |
 | Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | NEW boss: needs a roster migration |
 | Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 | NEW boss; no limbs: hand-guide its animation |

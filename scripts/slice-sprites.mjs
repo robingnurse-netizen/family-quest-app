@@ -214,16 +214,23 @@ const SHEETS = [
     },
   },
   {
-    file: "Gemini_Generated_Image_8cf69b8cf69b8cf6.jpeg",
-    bg: [[241, 241, 241], [128, 128, 128]],
-    tol: 22,
+    // PixelLab, built like the goblin's (88px cells, same rows, facing left).
+    // Stands on eight cable legs; every row is grounded by its lowest plug.
+    file: "cable-spider-pixellab.png",
+    grid: { cell: 88 },
     characters: {
       cable_spider: {
-        idle: { y0: 1238, y1: 1510, splits: [570, 1022] },
-        move: { y0: 1238, y1: 1510, splits: [1022, 1494] },
-        attack: { y0: 1238, y1: 1510, splits: [1494, 1985] },
-        hurt: { y0: 1238, y1: 1510, splits: [1985, 2393] },
-        death: { y0: 1238, y1: 1510, splits: [2393, 2800] },
+        idle: { row: 0 },
+        // Crouches (1–2), pounces left with its front plugs sparking: contact
+        // frame 4 (furthest reach); the leap (3–7) is off the ground.
+        attack: { row: 1, contact: 4, airborne: [3, 4, 5, 6, 7] },
+        // Jolts back, legs splaying, sparks fly (peak 4–5).
+        hurt: { row: 2 },
+        // Short-circuits, legs buckle and splay (4–6), the body drops flat
+        // onto the ground, eyes dark, smoke (holds frame 8: hand-drawn end
+        // frame, scripts/pixellab-helpers/spider-heap.cjs).
+        death: { row: 3 },
+        move: { row: 4 },
       },
     },
   },
@@ -676,7 +683,7 @@ const FACING = {
   trash_bag_slime: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   alarm_clock_swarm: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   laundry_goblin: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  cable_spider: { idle: "front", move: "front", attack: "front", hurt: "front", death: "front" },
+  cable_spider: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   magma_behemoth: { idle: "right", move: "right", attack: "right", defeated: "right" },
   chronosphinx: { idle: "front", move: "right", attack: "right", defeated: "right" },
   abyssal_kraken: { idle: "front", move: "right", attack: "front", defeated: "front" },

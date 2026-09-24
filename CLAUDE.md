@@ -200,9 +200,7 @@ PROJECT STATUS:
     thrust, slash, hurt, ko, victory (fps 6 / 16 / 16 / 16 / 12 / 10 / 10).
     The old Gemini hero sheet (Gemini_Generated_Image_4emgkn…png) and its
     frames are deleted (git history keeps them).
-  * Known art limits: single-frame animations (Cable Spider all;
-    Goblin death) are
-    static; Chronosphinx attack frames 3–4 share an overlapping beam;
+  * Known art limits: Chronosphinx attack frames 3–4 share an overlapping beam;
     Shogun-Bot idle drops sheet frames 5 and 7 (sword flash). Lying down,
     the hero's legs overlap Rogue on the same ground line; Rogue is drawn
     in front so his paws show (see ROGUE ART) — real depth needs a ground
@@ -668,6 +666,9 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   scripts/pixellab-helpers/previews/ (git-ignored).
   Laundry Goblin — DONE: assets/laundry-goblin-pixellab.png (88px grid),
   attack contact 5 (16 fps), 5 generations, no re-rolls.
+  Cable Spider — DONE: assets/cable-spider-pixellab.png (88px grid),
+  attack-v2 (pounce) contact 4; death-v3 animates into a hand-drawn end
+  frame (spider-heap.cjs) so it collapses onto the floor; 8 generations.
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via

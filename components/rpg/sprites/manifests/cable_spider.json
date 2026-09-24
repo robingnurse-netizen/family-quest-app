@@ -3,111 +3,404 @@
   "animations": {
     "idle": {
       "frames": [
-        "/sprites/cable_spider/idle/frame-01.png?v=2ba6fe347d"
+        "/sprites/cable_spider/idle/frame-01.png?v=fe39245edf",
+        "/sprites/cable_spider/idle/frame-02.png?v=162c0b6998",
+        "/sprites/cable_spider/idle/frame-03.png?v=c0b249f68e",
+        "/sprites/cable_spider/idle/frame-04.png?v=5b3f211fd7",
+        "/sprites/cable_spider/idle/frame-05.png?v=e544212f63",
+        "/sprites/cable_spider/idle/frame-06.png?v=72858e3eab",
+        "/sprites/cable_spider/idle/frame-07.png?v=0fc6115329",
+        "/sprites/cable_spider/idle/frame-08.png?v=cc7ad1cea5",
+        "/sprites/cable_spider/idle/frame-09.png?v=9e8bfa889f"
       ],
-      "width": 390,
-      "height": 251,
+      "width": 55,
+      "height": 63,
       "anchor": {
-        "x": 152,
-        "y": 246
+        "x": 39,
+        "y": 62
       },
+      "bodyHeight": 60,
       "fps": 6,
       "loop": true,
-      "facing": "front",
+      "facing": "left",
       "shadow": {
-        "/sprites/cable_spider/idle/frame-01.png?v=2ba6fe347d": [
-          198.5,
-          344.3,
+        "/sprites/cable_spider/idle/frame-01.png?v=fe39245edf": [
+          42.5,
+          20.9,
           0,
-          30
-        ]
-      }
-    },
-    "move": {
-      "frames": [
-        "/sprites/cable_spider/move/frame-01.png?v=129a1d0ade"
-      ],
-      "width": 405,
-      "height": 239,
-      "anchor": {
-        "x": 193,
-        "y": 234
-      },
-      "fps": 8,
-      "loop": true,
-      "facing": "front",
-      "shadow": {
-        "/sprites/cable_spider/move/frame-01.png?v=129a1d0ade": [
-          213.5,
-          51.7,
+          8
+        ],
+        "/sprites/cable_spider/idle/frame-02.png?v=162c0b6998": [
+          42.5,
+          20.9,
           0,
-          26
+          8
+        ],
+        "/sprites/cable_spider/idle/frame-03.png?v=c0b249f68e": [
+          42.5,
+          20.9,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/idle/frame-04.png?v=5b3f211fd7": [
+          42.5,
+          20.9,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/idle/frame-05.png?v=e544212f63": [
+          43,
+          19.8,
+          0,
+          7
+        ],
+        "/sprites/cable_spider/idle/frame-06.png?v=72858e3eab": [
+          43.5,
+          20.9,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/idle/frame-07.png?v=0fc6115329": [
+          42.5,
+          20.9,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/idle/frame-08.png?v=cc7ad1cea5": [
+          42.5,
+          20.9,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/idle/frame-09.png?v=9e8bfa889f": [
+          42.5,
+          20.9,
+          0,
+          8
         ]
       }
     },
     "attack": {
       "frames": [
-        "/sprites/cable_spider/attack/frame-01.png?v=e4bb44b5b3"
+        "/sprites/cable_spider/attack/frame-01.png?v=1aaac3121a",
+        "/sprites/cable_spider/attack/frame-02.png?v=7ad9f2720c",
+        "/sprites/cable_spider/attack/frame-03.png?v=fd6963c3f2",
+        "/sprites/cable_spider/attack/frame-04.png?v=c0945eec73",
+        "/sprites/cable_spider/attack/frame-05.png?v=2154bc81b5",
+        "/sprites/cable_spider/attack/frame-06.png?v=43d5dbefaf",
+        "/sprites/cable_spider/attack/frame-07.png?v=19df421d4f",
+        "/sprites/cable_spider/attack/frame-08.png?v=56fa957fb9",
+        "/sprites/cable_spider/attack/frame-09.png?v=1e043f179a"
       ],
-      "width": 440,
-      "height": 261,
+      "width": 68,
+      "height": 63,
       "anchor": {
-        "x": 113,
-        "y": 256
+        "x": 48,
+        "y": 62
       },
+      "bodyHeight": 60,
+      "airborne": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "contact": 4,
       "fps": 10,
       "loop": false,
-      "facing": "front",
+      "facing": "left",
       "shadow": {
-        "/sprites/cable_spider/attack/frame-01.png?v=e4bb44b5b3": [
-          92.5,
-          111.1,
+        "/sprites/cable_spider/attack/frame-01.png?v=1aaac3121a": [
+          51.5,
+          20.9,
           0,
-          31
+          8
+        ],
+        "/sprites/cable_spider/attack/frame-02.png?v=7ad9f2720c": [
+          51.5,
+          20.9,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/attack/frame-03.png?v=fd6963c3f2": [
+          51.5,
+          20.9,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/attack/frame-04.png?v=c0945eec73": [
+          36,
+          61.6,
+          6,
+          8
+        ],
+        "/sprites/cable_spider/attack/frame-05.png?v=2154bc81b5": [
+          42,
+          33,
+          4,
+          8
+        ],
+        "/sprites/cable_spider/attack/frame-06.png?v=43d5dbefaf": [
+          46,
+          26.4,
+          8,
+          8
+        ],
+        "/sprites/cable_spider/attack/frame-07.png?v=19df421d4f": [
+          41,
+          35.2,
+          1,
+          8
+        ],
+        "/sprites/cable_spider/attack/frame-08.png?v=56fa957fb9": [
+          47,
+          26.4,
+          5,
+          8
+        ],
+        "/sprites/cable_spider/attack/frame-09.png?v=1e043f179a": [
+          46,
+          26.4,
+          0,
+          7
         ]
       }
     },
     "hurt": {
       "frames": [
-        "/sprites/cable_spider/hurt/frame-01.png?v=30ff208190"
+        "/sprites/cable_spider/hurt/frame-01.png?v=7c78179dc0",
+        "/sprites/cable_spider/hurt/frame-02.png?v=7ef7540bca",
+        "/sprites/cable_spider/hurt/frame-03.png?v=6696ab6a95",
+        "/sprites/cable_spider/hurt/frame-04.png?v=ef10339e2c",
+        "/sprites/cable_spider/hurt/frame-05.png?v=003c8ad41b",
+        "/sprites/cable_spider/hurt/frame-06.png?v=87414f1e85",
+        "/sprites/cable_spider/hurt/frame-07.png?v=ad0d19f065",
+        "/sprites/cable_spider/hurt/frame-08.png?v=61cb8fee2b",
+        "/sprites/cable_spider/hurt/frame-09.png?v=9db250d753"
       ],
-      "width": 353,
-      "height": 251,
+      "width": 64,
+      "height": 65,
       "anchor": {
-        "x": 175,
-        "y": 246
+        "x": 43,
+        "y": 64
       },
+      "bodyHeight": 60,
       "fps": 8,
       "loop": false,
-      "facing": "front",
+      "facing": "left",
       "shadow": {
-        "/sprites/cable_spider/hurt/frame-01.png?v=30ff208190": [
-          182,
-          316.8,
+        "/sprites/cable_spider/hurt/frame-01.png?v=7c78179dc0": [
+          46.5,
+          20.9,
           0,
-          30
+          8
+        ],
+        "/sprites/cable_spider/hurt/frame-02.png?v=7ef7540bca": [
+          31,
+          55,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/hurt/frame-03.png?v=6696ab6a95": [
+          45.5,
+          25.3,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/hurt/frame-04.png?v=ef10339e2c": [
+          35.5,
+          7.7,
+          0,
+          7
+        ],
+        "/sprites/cable_spider/hurt/frame-05.png?v=003c8ad41b": [
+          35,
+          8.8,
+          0,
+          6
+        ],
+        "/sprites/cable_spider/hurt/frame-06.png?v=87414f1e85": [
+          36,
+          8.8,
+          0,
+          7
+        ],
+        "/sprites/cable_spider/hurt/frame-07.png?v=ad0d19f065": [
+          37.5,
+          7.7,
+          0,
+          6
+        ],
+        "/sprites/cable_spider/hurt/frame-08.png?v=61cb8fee2b": [
+          46.5,
+          23.1,
+          0,
+          8
+        ],
+        "/sprites/cable_spider/hurt/frame-09.png?v=9db250d753": [
+          47,
+          19.8,
+          0,
+          8
         ]
       }
     },
     "death": {
       "frames": [
-        "/sprites/cable_spider/death/frame-01.png?v=1685c28c32"
+        "/sprites/cable_spider/death/frame-01.png?v=61a2ad4881",
+        "/sprites/cable_spider/death/frame-02.png?v=caac277f5f",
+        "/sprites/cable_spider/death/frame-03.png?v=f632a8a534",
+        "/sprites/cable_spider/death/frame-04.png?v=3e115dc703",
+        "/sprites/cable_spider/death/frame-05.png?v=f32d22c0c2",
+        "/sprites/cable_spider/death/frame-06.png?v=976b231f16",
+        "/sprites/cable_spider/death/frame-07.png?v=efea32e049",
+        "/sprites/cable_spider/death/frame-08.png?v=7bcb461659",
+        "/sprites/cable_spider/death/frame-09.png?v=60f21c0b91"
       ],
-      "width": 372,
-      "height": 245,
+      "width": 69,
+      "height": 62,
       "anchor": {
-        "x": 182,
-        "y": 240
+        "x": 47,
+        "y": 61
       },
+      "bodyHeight": 60,
       "fps": 6,
       "loop": false,
-      "facing": "front",
+      "facing": "left",
       "shadow": {
-        "/sprites/cable_spider/death/frame-01.png?v=1685c28c32": [
-          183.5,
-          394.9,
+        "/sprites/cable_spider/death/frame-01.png?v=61a2ad4881": [
+          50,
+          19.8,
           0,
-          29
+          6
+        ],
+        "/sprites/cable_spider/death/frame-02.png?v=caac277f5f": [
+          51,
+          15.4,
+          0,
+          7
+        ],
+        "/sprites/cable_spider/death/frame-03.png?v=f632a8a534": [
+          52,
+          13.2,
+          0,
+          6
+        ],
+        "/sprites/cable_spider/death/frame-04.png?v=3e115dc703": [
+          54,
+          13.2,
+          0,
+          7
+        ],
+        "/sprites/cable_spider/death/frame-05.png?v=f32d22c0c2": [
+          42,
+          44,
+          0,
+          7
+        ],
+        "/sprites/cable_spider/death/frame-06.png?v=976b231f16": [
+          27.5,
+          16.5,
+          0,
+          6
+        ],
+        "/sprites/cable_spider/death/frame-07.png?v=efea32e049": [
+          27,
+          37.4,
+          0,
+          7
+        ],
+        "/sprites/cable_spider/death/frame-08.png?v=7bcb461659": [
+          35,
+          72.6,
+          0,
+          5
+        ],
+        "/sprites/cable_spider/death/frame-09.png?v=60f21c0b91": [
+          36,
+          70.4,
+          0,
+          4
+        ]
+      }
+    },
+    "move": {
+      "frames": [
+        "/sprites/cable_spider/move/frame-01.png?v=b88d78c248",
+        "/sprites/cable_spider/move/frame-02.png?v=2e31f89376",
+        "/sprites/cable_spider/move/frame-03.png?v=c3df672792",
+        "/sprites/cable_spider/move/frame-04.png?v=3470ffc804",
+        "/sprites/cable_spider/move/frame-05.png?v=4c0990e668",
+        "/sprites/cable_spider/move/frame-06.png?v=35dc8d463b",
+        "/sprites/cable_spider/move/frame-07.png?v=a74e245ca9",
+        "/sprites/cable_spider/move/frame-08.png?v=f435b7f2e2",
+        "/sprites/cable_spider/move/frame-09.png?v=3ac61052d6"
+      ],
+      "width": 63,
+      "height": 62,
+      "anchor": {
+        "x": 44,
+        "y": 61
+      },
+      "bodyHeight": 60,
+      "fps": 8,
+      "loop": true,
+      "facing": "left",
+      "shadow": {
+        "/sprites/cable_spider/move/frame-01.png?v=b88d78c248": [
+          47,
+          19.8,
+          0,
+          6
+        ],
+        "/sprites/cable_spider/move/frame-02.png?v=2e31f89376": [
+          40.5,
+          7.7,
+          0,
+          5
+        ],
+        "/sprites/cable_spider/move/frame-03.png?v=c3df672792": [
+          42,
+          6.6,
+          0,
+          4
+        ],
+        "/sprites/cable_spider/move/frame-04.png?v=3470ffc804": [
+          47.5,
+          14.3,
+          0,
+          6
+        ],
+        "/sprites/cable_spider/move/frame-05.png?v=4c0990e668": [
+          47.5,
+          9.9,
+          0,
+          6
+        ],
+        "/sprites/cable_spider/move/frame-06.png?v=35dc8d463b": [
+          48,
+          8.8,
+          0,
+          5
+        ],
+        "/sprites/cable_spider/move/frame-07.png?v=a74e245ca9": [
+          49,
+          8.8,
+          0,
+          6
+        ],
+        "/sprites/cable_spider/move/frame-08.png?v=f435b7f2e2": [
+          49.5,
+          12.1,
+          0,
+          7
+        ],
+        "/sprites/cable_spider/move/frame-09.png?v=3ac61052d6": [
+          50,
+          15.4,
+          0,
+          7
         ]
       }
     }
