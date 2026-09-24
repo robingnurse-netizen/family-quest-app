@@ -68,6 +68,8 @@ test("the airborne exemptions are the deliberate ones", () => {
     "alarm_clock_swarm/hurt": [0, 1, 2, 3, 4, 5, 6, 7, 8],
     "alarm_clock_swarm/death": [0, 1, 2, 3, 4, 5, 6],
     "alarm_clock_swarm/move": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "laundry_goblin/attack": [5, 6, 7], // a small lunge hop with the sock
+    "laundry_goblin/hurt": [3, 4, 5, 6, 7], // knocked back in a hop
     "chronosphinx/idle": [0, 1, 2, 3], // hovers; the scythe swings below it
     "abyssal_kraken/move": [0, 1, 2, 3, 4, 5], // hovers
     "abyssal_kraken/attack": [3], // springs up

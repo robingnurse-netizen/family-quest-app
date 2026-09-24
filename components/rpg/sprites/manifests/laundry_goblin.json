@@ -3,146 +3,409 @@
   "animations": {
     "idle": {
       "frames": [
-        "/sprites/laundry_goblin/idle/frame-01.png?v=98217dc990",
-        "/sprites/laundry_goblin/idle/frame-02.png?v=7a641609cc"
+        "/sprites/laundry_goblin/idle/frame-01.png?v=837e0726c6",
+        "/sprites/laundry_goblin/idle/frame-02.png?v=414f07a86e",
+        "/sprites/laundry_goblin/idle/frame-03.png?v=7e3e34e77a",
+        "/sprites/laundry_goblin/idle/frame-04.png?v=34915e3f2e",
+        "/sprites/laundry_goblin/idle/frame-05.png?v=12afa34105",
+        "/sprites/laundry_goblin/idle/frame-06.png?v=b1076258ca",
+        "/sprites/laundry_goblin/idle/frame-07.png?v=5d62871691",
+        "/sprites/laundry_goblin/idle/frame-08.png?v=554e787f82",
+        "/sprites/laundry_goblin/idle/frame-09.png?v=a32075a65e"
       ],
-      "width": 204,
-      "height": 229,
+      "width": 55,
+      "height": 62,
       "anchor": {
-        "x": 96,
-        "y": 224
+        "x": 31,
+        "y": 61
       },
-      "fps": 2,
+      "bodyHeight": 61,
+      "fps": 6,
       "loop": true,
-      "facing": "right",
+      "facing": "left",
       "shadow": {
-        "/sprites/laundry_goblin/idle/frame-01.png?v=98217dc990": [
-          98,
-          94.6,
+        "/sprites/laundry_goblin/idle/frame-01.png?v=837e0726c6": [
+          30,
+          33,
           0,
-          20
+          6
         ],
-        "/sprites/laundry_goblin/idle/frame-02.png?v=7a641609cc": [
-          100,
-          132,
+        "/sprites/laundry_goblin/idle/frame-02.png?v=414f07a86e": [
+          30,
+          33,
           0,
-          23
-        ]
-      }
-    },
-    "move": {
-      "frames": [
-        "/sprites/laundry_goblin/move/frame-01.png?v=5e05a77dda",
-        "/sprites/laundry_goblin/move/frame-02.png?v=ca4ca626aa",
-        "/sprites/laundry_goblin/move/frame-03.png?v=81ffd1293a"
-      ],
-      "width": 169,
-      "height": 229,
-      "anchor": {
-        "x": 84,
-        "y": 224
-      },
-      "fps": 8,
-      "loop": true,
-      "facing": "right",
-      "shadow": {
-        "/sprites/laundry_goblin/move/frame-01.png?v=5e05a77dda": [
-          85.5,
-          128.7,
-          0,
-          27
+          6
         ],
-        "/sprites/laundry_goblin/move/frame-02.png?v=ca4ca626aa": [
-          90.5,
-          104.5,
+        "/sprites/laundry_goblin/idle/frame-03.png?v=7e3e34e77a": [
+          30,
+          33,
           0,
-          26
+          6
         ],
-        "/sprites/laundry_goblin/move/frame-03.png?v=81ffd1293a": [
-          80.5,
-          135.3,
+        "/sprites/laundry_goblin/idle/frame-04.png?v=34915e3f2e": [
+          30,
+          33,
           0,
-          26
+          6
+        ],
+        "/sprites/laundry_goblin/idle/frame-05.png?v=12afa34105": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/idle/frame-06.png?v=b1076258ca": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/idle/frame-07.png?v=5d62871691": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/idle/frame-08.png?v=554e787f82": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/idle/frame-09.png?v=a32075a65e": [
+          30,
+          33,
+          0,
+          6
         ]
       }
     },
     "attack": {
       "frames": [
-        "/sprites/laundry_goblin/attack/frame-01.png?v=b6059db52e",
-        "/sprites/laundry_goblin/attack/frame-02.png?v=eca48eb038"
+        "/sprites/laundry_goblin/attack/frame-01.png?v=f1754234ee",
+        "/sprites/laundry_goblin/attack/frame-02.png?v=6d577e9e92",
+        "/sprites/laundry_goblin/attack/frame-03.png?v=921b39f70b",
+        "/sprites/laundry_goblin/attack/frame-04.png?v=b01a5ce4df",
+        "/sprites/laundry_goblin/attack/frame-05.png?v=a2c5fda210",
+        "/sprites/laundry_goblin/attack/frame-06.png?v=13888be730",
+        "/sprites/laundry_goblin/attack/frame-07.png?v=df364dacc0",
+        "/sprites/laundry_goblin/attack/frame-08.png?v=1323dec2b4",
+        "/sprites/laundry_goblin/attack/frame-09.png?v=e2adf33a87"
       ],
-      "width": 268,
-      "height": 264,
+      "width": 71,
+      "height": 63,
       "anchor": {
-        "x": 117,
-        "y": 259
+        "x": 41,
+        "y": 62
       },
-      "fps": 4,
+      "bodyHeight": 61,
+      "airborne": [
+        5,
+        6,
+        7
+      ],
+      "contact": 5,
+      "fps": 16,
       "loop": false,
-      "facing": "right",
+      "facing": "left",
       "shadow": {
-        "/sprites/laundry_goblin/attack/frame-01.png?v=b6059db52e": [
-          141.5,
-          218.9,
+        "/sprites/laundry_goblin/attack/frame-01.png?v=f1754234ee": [
+          40,
+          33,
           0,
-          31
+          6
         ],
-        "/sprites/laundry_goblin/attack/frame-02.png?v=eca48eb038": [
-          119.5,
-          124.3,
+        "/sprites/laundry_goblin/attack/frame-02.png?v=6d577e9e92": [
+          40,
+          33,
           0,
-          29
+          6
+        ],
+        "/sprites/laundry_goblin/attack/frame-03.png?v=921b39f70b": [
+          40,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/attack/frame-04.png?v=b01a5ce4df": [
+          40.5,
+          34.1,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/attack/frame-05.png?v=a2c5fda210": [
+          41.5,
+          36.3,
+          0,
+          8
+        ],
+        "/sprites/laundry_goblin/attack/frame-06.png?v=13888be730": [
+          43,
+          44,
+          3,
+          6
+        ],
+        "/sprites/laundry_goblin/attack/frame-07.png?v=df364dacc0": [
+          32,
+          68.2,
+          2,
+          6
+        ],
+        "/sprites/laundry_goblin/attack/frame-08.png?v=1323dec2b4": [
+          36.5,
+          51.7,
+          3,
+          6
+        ],
+        "/sprites/laundry_goblin/attack/frame-09.png?v=e2adf33a87": [
+          41.5,
+          36.3,
+          0,
+          6
         ]
       }
     },
     "hurt": {
       "frames": [
-        "/sprites/laundry_goblin/hurt/frame-01.png?v=97f824f973",
-        "/sprites/laundry_goblin/hurt/frame-02.png?v=1a7b126fe2"
+        "/sprites/laundry_goblin/hurt/frame-01.png?v=4ac1373347",
+        "/sprites/laundry_goblin/hurt/frame-02.png?v=b8d4722a97",
+        "/sprites/laundry_goblin/hurt/frame-03.png?v=0306c9adbb",
+        "/sprites/laundry_goblin/hurt/frame-04.png?v=376ae07643",
+        "/sprites/laundry_goblin/hurt/frame-05.png?v=1f1f86f0de",
+        "/sprites/laundry_goblin/hurt/frame-06.png?v=b2d5349039",
+        "/sprites/laundry_goblin/hurt/frame-07.png?v=d474e7cf51",
+        "/sprites/laundry_goblin/hurt/frame-08.png?v=9b94d40245",
+        "/sprites/laundry_goblin/hurt/frame-09.png?v=72557dd630"
       ],
-      "width": 213,
-      "height": 220,
+      "width": 59,
+      "height": 62,
       "anchor": {
-        "x": 116,
-        "y": 215
+        "x": 29,
+        "y": 61
       },
-      "fps": 4,
+      "bodyHeight": 61,
+      "airborne": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "fps": 8,
       "loop": false,
-      "facing": "right",
+      "facing": "left",
       "shadow": {
-        "/sprites/laundry_goblin/hurt/frame-01.png?v=97f824f973": [
-          117.5,
-          133.1,
+        "/sprites/laundry_goblin/hurt/frame-01.png?v=4ac1373347": [
+          28,
+          33,
           0,
-          24
+          6
         ],
-        "/sprites/laundry_goblin/hurt/frame-02.png?v=1a7b126fe2": [
-          117.5,
-          104.5,
+        "/sprites/laundry_goblin/hurt/frame-02.png?v=b8d4722a97": [
+          28,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/hurt/frame-03.png?v=0306c9adbb": [
+          28,
+          33,
           0,
           5
+        ],
+        "/sprites/laundry_goblin/hurt/frame-04.png?v=376ae07643": [
+          25.5,
+          34.1,
+          5,
+          6
+        ],
+        "/sprites/laundry_goblin/hurt/frame-05.png?v=1f1f86f0de": [
+          24.5,
+          36.3,
+          5,
+          6
+        ],
+        "/sprites/laundry_goblin/hurt/frame-06.png?v=b2d5349039": [
+          24.5,
+          36.3,
+          5,
+          6
+        ],
+        "/sprites/laundry_goblin/hurt/frame-07.png?v=d474e7cf51": [
+          25,
+          35.2,
+          5,
+          6
+        ],
+        "/sprites/laundry_goblin/hurt/frame-08.png?v=9b94d40245": [
+          26,
+          33,
+          5,
+          6
+        ],
+        "/sprites/laundry_goblin/hurt/frame-09.png?v=72557dd630": [
+          28,
+          33,
+          0,
+          6
         ]
       }
     },
     "death": {
       "frames": [
-        "/sprites/laundry_goblin/death/frame-01.png?v=74ddc69b8f"
+        "/sprites/laundry_goblin/death/frame-01.png?v=986070edf9",
+        "/sprites/laundry_goblin/death/frame-02.png?v=79db73452c",
+        "/sprites/laundry_goblin/death/frame-03.png?v=75df9ffe14",
+        "/sprites/laundry_goblin/death/frame-04.png?v=329d9a7e2c",
+        "/sprites/laundry_goblin/death/frame-05.png?v=b2edfa94ce",
+        "/sprites/laundry_goblin/death/frame-06.png?v=74ed7a9a60",
+        "/sprites/laundry_goblin/death/frame-07.png?v=a7d4b75102",
+        "/sprites/laundry_goblin/death/frame-08.png?v=d072f7611a",
+        "/sprites/laundry_goblin/death/frame-09.png?v=9e5bdee187"
       ],
-      "width": 300,
-      "height": 143,
+      "width": 65,
+      "height": 62,
       "anchor": {
-        "x": 155,
-        "y": 138
+        "x": 31,
+        "y": 61
       },
+      "bodyHeight": 61,
       "fps": 6,
       "loop": false,
-      "facing": "front",
+      "facing": "left",
       "shadow": {
-        "/sprites/laundry_goblin/death/frame-01.png?v=74ddc69b8f": [
-          150,
-          321.2,
+        "/sprites/laundry_goblin/death/frame-01.png?v=986070edf9": [
+          30,
+          33,
           0,
-          11
+          6
+        ],
+        "/sprites/laundry_goblin/death/frame-02.png?v=79db73452c": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/death/frame-03.png?v=75df9ffe14": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/death/frame-04.png?v=329d9a7e2c": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/death/frame-05.png?v=b2edfa94ce": [
+          27.5,
+          31.9,
+          0,
+          7
+        ],
+        "/sprites/laundry_goblin/death/frame-06.png?v=74ed7a9a60": [
+          34,
+          55,
+          0,
+          7
+        ],
+        "/sprites/laundry_goblin/death/frame-07.png?v=a7d4b75102": [
+          32.5,
+          56.1,
+          0,
+          7
+        ],
+        "/sprites/laundry_goblin/death/frame-08.png?v=d072f7611a": [
+          32,
+          57.2,
+          0,
+          7
+        ],
+        "/sprites/laundry_goblin/death/frame-09.png?v=9e5bdee187": [
+          32.5,
+          58.3,
+          0,
+          7
+        ]
+      }
+    },
+    "move": {
+      "frames": [
+        "/sprites/laundry_goblin/move/frame-01.png?v=f020126dba",
+        "/sprites/laundry_goblin/move/frame-02.png?v=0cc1667c0d",
+        "/sprites/laundry_goblin/move/frame-03.png?v=67ab6e9d0c",
+        "/sprites/laundry_goblin/move/frame-04.png?v=eb52509db8",
+        "/sprites/laundry_goblin/move/frame-05.png?v=fadfb5940b",
+        "/sprites/laundry_goblin/move/frame-06.png?v=a9c91450af",
+        "/sprites/laundry_goblin/move/frame-07.png?v=073b14b42d",
+        "/sprites/laundry_goblin/move/frame-08.png?v=681be9a42d",
+        "/sprites/laundry_goblin/move/frame-09.png?v=0dd1b811c7"
+      ],
+      "width": 57,
+      "height": 61,
+      "anchor": {
+        "x": 31,
+        "y": 60
+      },
+      "bodyHeight": 61,
+      "fps": 8,
+      "loop": true,
+      "facing": "left",
+      "shadow": {
+        "/sprites/laundry_goblin/move/frame-01.png?v=f020126dba": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/move/frame-02.png?v=0cc1667c0d": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/move/frame-03.png?v=67ab6e9d0c": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/move/frame-04.png?v=eb52509db8": [
+          30,
+          33,
+          0,
+          7
+        ],
+        "/sprites/laundry_goblin/move/frame-05.png?v=fadfb5940b": [
+          30,
+          33,
+          0,
+          7
+        ],
+        "/sprites/laundry_goblin/move/frame-06.png?v=a9c91450af": [
+          30,
+          33,
+          0,
+          7
+        ],
+        "/sprites/laundry_goblin/move/frame-07.png?v=073b14b42d": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/move/frame-08.png?v=681be9a42d": [
+          30,
+          33,
+          0,
+          6
+        ],
+        "/sprites/laundry_goblin/move/frame-09.png?v=0dd1b811c7": [
+          30,
+          33,
+          0,
+          6
         ]
       }
     }

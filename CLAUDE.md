@@ -662,6 +662,12 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   attack contact 4, death guided by a hand-drawn end frame; grid entries
   take an optional `ground` (cell row) for hovering bosses. Details in the
   style guide's swarm record.
+  Roster pass (six bosses, style guide "Remaining-roster pass"): sheets
+  built by scripts/pixellab-helpers/build-boss-sheet.cjs <key> (config
+  per boss, speck cleanup), previews by preview-gif.cjs <key> →
+  scripts/pixellab-helpers/previews/ (git-ignored).
+  Laundry Goblin — DONE: assets/laundry-goblin-pixellab.png (88px grid),
+  attack contact 5 (16 fps), 5 generations, no re-rolls.
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via

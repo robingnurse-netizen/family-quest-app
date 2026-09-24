@@ -192,17 +192,32 @@ const SHEETS = [
     },
   },
   {
+    // PixelLab (docs/pixellab-style.md): 88×88 cells (the v3 canvas around
+    // the 64px character), 9 columns, rows idle / attack / hurt / death /
+    // move, facing left (south-west); built by
+    // scripts/pixellab-helpers/build-boss-sheet.cjs (specks cleaned).
+    file: "laundry-goblin-pixellab.png",
+    grid: { cell: 88 },
+    characters: {
+      laundry_goblin: {
+        idle: { row: 0 },
+        // Raises the wet sock overhead (2–4), whips it down in a splash on
+        // contact (frame 5) in a small lunge hop (5–7 off the ground, 3px).
+        // 16 fps keeps the raise (like the slime).
+        attack: { row: 1, contact: 5, fps: 16, airborne: [5, 6, 7] },
+        // Knocked back in a little hop (3–7 off the ground); peak frame 4.
+        hurt: { row: 2, airborne: [3, 4, 5, 6, 7] },
+        // Topples over backward and lies flat on his back (holds frame 8).
+        death: { row: 3 },
+        move: { row: 4 },
+      },
+    },
+  },
+  {
     file: "Gemini_Generated_Image_8cf69b8cf69b8cf6.jpeg",
     bg: [[241, 241, 241], [128, 128, 128]],
     tol: 22,
     characters: {
-      laundry_goblin: {
-        idle: { y0: 859, y1: 1126, splits: [565, 768, 983], fps: 2 },
-        move: { y0: 859, y1: 1126, splits: [983, 1178, 1336, 1505] },
-        attack: { y0: 859, y1: 1126, splits: [1505, 1798, 2027], fps: 4 },
-        hurt: { y0: 859, y1: 1126, splits: [2027, 2256, 2445], fps: 4 },
-        death: { y0: 859, y1: 1126, splits: [2445, 2800] },
-      },
       cable_spider: {
         idle: { y0: 1238, y1: 1510, splits: [570, 1022] },
         move: { y0: 1238, y1: 1510, splits: [1022, 1494] },
@@ -660,7 +675,7 @@ const FACING = {
   },
   trash_bag_slime: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   alarm_clock_swarm: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  laundry_goblin: { idle: "right", move: "right", attack: "right", hurt: "right", death: "front" },
+  laundry_goblin: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   cable_spider: { idle: "front", move: "front", attack: "front", hurt: "front", death: "front" },
   magma_behemoth: { idle: "right", move: "right", attack: "right", defeated: "right" },
   chronosphinx: { idle: "front", move: "right", attack: "right", defeated: "right" },

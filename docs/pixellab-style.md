@@ -221,6 +221,53 @@ happens in the nightly reset.)
   airborne throughout (frame 0 hovers 4 px up), the death's heap lands on
   the line.
 
+## Remaining-roster pass (six bosses, one autonomous run)
+
+Tools (rough helpers in scripts/pixellab-helpers/, inputs git-ignored):
+
+- Frames: the character's download ZIP
+  (`https://api.pixellab.ai/mcp/characters/<id>/download`) holds every
+  animation as `<name>/south-west/frame_NNN.png`; unpack into
+  `PIXELLAB_WORK/<name>/<n>.png`.
+- `build-boss-sheet.cjs <key>`: the general form of build-sheet.cjs. One
+  config entry per boss (file, cell, rows); frames copied at the same spot
+  (every v3 animation of a character shares one canvas with the rotation).
+  Speck cleanup (8-connected, < 10 px): idle / move / frames 0 and 8
+  lose every small cluster; attack / hurt / death frames 1–7 keep the ones
+  outside the body's bounding box (sparks, splashes, shards) unless they
+  hang below frame 0's ground row.
+- `preview-gif.cjs <key>`: a GIF of the sliced animations on one ground
+  line (idle, attack, idle, hurt, idle, move, death held) →
+  scripts/pixellab-helpers/previews/<key>.gif (git-ignored).
+
+### Laundry Goblin record
+
+- Character `6319df54-b5d0-4fb3-9a43-bb8adcb345d5`; v3 animations at an
+  88×88 canvas, 1 generation each: 5 generations, no re-rolls.
+- Sheet: assets/laundry-goblin-pixellab.png (88px cells). Idle 55×62.
+- Hand fixes after browser review (scripts/pixellab-helpers/goblin-fixes.cjs,
+  the builder's `fix` hook): v3 hung dark / water-blue drips off the wet
+  sock in most frames (they read as noise, and touch the sock diagonally,
+  so speck cleanup missed them) — removed below the sock loop, as
+  detached droplets in the raised-sock attack frames, and pixel by pixel
+  in hurt 4 / 6; the attack's strike splash (5–6) stays. A pale speck on
+  the left ear's outline (frame 0 of every row) is now outline black, and
+  the far eye's highlight under that ear, which flashed bright cream in
+  some frames, is held dim grey.
+- Wording (all first tries): idle "stands hunched … shoulders rising and
+  falling … the wet grey sock dangling from its fist"; attack "raises the
+  wet grey sock high over its head … lunges forward toward the left and
+  whips the sock down hard in front of it like a whip, water droplets
+  spraying, mouth open in a snarl, clear forward motion toward
+  camera-left"; hurt "recoils sharply backward toward the right … arms
+  flung up, knees buckling"; death "knees give way and it topples over
+  backward, falling flat onto its back … ends lying flat and still on the
+  ground"; move "scurries along in place with quick sneaky hunched steps".
+- Contact frame 5 (the splash; the sock is raised in 2–4), 16 fps like the
+  slime. Attack 5–7 are a small lunge hop (3 px up: airborne); hurt 3–7 a
+  knock-back hop (airborne), peak frame 4. Death ends flat on his back
+  (the hat stayed on; no X eyes — as with the slime, details get skipped).
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -230,7 +277,7 @@ directions; rejected attempts are still in the PixelLab account.
 |------|---------------|--------------------|------|-------|
 | Trash-Bag Slime | low (64) | a380da4d-4c2a-402f-bf6b-f1063c735e15 | 51 × 59 | animated + integrated (pilot) |
 | Alarm Clock Swarm | low (64) | fa3bd6fe-c464-43f2-bea0-24618512c504 ("v3") | 62 × 55 | animated + integrated (see its record above) |
-| Laundry Goblin | low (64) | 6319df54-b5d0-4fb3-9a43-bb8adcb345d5 | 49 × 61 | the wet sock reads as a hook/rope |
+| Laundry Goblin | low (64) | 6319df54-b5d0-4fb3-9a43-bb8adcb345d5 | 49 × 61 | animated + integrated (roster pass); the wet sock reads as a hook/rope |
 | Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | |
 | Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | NEW boss: needs a roster migration |
 | Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | NEW boss: needs a roster migration |
