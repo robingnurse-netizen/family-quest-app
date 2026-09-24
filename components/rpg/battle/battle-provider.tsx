@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import type { Boss, PartyHealth } from "@/lib/supabase/types";
+import { createClient } from "@/lib/supabase/client";
 import { useBattle } from "@/lib/hooks/use-battle";
 import { initialStage, stageReducer, type StageState } from "@/lib/rpg/boss-stage";
 import { createBattleEmitter, type BattleEvent, type BattleListener } from "@/lib/rpg/battle-events";
@@ -89,9 +90,37 @@ export function BattleProvider({
       },
       /** Log / hook every event (e.g. to prototype sounds); returns an unsubscribe. */
       listen: (fn: BattleListener) => emitter.subscribe(fn),
+      /**
+       * Show one of the family's roster bosses as the active boss, at full
+       * HP — by sprite_key ("trash_bag_slime") or 1-based roster position
+       * (activation order: low → mid → epic). THIS TAB ONLY: nothing is
+       * written, and real quest ticks still hit the database's active boss.
+       * null follows the database again.
+       */
+      jumpToBoss: async (target: string | number | null) => {
+        if (target === null) {
+          setDev((d) => ({ ...d, boss: undefined }));
+          return "Following the database's active boss again.";
+        }
+        const roster = await loadRoster(familyId);
+        const i = typeof target === "number" ? target - 1 : roster.findIndex((b) => b.sprite_key === target);
+        const row = roster[i];
+        if (!row) {
+          throw new Error(`No boss ${JSON.stringify(target)}. Roster: ${roster.map((b, n) => `${n + 1} ${b.sprite_key}`).join(", ")}`);
+        }
+        const boss: Boss = { ...row, status: "active", current_hp: row.max_hp };
+        setDev((d) => ({ ...d, boss }));
+        emitter.emit({ type: "activated", boss });
+        return `${i + 1}. ${boss.name} (${boss.tier}, ${boss.max_hp} HP) — this tab only`;
+      },
+      /** The family's roster in activation order, with positions for jumpToBoss. */
+      bosses: async () => {
+        const roster = await loadRoster(familyId);
+        console.table(roster.map((b, n) => ({ position: n + 1, sprite_key: b.sprite_key, name: b.name, tier: b.tier, status: b.status, hp: `${b.current_hp}/${b.max_hp}` })));
+      },
     };
     return registerDevTools(tools);
-  }, [emitter]);
+  }, [emitter, familyId]);
 
   const onBossAnimationEnd = useCallback(() => dispatch({ type: "animation-end" }), []);
   const onBossFinished = useCallback(() => dispatch({ type: "swap" }), []);
@@ -148,6 +177,20 @@ export function useBattleEvents(listener: BattleListener) {
  * hook). Returns a cleanup that removes them again. A no-op in production
  * builds, so no trace of the hook ships.
  */
+const TIER_ORDER = { low: 1, mid: 2, epic: 3 } as const;
+
+/** Dev only: the family's bosses in activation order (as activate_next_boss picks them). */
+async function loadRoster(familyId: string): Promise<Boss[]> {
+  const { data, error } = await createClient().from("bosses").select("*").eq("family_id", familyId);
+  if (error) throw new Error(`Couldn't load the boss roster: ${error.message}`);
+  return [...(data as Boss[])].sort(
+    (a, b) =>
+      TIER_ORDER[a.tier] - TIER_ORDER[b.tier] ||
+      a.queue_position - b.queue_position ||
+      a.created_at.localeCompare(b.created_at),
+  );
+}
+
 export const registerDevTools: (tools: Record<string, unknown>) => () => void =
   process.env.NODE_ENV === "development"
     ? (tools) => {

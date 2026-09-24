@@ -301,7 +301,10 @@ PROJECT STATUS:
     live boss/party and the stage machine (itself just a subscriber). Add
     listeners (hit overlay, sounds) with useBattleEvents inside the
     provider — /player wraps the whole dashboard in it. Dev-only
-    window.__fqBattle { emit, setBoss, setParty } drives it without the DB
+    window.__fqBattle { emit, setBoss, setParty, jumpToBoss, bosses } drives it without the DB
+    (jumpToBoss("cable_spider" | 4 | null): a roster boss by sprite_key or
+    1-based activation position, full HP, this tab only — no writes;
+    bosses() prints the roster with positions)
     (stripped from production builds).
   * Sprites: every animation carries its own `facing` (right/left/front),
     set per animation in scripts/slice-sprites.mjs FACING — judged by where
