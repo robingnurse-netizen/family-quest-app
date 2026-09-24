@@ -91,8 +91,36 @@ PROJECT STATUS:
     lying hero rests on his hand and bat tip with his torso ~3–4 art px
     higher. Re-slicing is deterministic (verified: unchanged config →
     byte-identical frames).
-  * GROUND SHADOWS: scripts/sprite-shadows.mjs measures every frame PNG
-    and writes each animation's `shadow` map (frame path → [centreX, width,
+  * SPRITE LOADING (each frame downloaded ONCE; never alt text):
+    - Frame URLs in the manifests carry a content hash:
+      /sprites/<key>/<anim>/frame-NN.png?v=<10 hex of SHA-256>, written by
+      scripts/sprite-manifests.mjs (was sprite-shadows.mjs; the slicer runs
+      it). next.config.ts serves /sprites/:path* with
+      "public, max-age=31536000, immutable" (Next's public/ default is
+      max-age=0 — frames were re-downloaded whenever the browser dropped
+      them: 150 requests for 104 frames in a minute, frames 2–3×).
+      tests/sprite-urls.test.mjs checks every hash is current: after ANY
+      frame edit, run node scripts/sprite-manifests.mjs.
+    - components/rpg/sprites/frame-cache.ts: one Image per URL for the
+      page's life (loaded + decoded, kept referenced); a failed frame is
+      retried with backoff (1s, 2s … 30s) on its next request.
+    - SpriteAnimator only swaps to frames the cache has ready; a frame that
+      isn't (slow/failed) is skipped and the last good frame stays up. The
+      <img> falls back to its last loaded frame on error, or hides until
+      one loads; img.sprite-pixelated has transparent, zero-size alt text
+      (covers a server-rendered first frame failing before hydration).
+      Checked with forced connection resets on hero idle frames 01/06:
+      no alt text or broken image in 0 of ~450 samples, frames recovered.
+    - bossAnimations() is memoized per sprite key (a new object per render
+      restarted SpriteAnimator on every overlay re-render).
+    - proxy.ts already skips sprites/ (and .png etc.), so no auth round
+      trip on frames.
+    - The Linux dev container (ChromeOS) can run low on memory (seen:
+      ~300MB available of 6.4GB, no swap — the host reclaims RAM), which
+      is when the dev server dropped frame requests (ERR_CONNECTION_RESET).
+      /tmp is RAM (tmpfs): keep scratch files there small.
+  * GROUND SHADOWS: scripts/sprite-manifests.mjs measures every frame PNG
+    and writes each animation's `shadow` map (frame URL → [centreX, width,
     lift, band]) into the manifests — for all characters, without
     re-slicing anything. Footprint = every column whose lowest pixel is in
     the bottom ~12% of the canvas (all feet, the far ones included, or a
@@ -100,7 +128,7 @@ PROJECT STATUS:
     bottoms down to the lowest pixel; lift = height off the ground line.
     Airborne frames keep the first frame's band. The slicer runs it after
     slicing; run it by hand after hand-editing frames:
-    node scripts/sprite-shadows.mjs [key…]. AnchoredSprite draws a soft
+    node scripts/sprite-manifests.mjs [key…]. AnchoredSprite draws a soft
     dark ellipse (.sprite-shadow) CENTRED ON THE CONTACT BAND (so the feet —
     near and far — or a lying body visibly meet it, not below the feet),
     updated per frame (SpriteAnimator onFrame): wide and flat lying down,
@@ -491,7 +519,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike, hero-stage, rogue, grounding, recap-healing, recap, evening (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-healing, recap, evening (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.

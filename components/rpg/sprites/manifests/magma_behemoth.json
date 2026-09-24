@@ -3,11 +3,11 @@
   "animations": {
     "idle": {
       "frames": [
-        "/sprites/magma_behemoth/idle/frame-01.png",
-        "/sprites/magma_behemoth/idle/frame-02.png",
-        "/sprites/magma_behemoth/idle/frame-03.png",
-        "/sprites/magma_behemoth/idle/frame-04.png",
-        "/sprites/magma_behemoth/idle/frame-05.png"
+        "/sprites/magma_behemoth/idle/frame-01.png?v=496725ecb4",
+        "/sprites/magma_behemoth/idle/frame-02.png?v=e6009d0357",
+        "/sprites/magma_behemoth/idle/frame-03.png?v=c501584284",
+        "/sprites/magma_behemoth/idle/frame-04.png?v=62977c1c54",
+        "/sprites/magma_behemoth/idle/frame-05.png?v=7a1c55cda0"
       ],
       "width": 328,
       "height": 269,
@@ -19,31 +19,31 @@
       "loop": true,
       "facing": "right",
       "shadow": {
-        "/sprites/magma_behemoth/idle/frame-01.png": [
+        "/sprites/magma_behemoth/idle/frame-01.png?v=496725ecb4": [
           140.5,
           260.7,
           0,
           32
         ],
-        "/sprites/magma_behemoth/idle/frame-02.png": [
+        "/sprites/magma_behemoth/idle/frame-02.png?v=e6009d0357": [
           142.5,
           258.5,
           0,
           31
         ],
-        "/sprites/magma_behemoth/idle/frame-03.png": [
+        "/sprites/magma_behemoth/idle/frame-03.png?v=c501584284": [
           142.5,
           258.5,
           0,
           32
         ],
-        "/sprites/magma_behemoth/idle/frame-04.png": [
+        "/sprites/magma_behemoth/idle/frame-04.png?v=62977c1c54": [
           142,
           259.6,
           0,
           32
         ],
-        "/sprites/magma_behemoth/idle/frame-05.png": [
+        "/sprites/magma_behemoth/idle/frame-05.png?v=7a1c55cda0": [
           142.5,
           260.7,
           0,
@@ -53,12 +53,12 @@
     },
     "move": {
       "frames": [
-        "/sprites/magma_behemoth/move/frame-01.png",
-        "/sprites/magma_behemoth/move/frame-02.png",
-        "/sprites/magma_behemoth/move/frame-03.png",
-        "/sprites/magma_behemoth/move/frame-04.png",
-        "/sprites/magma_behemoth/move/frame-05.png",
-        "/sprites/magma_behemoth/move/frame-06.png"
+        "/sprites/magma_behemoth/move/frame-01.png?v=94031b8f70",
+        "/sprites/magma_behemoth/move/frame-02.png?v=57dc3417a2",
+        "/sprites/magma_behemoth/move/frame-03.png?v=fb7e9d5cc7",
+        "/sprites/magma_behemoth/move/frame-04.png?v=0bfdf8ea3c",
+        "/sprites/magma_behemoth/move/frame-05.png?v=c52dd0b9ba",
+        "/sprites/magma_behemoth/move/frame-06.png?v=2acf3afa93"
       ],
       "width": 329,
       "height": 269,
@@ -70,37 +70,37 @@
       "loop": true,
       "facing": "right",
       "shadow": {
-        "/sprites/magma_behemoth/move/frame-01.png": [
+        "/sprites/magma_behemoth/move/frame-01.png?v=94031b8f70": [
           160,
           231,
           0,
           31
         ],
-        "/sprites/magma_behemoth/move/frame-02.png": [
+        "/sprites/magma_behemoth/move/frame-02.png?v=57dc3417a2": [
           158,
           220,
           0,
           32
         ],
-        "/sprites/magma_behemoth/move/frame-03.png": [
+        "/sprites/magma_behemoth/move/frame-03.png?v=fb7e9d5cc7": [
           155.5,
           157.3,
           0,
           14
         ],
-        "/sprites/magma_behemoth/move/frame-04.png": [
+        "/sprites/magma_behemoth/move/frame-04.png?v=0bfdf8ea3c": [
           142,
           257.4,
           0,
           14
         ],
-        "/sprites/magma_behemoth/move/frame-05.png": [
+        "/sprites/magma_behemoth/move/frame-05.png?v=c52dd0b9ba": [
           165,
           345.4,
           0,
           32
         ],
-        "/sprites/magma_behemoth/move/frame-06.png": [
+        "/sprites/magma_behemoth/move/frame-06.png?v=2acf3afa93": [
           163.5,
           214.5,
           0,
@@ -110,13 +110,13 @@
     },
     "attack": {
       "frames": [
-        "/sprites/magma_behemoth/attack/frame-01.png",
-        "/sprites/magma_behemoth/attack/frame-02.png",
-        "/sprites/magma_behemoth/attack/frame-03.png",
-        "/sprites/magma_behemoth/attack/frame-04.png",
-        "/sprites/magma_behemoth/attack/frame-05.png",
-        "/sprites/magma_behemoth/attack/frame-06.png",
-        "/sprites/magma_behemoth/attack/frame-07.png"
+        "/sprites/magma_behemoth/attack/frame-01.png?v=e89c148234",
+        "/sprites/magma_behemoth/attack/frame-02.png?v=9fa5023ef7",
+        "/sprites/magma_behemoth/attack/frame-03.png?v=dcea31ee91",
+        "/sprites/magma_behemoth/attack/frame-04.png?v=c881caafbb",
+        "/sprites/magma_behemoth/attack/frame-05.png?v=daa30d7f15",
+        "/sprites/magma_behemoth/attack/frame-06.png?v=d0fde33a0b",
+        "/sprites/magma_behemoth/attack/frame-07.png?v=f921de2df0"
       ],
       "width": 451,
       "height": 287,
@@ -128,43 +128,43 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/magma_behemoth/attack/frame-01.png": [
+        "/sprites/magma_behemoth/attack/frame-01.png?v=e89c148234": [
           263,
           209,
           0,
           34
         ],
-        "/sprites/magma_behemoth/attack/frame-02.png": [
+        "/sprites/magma_behemoth/attack/frame-02.png?v=9fa5023ef7": [
           263,
           209,
           0,
           34
         ],
-        "/sprites/magma_behemoth/attack/frame-03.png": [
+        "/sprites/magma_behemoth/attack/frame-03.png?v=dcea31ee91": [
           235.5,
           401.5,
           0,
           34
         ],
-        "/sprites/magma_behemoth/attack/frame-04.png": [
+        "/sprites/magma_behemoth/attack/frame-04.png?v=c881caafbb": [
           262.5,
           236.5,
           0,
           34
         ],
-        "/sprites/magma_behemoth/attack/frame-05.png": [
+        "/sprites/magma_behemoth/attack/frame-05.png?v=daa30d7f15": [
           246,
           325.6,
           0,
           34
         ],
-        "/sprites/magma_behemoth/attack/frame-06.png": [
+        "/sprites/magma_behemoth/attack/frame-06.png?v=d0fde33a0b": [
           246,
           360.8,
           0,
           32
         ],
-        "/sprites/magma_behemoth/attack/frame-07.png": [
+        "/sprites/magma_behemoth/attack/frame-07.png?v=f921de2df0": [
           246,
           396,
           0,
@@ -174,12 +174,12 @@
     },
     "defeated": {
       "frames": [
-        "/sprites/magma_behemoth/defeated/frame-01.png",
-        "/sprites/magma_behemoth/defeated/frame-02.png",
-        "/sprites/magma_behemoth/defeated/frame-03.png",
-        "/sprites/magma_behemoth/defeated/frame-04.png",
-        "/sprites/magma_behemoth/defeated/frame-05.png",
-        "/sprites/magma_behemoth/defeated/frame-06.png"
+        "/sprites/magma_behemoth/defeated/frame-01.png?v=28a06f3a75",
+        "/sprites/magma_behemoth/defeated/frame-02.png?v=1b37182c00",
+        "/sprites/magma_behemoth/defeated/frame-03.png?v=3e860f5e96",
+        "/sprites/magma_behemoth/defeated/frame-04.png?v=364075a9f0",
+        "/sprites/magma_behemoth/defeated/frame-05.png?v=2fababf473",
+        "/sprites/magma_behemoth/defeated/frame-06.png?v=ca21326968"
       ],
       "width": 477,
       "height": 301,
@@ -191,37 +191,37 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/magma_behemoth/defeated/frame-01.png": [
+        "/sprites/magma_behemoth/defeated/frame-01.png?v=28a06f3a75": [
           223.5,
           249.7,
           0,
           36
         ],
-        "/sprites/magma_behemoth/defeated/frame-02.png": [
+        "/sprites/magma_behemoth/defeated/frame-02.png?v=1b37182c00": [
           235.5,
           322.3,
           0,
           36
         ],
-        "/sprites/magma_behemoth/defeated/frame-03.png": [
+        "/sprites/magma_behemoth/defeated/frame-03.png?v=3e860f5e96": [
           224.5,
           342.1,
           0,
           36
         ],
-        "/sprites/magma_behemoth/defeated/frame-04.png": [
+        "/sprites/magma_behemoth/defeated/frame-04.png?v=364075a9f0": [
           203,
           385,
           0,
           34
         ],
-        "/sprites/magma_behemoth/defeated/frame-05.png": [
+        "/sprites/magma_behemoth/defeated/frame-05.png?v=2fababf473": [
           220.5,
           476.3,
           0,
           35
         ],
-        "/sprites/magma_behemoth/defeated/frame-06.png": [
+        "/sprites/magma_behemoth/defeated/frame-06.png?v=ca21326968": [
           246,
           497.2,
           0,

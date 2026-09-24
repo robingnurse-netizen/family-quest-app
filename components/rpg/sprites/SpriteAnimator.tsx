@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { frameReady, loadFrame } from "./frame-cache";
 import type { SpriteAnimation } from "./types";
 
 type Props = {
@@ -32,9 +33,14 @@ type Props = {
 
 /**
  * Plays a sprite animation by swapping an <img>'s src on a
- * requestAnimationFrame clock (no React re-render per frame). Frames are
- * preloaded first so the loop doesn't flicker; users who prefer reduced
- * motion see the first frame only.
+ * requestAnimationFrame clock (no React re-render per frame); users who
+ * prefer reduced motion see the first frame only.
+ *
+ * Frames come from the frame cache (./frame-cache): each is downloaded once
+ * per page and only shown once it's loaded and decoded. A frame that isn't
+ * ready (a slow or failed request) is skipped — the last good frame stays
+ * up, and the cache retries it — so a sprite never blinks out, and never
+ * shows its alt text or a broken-image icon.
  */
 export function SpriteAnimator({
   animation,
@@ -62,50 +68,71 @@ export function SpriteAnimator({
     onFrameRef.current = onFrame;
   }, [onFrame]);
 
+  // The last frame that actually loaded in this <img>: what an error falls
+  // back to.
+  const lastGoodRef = useRef<string | null>(null);
+
   useEffect(() => {
     const img = imgRef.current;
     const { frames, fps, loop } = animation;
     if (!img || frames.length === 0) return;
-    img.src = frames[0];
-    onFrameRef.current?.(frames[0]);
+    let cancelled = false;
+
+    /** Show frame `i` if it's ready (true); otherwise keep the current one. */
+    const show = (i: number) => {
+      const src = frames[i];
+      if (!frameReady(src)) {
+        void loadFrame(src); // retries a failed frame once its backoff is up
+        return false;
+      }
+      if (img.getAttribute("src") !== src) img.src = src;
+      img.style.visibility = "";
+      onFrameRef.current?.(src);
+      return true;
+    };
+    // The server-rendered first frame may have failed before this code ran
+    // (no error handler yet): hide it until a good frame is in.
+    if (img.complete && img.naturalWidth === 0) img.style.visibility = "hidden";
+    // The first frame: at once if it's ready, else as soon as it is.
+    if (!show(0)) {
+      void loadFrame(frames[0]).then((ok) => {
+        if (ok && !cancelled && !img.dataset.animating) show(0);
+      });
+    }
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (paused) return;
+    const stop = () => {
+      cancelled = true;
+    };
+    if (paused) return stop;
     // Nothing to animate (one frame, or reduced motion): show the first frame
     // for the animation's normal duration, then report completion so callers
     // waiting on a one-shot (hurt → idle) still move on.
     if (reduced || frames.length === 1) {
-      if (loop) return;
+      if (loop) return stop;
       const holdMs = Math.max(600, (frames.length / fps) * 1000);
       const timer = setTimeout(() => onCompleteRef.current?.(), holdMs);
-      return () => clearTimeout(timer);
+      return () => {
+        stop();
+        clearTimeout(timer);
+      };
     }
 
-    // Preload every frame before starting the clock.
-    let cancelled = false;
+    // Load every frame (once per page) before starting the clock; frames
+    // that failed are skipped until a retry succeeds.
     let raf = 0;
     let replayTimer: ReturnType<typeof setTimeout> | undefined;
-    const preload = frames.map(
-      (src) =>
-        new Promise<void>((resolve) => {
-          const im = new Image();
-          im.onload = im.onerror = () => resolve();
-          im.src = src;
-        }),
-    );
-
-    void Promise.all(preload).then(() => {
+    void Promise.all(frames.map(loadFrame)).then(() => {
       if (cancelled) return;
+      img.dataset.animating = "1";
       const frameMs = 1000 / fps;
       let start: number | null = null;
       let last: number | null = null;
-      let shown = 0;
+      let shown = frameReady(frames[0]) ? 0 : -1;
       const restart = () => {
         start = null;
         last = null;
-        shown = 0;
-        img.src = frames[0];
-        onFrameRef.current?.(frames[0]);
+        shown = show(0) ? 0 : -1;
         raf = requestAnimationFrame(tick);
       };
       const tick = (now: number) => {
@@ -116,11 +143,8 @@ export function SpriteAnimator({
         let index = Math.floor((now - start) / frameMs);
         if (loop) index %= frames.length;
         else if (index >= frames.length - 1) index = frames.length - 1;
-        if (index !== shown) {
-          shown = index;
-          img.src = frames[index];
-          onFrameRef.current?.(frames[index]);
-        }
+        // Not ready yet: keep the last good frame, try again next tick.
+        if (index !== shown && show(index)) shown = index;
         if (!loop && index === frames.length - 1) {
           onCompleteRef.current?.();
           if (replayDelayMs !== undefined) replayTimer = setTimeout(restart, replayDelayMs);
@@ -133,6 +157,7 @@ export function SpriteAnimator({
 
     return () => {
       cancelled = true;
+      delete img.dataset.animating;
       cancelAnimationFrame(raf);
       clearTimeout(replayTimer);
     };
@@ -148,6 +173,18 @@ export function SpriteAnimator({
       height={Math.round(animation.height * scale)}
       draggable={false}
       style={style}
+      onLoad={(e) => {
+        lastGoodRef.current = e.currentTarget.getAttribute("src");
+        e.currentTarget.style.visibility = "";
+      }}
+      // Never the alt text or a broken-image icon: back to the last frame
+      // that loaded, or invisible until one does.
+      onError={(e) => {
+        const el = e.currentTarget;
+        const good = lastGoodRef.current;
+        if (good && el.getAttribute("src") !== good) el.src = good;
+        else el.style.visibility = "hidden";
+      }}
       // Pixel art: scale with hard pixels, never smoothed (every sprite).
       className={`sprite-pixelated select-none ${className}`}
     />

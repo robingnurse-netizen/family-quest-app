@@ -33,12 +33,14 @@
 // exactly on the ground line, frame by frame, except frames an animation
 // lists as `airborne` (indices into its sliced frames: jumps, leaps,
 // flying, hovering) — tests/grounding.test.mjs checks every manifest.
+// Frame URLs in the manifests carry a content hash (?v=…, added by
+// scripts/sprite-manifests.mjs) for long-lived caching.
 //
 // Grid sheets (`grid: { cell }`: transparent, one frame per cell, e.g. the
 // PixelLab hero) skip all of the above: see sliceGridAnimation.
 
 import sharp from "sharp";
-import { writeManifestShadows } from "./sprite-shadows.mjs";
+import { finishManifest } from "./sprite-manifests.mjs";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -678,7 +680,7 @@ for (const sheetCfg of SHEETS) {
       console.log(`${character}/${animName}: ${paths.length} frames, ${width}x${height}`);
     }
     writeFileSync(join(OUT_MANIFESTS, `${character}.json`), JSON.stringify(manifest, null, 2) + "\n");
-    // Ground shadows from the frames just written (scripts/sprite-shadows.mjs).
-    await writeManifestShadows(character);
+    // Versioned frame URLs + ground shadows (scripts/sprite-manifests.mjs).
+    await finishManifest(character);
   }
 }

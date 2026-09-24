@@ -3,8 +3,8 @@
   "animations": {
     "idle": {
       "frames": [
-        "/sprites/laundry_goblin/idle/frame-01.png",
-        "/sprites/laundry_goblin/idle/frame-02.png"
+        "/sprites/laundry_goblin/idle/frame-01.png?v=98217dc990",
+        "/sprites/laundry_goblin/idle/frame-02.png?v=7a641609cc"
       ],
       "width": 204,
       "height": 229,
@@ -16,13 +16,13 @@
       "loop": true,
       "facing": "right",
       "shadow": {
-        "/sprites/laundry_goblin/idle/frame-01.png": [
+        "/sprites/laundry_goblin/idle/frame-01.png?v=98217dc990": [
           98,
           94.6,
           0,
           20
         ],
-        "/sprites/laundry_goblin/idle/frame-02.png": [
+        "/sprites/laundry_goblin/idle/frame-02.png?v=7a641609cc": [
           100,
           132,
           0,
@@ -32,9 +32,9 @@
     },
     "move": {
       "frames": [
-        "/sprites/laundry_goblin/move/frame-01.png",
-        "/sprites/laundry_goblin/move/frame-02.png",
-        "/sprites/laundry_goblin/move/frame-03.png"
+        "/sprites/laundry_goblin/move/frame-01.png?v=5e05a77dda",
+        "/sprites/laundry_goblin/move/frame-02.png?v=ca4ca626aa",
+        "/sprites/laundry_goblin/move/frame-03.png?v=81ffd1293a"
       ],
       "width": 169,
       "height": 229,
@@ -46,19 +46,19 @@
       "loop": true,
       "facing": "right",
       "shadow": {
-        "/sprites/laundry_goblin/move/frame-01.png": [
+        "/sprites/laundry_goblin/move/frame-01.png?v=5e05a77dda": [
           85.5,
           128.7,
           0,
           27
         ],
-        "/sprites/laundry_goblin/move/frame-02.png": [
+        "/sprites/laundry_goblin/move/frame-02.png?v=ca4ca626aa": [
           90.5,
           104.5,
           0,
           26
         ],
-        "/sprites/laundry_goblin/move/frame-03.png": [
+        "/sprites/laundry_goblin/move/frame-03.png?v=81ffd1293a": [
           80.5,
           135.3,
           0,
@@ -68,8 +68,8 @@
     },
     "attack": {
       "frames": [
-        "/sprites/laundry_goblin/attack/frame-01.png",
-        "/sprites/laundry_goblin/attack/frame-02.png"
+        "/sprites/laundry_goblin/attack/frame-01.png?v=b6059db52e",
+        "/sprites/laundry_goblin/attack/frame-02.png?v=eca48eb038"
       ],
       "width": 268,
       "height": 264,
@@ -81,13 +81,13 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/laundry_goblin/attack/frame-01.png": [
+        "/sprites/laundry_goblin/attack/frame-01.png?v=b6059db52e": [
           141.5,
           218.9,
           0,
           31
         ],
-        "/sprites/laundry_goblin/attack/frame-02.png": [
+        "/sprites/laundry_goblin/attack/frame-02.png?v=eca48eb038": [
           119.5,
           124.3,
           0,
@@ -97,8 +97,8 @@
     },
     "hurt": {
       "frames": [
-        "/sprites/laundry_goblin/hurt/frame-01.png",
-        "/sprites/laundry_goblin/hurt/frame-02.png"
+        "/sprites/laundry_goblin/hurt/frame-01.png?v=97f824f973",
+        "/sprites/laundry_goblin/hurt/frame-02.png?v=1a7b126fe2"
       ],
       "width": 213,
       "height": 220,
@@ -110,13 +110,13 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/laundry_goblin/hurt/frame-01.png": [
+        "/sprites/laundry_goblin/hurt/frame-01.png?v=97f824f973": [
           117.5,
           133.1,
           0,
           24
         ],
-        "/sprites/laundry_goblin/hurt/frame-02.png": [
+        "/sprites/laundry_goblin/hurt/frame-02.png?v=1a7b126fe2": [
           117.5,
           104.5,
           0,
@@ -126,7 +126,7 @@
     },
     "death": {
       "frames": [
-        "/sprites/laundry_goblin/death/frame-01.png"
+        "/sprites/laundry_goblin/death/frame-01.png?v=74ddc69b8f"
       ],
       "width": 300,
       "height": 143,
@@ -138,7 +138,7 @@
       "loop": false,
       "facing": "front",
       "shadow": {
-        "/sprites/laundry_goblin/death/frame-01.png": [
+        "/sprites/laundry_goblin/death/frame-01.png?v=74ddc69b8f": [
           150,
           321.2,
           0,

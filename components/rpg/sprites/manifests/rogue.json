@@ -3,15 +3,15 @@
   "animations": {
     "idle": {
       "frames": [
-        "/sprites/rogue/idle/frame-01.png",
-        "/sprites/rogue/idle/frame-02.png",
-        "/sprites/rogue/idle/frame-03.png",
-        "/sprites/rogue/idle/frame-04.png",
-        "/sprites/rogue/idle/frame-05.png",
-        "/sprites/rogue/idle/frame-06.png",
-        "/sprites/rogue/idle/frame-07.png",
-        "/sprites/rogue/idle/frame-08.png",
-        "/sprites/rogue/idle/frame-09.png"
+        "/sprites/rogue/idle/frame-01.png?v=1cb76c796e",
+        "/sprites/rogue/idle/frame-02.png?v=4dddf4e2be",
+        "/sprites/rogue/idle/frame-03.png?v=4cbede659e",
+        "/sprites/rogue/idle/frame-04.png?v=216c50157e",
+        "/sprites/rogue/idle/frame-05.png?v=f29dcfbae5",
+        "/sprites/rogue/idle/frame-06.png?v=85bfc91a4e",
+        "/sprites/rogue/idle/frame-07.png?v=5909672f0c",
+        "/sprites/rogue/idle/frame-08.png?v=e493ca37d7",
+        "/sprites/rogue/idle/frame-09.png?v=1cd52f7ff8"
       ],
       "width": 53,
       "height": 59,
@@ -24,55 +24,55 @@
       "loop": true,
       "facing": "right",
       "shadow": {
-        "/sprites/rogue/idle/frame-01.png": [
+        "/sprites/rogue/idle/frame-01.png?v=1cb76c796e": [
           25,
           44,
           0,
           7
         ],
-        "/sprites/rogue/idle/frame-02.png": [
+        "/sprites/rogue/idle/frame-02.png?v=4dddf4e2be": [
           25,
           44,
           0,
           7
         ],
-        "/sprites/rogue/idle/frame-03.png": [
+        "/sprites/rogue/idle/frame-03.png?v=4cbede659e": [
           25,
           44,
           0,
           7
         ],
-        "/sprites/rogue/idle/frame-04.png": [
+        "/sprites/rogue/idle/frame-04.png?v=216c50157e": [
           25,
           44,
           0,
           7
         ],
-        "/sprites/rogue/idle/frame-05.png": [
+        "/sprites/rogue/idle/frame-05.png?v=f29dcfbae5": [
           25,
           44,
           0,
           7
         ],
-        "/sprites/rogue/idle/frame-06.png": [
+        "/sprites/rogue/idle/frame-06.png?v=85bfc91a4e": [
           25,
           44,
           0,
           7
         ],
-        "/sprites/rogue/idle/frame-07.png": [
+        "/sprites/rogue/idle/frame-07.png?v=5909672f0c": [
           25,
           44,
           0,
           7
         ],
-        "/sprites/rogue/idle/frame-08.png": [
+        "/sprites/rogue/idle/frame-08.png?v=e493ca37d7": [
           25,
           44,
           0,
           7
         ],
-        "/sprites/rogue/idle/frame-09.png": [
+        "/sprites/rogue/idle/frame-09.png?v=1cd52f7ff8": [
           25,
           44,
           0,
@@ -82,15 +82,15 @@
     },
     "bark": {
       "frames": [
-        "/sprites/rogue/bark/frame-01.png",
-        "/sprites/rogue/bark/frame-02.png",
-        "/sprites/rogue/bark/frame-03.png",
-        "/sprites/rogue/bark/frame-04.png",
-        "/sprites/rogue/bark/frame-05.png",
-        "/sprites/rogue/bark/frame-06.png",
-        "/sprites/rogue/bark/frame-07.png",
-        "/sprites/rogue/bark/frame-08.png",
-        "/sprites/rogue/bark/frame-09.png"
+        "/sprites/rogue/bark/frame-01.png?v=07454d9bc9",
+        "/sprites/rogue/bark/frame-02.png?v=215bc8f8aa",
+        "/sprites/rogue/bark/frame-03.png?v=85d823a31d",
+        "/sprites/rogue/bark/frame-04.png?v=b3d648c8ea",
+        "/sprites/rogue/bark/frame-05.png?v=bc1eabf03f",
+        "/sprites/rogue/bark/frame-06.png?v=bb60e328cb",
+        "/sprites/rogue/bark/frame-07.png?v=ea18fc0147",
+        "/sprites/rogue/bark/frame-08.png?v=0853fedea9",
+        "/sprites/rogue/bark/frame-09.png?v=a79b65f896"
       ],
       "width": 56,
       "height": 55,
@@ -103,55 +103,55 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/rogue/bark/frame-01.png": [
+        "/sprites/rogue/bark/frame-01.png?v=07454d9bc9": [
           27,
           44,
           0,
           7
         ],
-        "/sprites/rogue/bark/frame-02.png": [
+        "/sprites/rogue/bark/frame-02.png?v=215bc8f8aa": [
           27,
           44,
           0,
           7
         ],
-        "/sprites/rogue/bark/frame-03.png": [
+        "/sprites/rogue/bark/frame-03.png?v=85d823a31d": [
           26.5,
           42.9,
           0,
           7
         ],
-        "/sprites/rogue/bark/frame-04.png": [
+        "/sprites/rogue/bark/frame-04.png?v=b3d648c8ea": [
           23,
           35.2,
           0,
           7
         ],
-        "/sprites/rogue/bark/frame-05.png": [
+        "/sprites/rogue/bark/frame-05.png?v=bc1eabf03f": [
           23,
           35.2,
           0,
           7
         ],
-        "/sprites/rogue/bark/frame-06.png": [
+        "/sprites/rogue/bark/frame-06.png?v=bb60e328cb": [
           23,
           35.2,
           0,
           7
         ],
-        "/sprites/rogue/bark/frame-07.png": [
+        "/sprites/rogue/bark/frame-07.png?v=ea18fc0147": [
           23,
           35.2,
           0,
           7
         ],
-        "/sprites/rogue/bark/frame-08.png": [
+        "/sprites/rogue/bark/frame-08.png?v=0853fedea9": [
           28.5,
           47.3,
           0,
           7
         ],
-        "/sprites/rogue/bark/frame-09.png": [
+        "/sprites/rogue/bark/frame-09.png?v=a79b65f896": [
           26.5,
           45.1,
           0,
@@ -161,15 +161,15 @@
     },
     "hurt": {
       "frames": [
-        "/sprites/rogue/hurt/frame-01.png",
-        "/sprites/rogue/hurt/frame-02.png",
-        "/sprites/rogue/hurt/frame-03.png",
-        "/sprites/rogue/hurt/frame-04.png",
-        "/sprites/rogue/hurt/frame-05.png",
-        "/sprites/rogue/hurt/frame-06.png",
-        "/sprites/rogue/hurt/frame-07.png",
-        "/sprites/rogue/hurt/frame-08.png",
-        "/sprites/rogue/hurt/frame-09.png"
+        "/sprites/rogue/hurt/frame-01.png?v=3fab7f4e34",
+        "/sprites/rogue/hurt/frame-02.png?v=a346917523",
+        "/sprites/rogue/hurt/frame-03.png?v=4304a1a262",
+        "/sprites/rogue/hurt/frame-04.png?v=bd86522dbc",
+        "/sprites/rogue/hurt/frame-05.png?v=1b039f29fc",
+        "/sprites/rogue/hurt/frame-06.png?v=75438bfb11",
+        "/sprites/rogue/hurt/frame-07.png?v=f64663fee9",
+        "/sprites/rogue/hurt/frame-08.png?v=206108361b",
+        "/sprites/rogue/hurt/frame-09.png?v=7af460aa05"
       ],
       "width": 57,
       "height": 53,
@@ -182,55 +182,55 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/rogue/hurt/frame-01.png": [
+        "/sprites/rogue/hurt/frame-01.png?v=3fab7f4e34": [
           27.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/hurt/frame-02.png": [
+        "/sprites/rogue/hurt/frame-02.png?v=a346917523": [
           27.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/hurt/frame-03.png": [
+        "/sprites/rogue/hurt/frame-03.png?v=4304a1a262": [
           27.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/hurt/frame-04.png": [
+        "/sprites/rogue/hurt/frame-04.png?v=bd86522dbc": [
           27.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/hurt/frame-05.png": [
+        "/sprites/rogue/hurt/frame-05.png?v=1b039f29fc": [
           27.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/hurt/frame-06.png": [
+        "/sprites/rogue/hurt/frame-06.png?v=75438bfb11": [
           27.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/hurt/frame-07.png": [
+        "/sprites/rogue/hurt/frame-07.png?v=f64663fee9": [
           27.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/hurt/frame-08.png": [
+        "/sprites/rogue/hurt/frame-08.png?v=206108361b": [
           27.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/hurt/frame-09.png": [
+        "/sprites/rogue/hurt/frame-09.png?v=7af460aa05": [
           27.5,
           42.9,
           0,
@@ -240,15 +240,15 @@
     },
     "pounce": {
       "frames": [
-        "/sprites/rogue/pounce/frame-01.png",
-        "/sprites/rogue/pounce/frame-02.png",
-        "/sprites/rogue/pounce/frame-03.png",
-        "/sprites/rogue/pounce/frame-04.png",
-        "/sprites/rogue/pounce/frame-05.png",
-        "/sprites/rogue/pounce/frame-06.png",
-        "/sprites/rogue/pounce/frame-07.png",
-        "/sprites/rogue/pounce/frame-08.png",
-        "/sprites/rogue/pounce/frame-09.png"
+        "/sprites/rogue/pounce/frame-01.png?v=bbc86c4c48",
+        "/sprites/rogue/pounce/frame-02.png?v=83d634b770",
+        "/sprites/rogue/pounce/frame-03.png?v=ff0e8074e5",
+        "/sprites/rogue/pounce/frame-04.png?v=07190399ed",
+        "/sprites/rogue/pounce/frame-05.png?v=2c3c8b997c",
+        "/sprites/rogue/pounce/frame-06.png?v=b546b6865b",
+        "/sprites/rogue/pounce/frame-07.png?v=e83a47e40c",
+        "/sprites/rogue/pounce/frame-08.png?v=4c563154b6",
+        "/sprites/rogue/pounce/frame-09.png?v=965b358b1e"
       ],
       "width": 67,
       "height": 59,
@@ -268,55 +268,55 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/rogue/pounce/frame-01.png": [
+        "/sprites/rogue/pounce/frame-01.png?v=bbc86c4c48": [
           29,
           44,
           0,
           7
         ],
-        "/sprites/rogue/pounce/frame-02.png": [
+        "/sprites/rogue/pounce/frame-02.png?v=83d634b770": [
           28.5,
           40.7,
           0,
           7
         ],
-        "/sprites/rogue/pounce/frame-03.png": [
+        "/sprites/rogue/pounce/frame-03.png?v=ff0e8074e5": [
           28.5,
           36.3,
           0,
           7
         ],
-        "/sprites/rogue/pounce/frame-04.png": [
+        "/sprites/rogue/pounce/frame-04.png?v=07190399ed": [
           30,
           48.4,
           5,
           7
         ],
-        "/sprites/rogue/pounce/frame-05.png": [
+        "/sprites/rogue/pounce/frame-05.png?v=2c3c8b997c": [
           17,
           22,
           5,
           7
         ],
-        "/sprites/rogue/pounce/frame-06.png": [
+        "/sprites/rogue/pounce/frame-06.png?v=b546b6865b": [
           17,
           22,
           5,
           7
         ],
-        "/sprites/rogue/pounce/frame-07.png": [
+        "/sprites/rogue/pounce/frame-07.png?v=e83a47e40c": [
           16,
           22,
           5,
           7
         ],
-        "/sprites/rogue/pounce/frame-08.png": [
+        "/sprites/rogue/pounce/frame-08.png?v=4c563154b6": [
           34,
           57.2,
           4,
           7
         ],
-        "/sprites/rogue/pounce/frame-09.png": [
+        "/sprites/rogue/pounce/frame-09.png?v=965b358b1e": [
           31,
           46.2,
           0,
@@ -326,15 +326,15 @@
     },
     "ko": {
       "frames": [
-        "/sprites/rogue/ko/frame-01.png",
-        "/sprites/rogue/ko/frame-02.png",
-        "/sprites/rogue/ko/frame-03.png",
-        "/sprites/rogue/ko/frame-04.png",
-        "/sprites/rogue/ko/frame-05.png",
-        "/sprites/rogue/ko/frame-06.png",
-        "/sprites/rogue/ko/frame-07.png",
-        "/sprites/rogue/ko/frame-08.png",
-        "/sprites/rogue/ko/frame-09.png"
+        "/sprites/rogue/ko/frame-01.png?v=aed59eb4f7",
+        "/sprites/rogue/ko/frame-02.png?v=863f512e5b",
+        "/sprites/rogue/ko/frame-03.png?v=93cd183298",
+        "/sprites/rogue/ko/frame-04.png?v=3c629f04ae",
+        "/sprites/rogue/ko/frame-05.png?v=9aff09be1e",
+        "/sprites/rogue/ko/frame-06.png?v=e91d8b9bf6",
+        "/sprites/rogue/ko/frame-07.png?v=6fee080c00",
+        "/sprites/rogue/ko/frame-08.png?v=3676ef6695",
+        "/sprites/rogue/ko/frame-09.png?v=fea66dbe0e"
       ],
       "width": 67,
       "height": 52,
@@ -347,55 +347,55 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/rogue/ko/frame-01.png": [
+        "/sprites/rogue/ko/frame-01.png?v=aed59eb4f7": [
           29.5,
           42.9,
           0,
           6
         ],
-        "/sprites/rogue/ko/frame-02.png": [
+        "/sprites/rogue/ko/frame-02.png?v=863f512e5b": [
           41,
           17.6,
           0,
           4
         ],
-        "/sprites/rogue/ko/frame-03.png": [
+        "/sprites/rogue/ko/frame-03.png?v=93cd183298": [
           41,
           17.6,
           0,
           4
         ],
-        "/sprites/rogue/ko/frame-04.png": [
+        "/sprites/rogue/ko/frame-04.png?v=3c629f04ae": [
           40.5,
           18.7,
           0,
           6
         ],
-        "/sprites/rogue/ko/frame-05.png": [
+        "/sprites/rogue/ko/frame-05.png?v=9aff09be1e": [
           32,
           50.6,
           0,
           5
         ],
-        "/sprites/rogue/ko/frame-06.png": [
+        "/sprites/rogue/ko/frame-06.png?v=e91d8b9bf6": [
           33,
           55,
           0,
           6
         ],
-        "/sprites/rogue/ko/frame-07.png": [
+        "/sprites/rogue/ko/frame-07.png?v=6fee080c00": [
           30.5,
           62.7,
           0,
           6
         ],
-        "/sprites/rogue/ko/frame-08.png": [
+        "/sprites/rogue/ko/frame-08.png?v=3676ef6695": [
           32,
           63.8,
           0,
           6
         ],
-        "/sprites/rogue/ko/frame-09.png": [
+        "/sprites/rogue/ko/frame-09.png?v=fea66dbe0e": [
           34,
           70.4,
           0,
@@ -405,12 +405,12 @@
     },
     "bark_front": {
       "frames": [
-        "/sprites/rogue/bark_front/frame-01.png",
-        "/sprites/rogue/bark_front/frame-02.png",
-        "/sprites/rogue/bark_front/frame-03.png",
-        "/sprites/rogue/bark_front/frame-04.png",
-        "/sprites/rogue/bark_front/frame-05.png",
-        "/sprites/rogue/bark_front/frame-06.png"
+        "/sprites/rogue/bark_front/frame-01.png?v=25e5841419",
+        "/sprites/rogue/bark_front/frame-02.png?v=4e628053a5",
+        "/sprites/rogue/bark_front/frame-03.png?v=c1eb53a6f7",
+        "/sprites/rogue/bark_front/frame-04.png?v=abdfa5ccef",
+        "/sprites/rogue/bark_front/frame-05.png?v=6dfd1a47e2",
+        "/sprites/rogue/bark_front/frame-06.png?v=ee6504bf27"
       ],
       "width": 32,
       "height": 59,
@@ -430,37 +430,37 @@
       "loop": false,
       "facing": "front",
       "shadow": {
-        "/sprites/rogue/bark_front/frame-01.png": [
+        "/sprites/rogue/bark_front/frame-01.png?v=25e5841419": [
           13,
           26.4,
           0,
           3
         ],
-        "/sprites/rogue/bark_front/frame-02.png": [
+        "/sprites/rogue/bark_front/frame-02.png?v=4e628053a5": [
           13,
           26.4,
           1,
           3
         ],
-        "/sprites/rogue/bark_front/frame-03.png": [
+        "/sprites/rogue/bark_front/frame-03.png?v=c1eb53a6f7": [
           13,
           24.2,
           2,
           3
         ],
-        "/sprites/rogue/bark_front/frame-04.png": [
+        "/sprites/rogue/bark_front/frame-04.png?v=abdfa5ccef": [
           13,
           24.2,
           3,
           3
         ],
-        "/sprites/rogue/bark_front/frame-05.png": [
+        "/sprites/rogue/bark_front/frame-05.png?v=6dfd1a47e2": [
           13,
           24.2,
           5,
           3
         ],
-        "/sprites/rogue/bark_front/frame-06.png": [
+        "/sprites/rogue/bark_front/frame-06.png?v=ee6504bf27": [
           13.5,
           25.3,
           4,
@@ -470,14 +470,14 @@
     },
     "idle_front": {
       "frames": [
-        "/sprites/rogue/idle_front/frame-01.png",
-        "/sprites/rogue/idle_front/frame-02.png",
-        "/sprites/rogue/idle_front/frame-03.png",
-        "/sprites/rogue/idle_front/frame-04.png",
-        "/sprites/rogue/idle_front/frame-05.png",
-        "/sprites/rogue/idle_front/frame-06.png",
-        "/sprites/rogue/idle_front/frame-07.png",
-        "/sprites/rogue/idle_front/frame-08.png"
+        "/sprites/rogue/idle_front/frame-01.png?v=6915365f9a",
+        "/sprites/rogue/idle_front/frame-02.png?v=08ed183751",
+        "/sprites/rogue/idle_front/frame-03.png?v=e5f79a1cd3",
+        "/sprites/rogue/idle_front/frame-04.png?v=a2b808e0ae",
+        "/sprites/rogue/idle_front/frame-05.png?v=e45ed7f3c1",
+        "/sprites/rogue/idle_front/frame-06.png?v=1cd8763b0a",
+        "/sprites/rogue/idle_front/frame-07.png?v=c864c3bbf0",
+        "/sprites/rogue/idle_front/frame-08.png?v=f3fdf85661"
       ],
       "width": 26,
       "height": 60,
@@ -490,49 +490,49 @@
       "loop": true,
       "facing": "front",
       "shadow": {
-        "/sprites/rogue/idle_front/frame-01.png": [
+        "/sprites/rogue/idle_front/frame-01.png?v=6915365f9a": [
           13,
           22,
           0,
           2
         ],
-        "/sprites/rogue/idle_front/frame-02.png": [
+        "/sprites/rogue/idle_front/frame-02.png?v=08ed183751": [
           13,
           22,
           0,
           2
         ],
-        "/sprites/rogue/idle_front/frame-03.png": [
+        "/sprites/rogue/idle_front/frame-03.png?v=e5f79a1cd3": [
           13,
           22,
           0,
           2
         ],
-        "/sprites/rogue/idle_front/frame-04.png": [
+        "/sprites/rogue/idle_front/frame-04.png?v=a2b808e0ae": [
           13,
           22,
           0,
           2
         ],
-        "/sprites/rogue/idle_front/frame-05.png": [
+        "/sprites/rogue/idle_front/frame-05.png?v=e45ed7f3c1": [
           13,
           22,
           0,
           2
         ],
-        "/sprites/rogue/idle_front/frame-06.png": [
+        "/sprites/rogue/idle_front/frame-06.png?v=1cd8763b0a": [
           13,
           22,
           0,
           2
         ],
-        "/sprites/rogue/idle_front/frame-07.png": [
+        "/sprites/rogue/idle_front/frame-07.png?v=c864c3bbf0": [
           13,
           22,
           0,
           2
         ],
-        "/sprites/rogue/idle_front/frame-08.png": [
+        "/sprites/rogue/idle_front/frame-08.png?v=f3fdf85661": [
           13,
           22,
           0,

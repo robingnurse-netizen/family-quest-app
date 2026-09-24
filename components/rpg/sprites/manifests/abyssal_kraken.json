@@ -3,12 +3,12 @@
   "animations": {
     "idle": {
       "frames": [
-        "/sprites/abyssal_kraken/idle/frame-01.png",
-        "/sprites/abyssal_kraken/idle/frame-02.png",
-        "/sprites/abyssal_kraken/idle/frame-03.png",
-        "/sprites/abyssal_kraken/idle/frame-04.png",
-        "/sprites/abyssal_kraken/idle/frame-05.png",
-        "/sprites/abyssal_kraken/idle/frame-06.png"
+        "/sprites/abyssal_kraken/idle/frame-01.png?v=6150b84fc8",
+        "/sprites/abyssal_kraken/idle/frame-02.png?v=51a18f0d2d",
+        "/sprites/abyssal_kraken/idle/frame-03.png?v=5031a2b5b8",
+        "/sprites/abyssal_kraken/idle/frame-04.png?v=733fd55e69",
+        "/sprites/abyssal_kraken/idle/frame-05.png?v=76c4ecc9c7",
+        "/sprites/abyssal_kraken/idle/frame-06.png?v=319b27a6de"
       ],
       "width": 337,
       "height": 364,
@@ -20,37 +20,37 @@
       "loop": true,
       "facing": "front",
       "shadow": {
-        "/sprites/abyssal_kraken/idle/frame-01.png": [
+        "/sprites/abyssal_kraken/idle/frame-01.png?v=6150b84fc8": [
           166.5,
           273.9,
           0,
           43
         ],
-        "/sprites/abyssal_kraken/idle/frame-02.png": [
+        "/sprites/abyssal_kraken/idle/frame-02.png?v=51a18f0d2d": [
           167,
           275,
           0,
           44
         ],
-        "/sprites/abyssal_kraken/idle/frame-03.png": [
+        "/sprites/abyssal_kraken/idle/frame-03.png?v=5031a2b5b8": [
           168,
           275,
           0,
           43
         ],
-        "/sprites/abyssal_kraken/idle/frame-04.png": [
+        "/sprites/abyssal_kraken/idle/frame-04.png?v=733fd55e69": [
           166,
           275,
           0,
           44
         ],
-        "/sprites/abyssal_kraken/idle/frame-05.png": [
+        "/sprites/abyssal_kraken/idle/frame-05.png?v=76c4ecc9c7": [
           167,
           275,
           0,
           44
         ],
-        "/sprites/abyssal_kraken/idle/frame-06.png": [
+        "/sprites/abyssal_kraken/idle/frame-06.png?v=319b27a6de": [
           169.5,
           273.9,
           0,
@@ -60,12 +60,12 @@
     },
     "move": {
       "frames": [
-        "/sprites/abyssal_kraken/move/frame-01.png",
-        "/sprites/abyssal_kraken/move/frame-02.png",
-        "/sprites/abyssal_kraken/move/frame-03.png",
-        "/sprites/abyssal_kraken/move/frame-04.png",
-        "/sprites/abyssal_kraken/move/frame-05.png",
-        "/sprites/abyssal_kraken/move/frame-06.png"
+        "/sprites/abyssal_kraken/move/frame-01.png?v=75196a5195",
+        "/sprites/abyssal_kraken/move/frame-02.png?v=9fd598cf2e",
+        "/sprites/abyssal_kraken/move/frame-03.png?v=826ff6184c",
+        "/sprites/abyssal_kraken/move/frame-04.png?v=46a2beb677",
+        "/sprites/abyssal_kraken/move/frame-05.png?v=31c2ebe6d0",
+        "/sprites/abyssal_kraken/move/frame-06.png?v=797d5a4d5d"
       ],
       "width": 441,
       "height": 263,
@@ -85,37 +85,37 @@
       "loop": true,
       "facing": "right",
       "shadow": {
-        "/sprites/abyssal_kraken/move/frame-01.png": [
+        "/sprites/abyssal_kraken/move/frame-01.png?v=75196a5195": [
           238.5,
           245.3,
           0,
           32
         ],
-        "/sprites/abyssal_kraken/move/frame-02.png": [
+        "/sprites/abyssal_kraken/move/frame-02.png?v=9fd598cf2e": [
           243.5,
           289.3,
           7,
           32
         ],
-        "/sprites/abyssal_kraken/move/frame-03.png": [
+        "/sprites/abyssal_kraken/move/frame-03.png?v=826ff6184c": [
           231.5,
           293.7,
           11,
           32
         ],
-        "/sprites/abyssal_kraken/move/frame-04.png": [
+        "/sprites/abyssal_kraken/move/frame-04.png?v=46a2beb677": [
           255,
           277.2,
           10,
           32
         ],
-        "/sprites/abyssal_kraken/move/frame-05.png": [
+        "/sprites/abyssal_kraken/move/frame-05.png?v=31c2ebe6d0": [
           194.5,
           361.9,
           21,
           32
         ],
-        "/sprites/abyssal_kraken/move/frame-06.png": [
+        "/sprites/abyssal_kraken/move/frame-06.png?v=797d5a4d5d": [
           243.5,
           236.5,
           0,
@@ -125,14 +125,14 @@
     },
     "attack": {
       "frames": [
-        "/sprites/abyssal_kraken/attack/frame-01.png",
-        "/sprites/abyssal_kraken/attack/frame-02.png",
-        "/sprites/abyssal_kraken/attack/frame-03.png",
-        "/sprites/abyssal_kraken/attack/frame-04.png",
-        "/sprites/abyssal_kraken/attack/frame-05.png",
-        "/sprites/abyssal_kraken/attack/frame-06.png",
-        "/sprites/abyssal_kraken/attack/frame-07.png",
-        "/sprites/abyssal_kraken/attack/frame-08.png"
+        "/sprites/abyssal_kraken/attack/frame-01.png?v=179c7bc4c9",
+        "/sprites/abyssal_kraken/attack/frame-02.png?v=32d685c89c",
+        "/sprites/abyssal_kraken/attack/frame-03.png?v=30b8861fe1",
+        "/sprites/abyssal_kraken/attack/frame-04.png?v=bd7aaf598e",
+        "/sprites/abyssal_kraken/attack/frame-05.png?v=d1f4e9f2b9",
+        "/sprites/abyssal_kraken/attack/frame-06.png?v=86ef928878",
+        "/sprites/abyssal_kraken/attack/frame-07.png?v=9b94c15e7b",
+        "/sprites/abyssal_kraken/attack/frame-08.png?v=352b52aa38"
       ],
       "width": 375,
       "height": 335,
@@ -147,49 +147,49 @@
       "loop": false,
       "facing": "front",
       "shadow": {
-        "/sprites/abyssal_kraken/attack/frame-01.png": [
+        "/sprites/abyssal_kraken/attack/frame-01.png?v=179c7bc4c9": [
           171,
           143,
           0,
           40
         ],
-        "/sprites/abyssal_kraken/attack/frame-02.png": [
+        "/sprites/abyssal_kraken/attack/frame-02.png?v=32d685c89c": [
           172.5,
           141.9,
           0,
           40
         ],
-        "/sprites/abyssal_kraken/attack/frame-03.png": [
+        "/sprites/abyssal_kraken/attack/frame-03.png?v=30b8861fe1": [
           173.5,
           159.5,
           0,
           40
         ],
-        "/sprites/abyssal_kraken/attack/frame-04.png": [
+        "/sprites/abyssal_kraken/attack/frame-04.png?v=bd7aaf598e": [
           189,
           178.2,
           26,
           40
         ],
-        "/sprites/abyssal_kraken/attack/frame-05.png": [
+        "/sprites/abyssal_kraken/attack/frame-05.png?v=d1f4e9f2b9": [
           182.5,
           320.1,
           0,
           40
         ],
-        "/sprites/abyssal_kraken/attack/frame-06.png": [
+        "/sprites/abyssal_kraken/attack/frame-06.png?v=86ef928878": [
           171.5,
           309.1,
           0,
           32
         ],
-        "/sprites/abyssal_kraken/attack/frame-07.png": [
+        "/sprites/abyssal_kraken/attack/frame-07.png?v=9b94c15e7b": [
           176,
           345.4,
           0,
           31
         ],
-        "/sprites/abyssal_kraken/attack/frame-08.png": [
+        "/sprites/abyssal_kraken/attack/frame-08.png?v=352b52aa38": [
           172.5,
           346.5,
           0,
@@ -199,13 +199,13 @@
     },
     "defeated": {
       "frames": [
-        "/sprites/abyssal_kraken/defeated/frame-01.png",
-        "/sprites/abyssal_kraken/defeated/frame-02.png",
-        "/sprites/abyssal_kraken/defeated/frame-03.png",
-        "/sprites/abyssal_kraken/defeated/frame-04.png",
-        "/sprites/abyssal_kraken/defeated/frame-05.png",
-        "/sprites/abyssal_kraken/defeated/frame-06.png",
-        "/sprites/abyssal_kraken/defeated/frame-07.png"
+        "/sprites/abyssal_kraken/defeated/frame-01.png?v=d65c6df048",
+        "/sprites/abyssal_kraken/defeated/frame-02.png?v=c324605818",
+        "/sprites/abyssal_kraken/defeated/frame-03.png?v=208544b2ed",
+        "/sprites/abyssal_kraken/defeated/frame-04.png?v=bb3425e1fd",
+        "/sprites/abyssal_kraken/defeated/frame-05.png?v=6364bbe617",
+        "/sprites/abyssal_kraken/defeated/frame-06.png?v=c0f3baf78b",
+        "/sprites/abyssal_kraken/defeated/frame-07.png?v=fa932c31eb"
       ],
       "width": 501,
       "height": 315,
@@ -220,43 +220,43 @@
       "loop": false,
       "facing": "front",
       "shadow": {
-        "/sprites/abyssal_kraken/defeated/frame-01.png": [
+        "/sprites/abyssal_kraken/defeated/frame-01.png?v=d65c6df048": [
           215,
           145.2,
           0,
           37
         ],
-        "/sprites/abyssal_kraken/defeated/frame-02.png": [
+        "/sprites/abyssal_kraken/defeated/frame-02.png?v=c324605818": [
           218.5,
           139.7,
           22,
           37
         ],
-        "/sprites/abyssal_kraken/defeated/frame-03.png": [
+        "/sprites/abyssal_kraken/defeated/frame-03.png?v=208544b2ed": [
           232.5,
           265.1,
           0,
           38
         ],
-        "/sprites/abyssal_kraken/defeated/frame-04.png": [
+        "/sprites/abyssal_kraken/defeated/frame-04.png?v=bb3425e1fd": [
           237,
           407,
           0,
           36
         ],
-        "/sprites/abyssal_kraken/defeated/frame-05.png": [
+        "/sprites/abyssal_kraken/defeated/frame-05.png?v=6364bbe617": [
           243.5,
           471.9,
           0,
           38
         ],
-        "/sprites/abyssal_kraken/defeated/frame-06.png": [
+        "/sprites/abyssal_kraken/defeated/frame-06.png?v=c0f3baf78b": [
           211,
           424.6,
           0,
           38
         ],
-        "/sprites/abyssal_kraken/defeated/frame-07.png": [
+        "/sprites/abyssal_kraken/defeated/frame-07.png?v=fa932c31eb": [
           197,
           424.6,
           0,

@@ -383,6 +383,10 @@ body {
 
 /* Sprites are pixel art: never smooth them when scaled (SpriteAnimator). */
 .sprite-pixelated { image-rendering: pixelated; }
+/* Sprites never show alt text over the scene if a frame fails (SpriteAnimator
+   keeps the last good frame; this covers the moment before it runs). The alt
+   text still reaches screen readers. */
+img.sprite-pixelated { color: transparent; font-size: 0; }
 
 /* Ground shadow under every character (AnchoredSprite): a soft dark ellipse
    on the ground line, so feet drawn in three-quarter view (far feet higher)

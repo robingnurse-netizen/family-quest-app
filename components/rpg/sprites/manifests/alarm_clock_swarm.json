@@ -3,7 +3,7 @@
   "animations": {
     "idle": {
       "frames": [
-        "/sprites/alarm_clock_swarm/idle/frame-01.png"
+        "/sprites/alarm_clock_swarm/idle/frame-01.png?v=68896dc8a6"
       ],
       "width": 322,
       "height": 261,
@@ -15,7 +15,7 @@
       "loop": true,
       "facing": "front",
       "shadow": {
-        "/sprites/alarm_clock_swarm/idle/frame-01.png": [
+        "/sprites/alarm_clock_swarm/idle/frame-01.png?v=68896dc8a6": [
           152,
           202.4,
           0,
@@ -25,7 +25,7 @@
     },
     "move": {
       "frames": [
-        "/sprites/alarm_clock_swarm/move/frame-01.png"
+        "/sprites/alarm_clock_swarm/move/frame-01.png?v=530fc8f4c0"
       ],
       "width": 421,
       "height": 228,
@@ -37,7 +37,7 @@
       "loop": true,
       "facing": "front",
       "shadow": {
-        "/sprites/alarm_clock_swarm/move/frame-01.png": [
+        "/sprites/alarm_clock_swarm/move/frame-01.png?v=530fc8f4c0": [
           229,
           77,
           0,
@@ -47,8 +47,8 @@
     },
     "attack": {
       "frames": [
-        "/sprites/alarm_clock_swarm/attack/frame-01.png",
-        "/sprites/alarm_clock_swarm/attack/frame-02.png"
+        "/sprites/alarm_clock_swarm/attack/frame-01.png?v=fbe1503964",
+        "/sprites/alarm_clock_swarm/attack/frame-02.png?v=c5db393cf2"
       ],
       "width": 340,
       "height": 226,
@@ -63,13 +63,13 @@
       "loop": false,
       "facing": "right",
       "shadow": {
-        "/sprites/alarm_clock_swarm/attack/frame-01.png": [
+        "/sprites/alarm_clock_swarm/attack/frame-01.png?v=fbe1503964": [
           112.5,
           141.9,
           47,
           27
         ],
-        "/sprites/alarm_clock_swarm/attack/frame-02.png": [
+        "/sprites/alarm_clock_swarm/attack/frame-02.png?v=c5db393cf2": [
           108,
           138.6,
           0,
@@ -79,7 +79,7 @@
     },
     "hurt": {
       "frames": [
-        "/sprites/alarm_clock_swarm/hurt/frame-01.png"
+        "/sprites/alarm_clock_swarm/hurt/frame-01.png?v=e89045a0e8"
       ],
       "width": 337,
       "height": 210,
@@ -91,7 +91,7 @@
       "loop": false,
       "facing": "front",
       "shadow": {
-        "/sprites/alarm_clock_swarm/hurt/frame-01.png": [
+        "/sprites/alarm_clock_swarm/hurt/frame-01.png?v=e89045a0e8": [
           163.5,
           75.9,
           0,
@@ -101,7 +101,7 @@
     },
     "death": {
       "frames": [
-        "/sprites/alarm_clock_swarm/death/frame-01.png"
+        "/sprites/alarm_clock_swarm/death/frame-01.png?v=c03837eded"
       ],
       "width": 327,
       "height": 271,
@@ -113,7 +113,7 @@
       "loop": false,
       "facing": "front",
       "shadow": {
-        "/sprites/alarm_clock_swarm/death/frame-01.png": [
+        "/sprites/alarm_clock_swarm/death/frame-01.png?v=c03837eded": [
           165.5,
           278.3,
           0,

@@ -19,12 +19,23 @@ export type BossAnimations = {
 // first frames are the flinch.
 const EPIC_HURT_FRAMES = 3;
 
+const cache = new Map<string, BossAnimations | null>();
+
 /**
  * Low-tier bosses have their own hurt/death strips (often a single frame);
  * epic bosses derive hurt from the start of `defeated`. Returns null for an
  * unknown sprite key so the caller can show a placeholder instead of failing.
+ *
+ * The same objects every time for a key: SpriteAnimator restarts whenever
+ * its animation object changes, so a fresh object per render would restart
+ * the boss's animation on every re-render (the hit overlay re-renders a lot).
  */
 export function bossAnimations(spriteKey: string): BossAnimations | null {
+  if (!cache.has(spriteKey)) cache.set(spriteKey, buildBossAnimations(spriteKey));
+  return cache.get(spriteKey) ?? null;
+}
+
+function buildBossAnimations(spriteKey: string): BossAnimations | null {
   const manifest = (SPRITES as Record<string, SpriteManifest>)[spriteKey];
   if (!manifest) return null;
   const a = manifest.animations;

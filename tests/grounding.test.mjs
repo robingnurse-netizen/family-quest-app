@@ -4,7 +4,7 @@
 // animation lists as `airborne` (jumps, a pounce, a mid-fall frame, flying,
 // hovering) are exempt from floating, but still may not sink. Checked frame
 // by frame for the hero, Rogue and every boss (scripts/slice-sprites.mjs
-// grounds them; scripts/sprite-shadows.mjs records the same lift).
+// grounds them; scripts/sprite-manifests.mjs records the same lift).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";

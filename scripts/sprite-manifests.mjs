@@ -1,16 +1,21 @@
 #!/usr/bin/env node
-// Ground shadows for every sprite frame, measured from the frame PNGs and
-// written into the manifests (components/rpg/sprites/manifests/<key>.json)
-// as each animation's `shadow`: frame path → [centreX, width, lift, band],
-// in canvas pixels. AnchoredSprite draws a soft ellipse from it where the
+// Finishes the sprite manifests (components/rpg/sprites/manifests/<key>.json)
+// from the frame PNGs, without re-slicing anything:
+//
+//   1. VERSIONED FRAME URLS: every frame path gets ?v=<first 10 hex of the
+//      file's SHA-256>. /sprites is served with a one-year immutable cache
+//      (next.config.ts), so a browser downloads each frame once and never
+//      re-asks; new art means a new hash, so a new URL.
+//   2. GROUND SHADOWS: each animation's `shadow`: frame URL → [centreX,
+//      width, lift, band], in canvas pixels. AnchoredSprite draws a soft ellipse from it where the
 // character meets the ground, frame by frame (smaller and fainter while
 // airborne).
 //
-//   node scripts/sprite-shadows.mjs              # every manifest
-//   node scripts/sprite-shadows.mjs hero rogue   # just these
+//   node scripts/sprite-manifests.mjs              # every manifest
+//   node scripts/sprite-manifests.mjs hero rogue   # just these
 //
-// Reads frames only — never re-slices them. scripts/slice-sprites.mjs runs
-// it for the characters it slices, so re-slicing keeps shadows current.
+// scripts/slice-sprites.mjs runs it for the characters it slices. Run it
+// by hand after editing any frame PNG (the hash — so the URL — changes).
 //
 // Per frame: the footprint is every column whose lowest opaque pixel lies in
 // the frame's bottom band (the lowest ~12% of the canvas, at least 4 rows):
@@ -24,6 +29,7 @@
 // keep the animation's first-frame band: their shadow stays on the ground.
 
 import sharp from "sharp";
+import { createHash } from "node:crypto";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -31,6 +37,16 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const PUBLIC = join(ROOT, "public");
 const MANIFESTS = join(ROOT, "components", "rpg", "sprites", "manifests");
+
+/** A frame URL without its ?v= version (the file's path under public/). */
+export const framePath = (url) => url.split("?")[0];
+
+/** The frame URL with its content version: /sprites/…/frame-01.png?v=… */
+export function versionedFrame(url) {
+  const path = framePath(url);
+  const hash = createHash("sha256").update(readFileSync(join(PUBLIC, path))).digest("hex").slice(0, 10);
+  return `${path}?v=${hash}`;
+}
 
 /** [centreX, width, lift, band] for one frame, in canvas pixels. */
 export async function frameShadow(file, anchorY) {
@@ -62,7 +78,7 @@ export async function animationShadows(anim) {
   const airborne = new Set(anim.airborne ?? []);
   let firstBand = null;
   for (const [i, frame] of anim.frames.entries()) {
-    const s = await frameShadow(join(PUBLIC, frame), anim.anchor.y);
+    const s = await frameShadow(join(PUBLIC, framePath(frame)), anim.anchor.y);
     firstBand ??= s[3];
     if (airborne.has(i)) s[3] = firstBand;
     shadow[frame] = s;
@@ -70,11 +86,14 @@ export async function animationShadows(anim) {
   return shadow;
 }
 
-/** Add shadows to a manifest file in place. */
-export async function writeManifestShadows(key) {
+/** Version the frame URLs and add shadows, in place. */
+export async function finishManifest(key) {
   const path = join(MANIFESTS, `${key}.json`);
   const manifest = JSON.parse(readFileSync(path, "utf8"));
-  for (const anim of Object.values(manifest.animations)) anim.shadow = await animationShadows(anim);
+  for (const anim of Object.values(manifest.animations)) {
+    anim.frames = anim.frames.map(versionedFrame);
+    anim.shadow = await animationShadows(anim);
+  }
   writeFileSync(path, JSON.stringify(manifest, null, 2) + "\n");
 }
 
@@ -84,7 +103,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     ? only
     : readdirSync(MANIFESTS).filter((f) => f.endsWith(".json")).map((f) => f.replace(/\.json$/, ""));
   for (const key of keys) {
-    await writeManifestShadows(key);
-    console.log(`${key}: shadows written`);
+    await finishManifest(key);
+    console.log(`${key}: frame versions + shadows written`);
   }
 }

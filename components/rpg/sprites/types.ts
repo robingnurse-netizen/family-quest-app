@@ -17,7 +17,7 @@ export type SpriteAnimation = {
    *  first frame), where later frames can make the canvas taller. */
   bodyHeight?: number;
   /**
-   * Ground shadow per frame (scripts/sprite-shadows.mjs): frame path →
+   * Ground shadow per frame (scripts/sprite-manifests.mjs): frame URL →
    * [centreX, width, lift, band] in canvas pixels (band: the contact band's
    * height, far feet to lowest pixel). Keyed by path, so animations built
    * from these frames (reordered, trimmed, reversed) keep it.

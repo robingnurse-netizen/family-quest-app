@@ -17,6 +17,7 @@ import { SPRITES } from "@/components/rpg/sprites/manifests";
 import { AnchoredSprite, needsMirror } from "@/components/rpg/sprites/anchored-sprite";
 import { bossAnimations } from "@/components/rpg/sprites/boss-animations";
 import type { SpriteAnimation } from "@/components/rpg/sprites/types";
+import { preloadFrames } from "@/components/rpg/sprites/frame-cache";
 import { CoinIcon } from "@/components/ui/icons";
 import { registerDevTools, useBattleContext, useBattleEvents } from "./battle-provider";
 import {
@@ -762,13 +763,9 @@ function usePrefersReducedMotion() {
   );
 }
 
+/** Load what the overlay draws ahead of time — once, into the frame cache. */
 function preload(animations: SpriteAnimation[]) {
-  for (const animation of animations) {
-    for (const src of animation.frames) {
-      const img = new Image();
-      img.src = src;
-    }
-  }
+  for (const animation of animations) preloadFrames(animation.frames);
 }
 
 /** Development only: the boss after `boss` in the roster, for finalBlow(). */
