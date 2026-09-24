@@ -448,9 +448,6 @@ function Strike({ show }: { show: Show }) {
         className={`absolute inset-x-0 bottom-(--ground) top-0 ${phase === "fly" ? "overlay-fly" : ""}`}
         style={phase === "fly" ? { animationDuration: `${T.fly}ms` } : undefined}
       >
-        {/* Ground shadow so the characters read as standing somewhere. */}
-        <div className="overlay-ground absolute inset-x-[8%] bottom-[-3%] h-[6%] rounded-[50%]" />
-
         <div className="overlay-dash absolute inset-0">
           <FeetSpot x={STRIKE_X.rogue}>
             <RoguePounce
@@ -532,20 +529,14 @@ function HeroStrike({
   const animation = useMemo(() => contactAnimation(attack, v.contact, leadMs), [attack, v.contact, leadMs]);
   const ref = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
-  const shadowRef = useRef<HTMLDivElement>(null);
   // Mount only (the component is keyed per hit): the motion lands on contact.
-  // The sprite moves; his shadow stays on the ground (shrinking under a
-  // leap) or comes along (a lunge).
   useLayoutEffect(() => {
     const el = ref.current;
     const motion = el && strikeMotion(v.motion, leadMs, hitStopMs, el.offsetHeight);
     if (!el || !motion) return;
     const timing = { duration: motion.duration, fill: "none" } as const;
-    const runs = [
-      bodyRef.current?.animate(motion.keyframes, timing),
-      shadowRef.current?.animate(motion.shadow, timing),
-    ];
-    return () => runs.forEach((run) => run?.cancel());
+    const run = bodyRef.current?.animate(motion.keyframes, timing);
+    return () => run?.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
@@ -557,7 +548,6 @@ function HeroStrike({
         mirror={needsMirror(animation.facing, "right")}
         frozen={frozen}
         bodyRef={bodyRef}
-        shadowRef={shadowRef}
         alt=""
       />
     </div>
@@ -675,7 +665,6 @@ function Teaser({ next }: { next: Boss | null | undefined }) {
                 height={`min(104px, ${(150 / (anims.idle.width / anims.idle.height)).toFixed(1)}px)`}
                 mirror={needsMirror(anims.idle.facing, "left")}
                 alt=""
-                shadow={false}
                 className="teaser-silhouette"
               />
             </div>

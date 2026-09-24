@@ -20,7 +20,6 @@ test("every frame URL is versioned with the current content hash of its file", (
         assert.ok(match, `${file} ${name}: ${url} is versioned`);
         const bytes = readFileSync(fileURLToPath(new URL(`../public${match[1]}`, import.meta.url)));
         assert.equal(createHash("sha256").update(bytes).digest("hex").slice(0, 10), match[2], `${url} is current`);
-        assert.ok(anim.shadow[url], `${file} ${name}: shadow keyed by the versioned URL`);
         count++;
       }
     }

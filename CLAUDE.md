@@ -122,27 +122,16 @@ PROJECT STATUS:
       ~300MB available of 6.4GB, no swap — the host reclaims RAM), which
       is when the dev server dropped frame requests (ERR_CONNECTION_RESET).
       /tmp is RAM (tmpfs): keep scratch files there small.
-  * GROUND SHADOWS: scripts/sprite-manifests.mjs measures every frame PNG
-    and writes each animation's `shadow` map (frame URL → [centreX, width,
-    lift, band]) into the manifests — for all characters, without
-    re-slicing anything. Footprint = every column whose lowest pixel is in
-    the bottom ~12% of the canvas (all feet, the far ones included, or a
-    lying body); band = its height, from the highest of those column
-    bottoms down to the lowest pixel; lift = height off the ground line.
-    Airborne frames keep the first frame's band. The slicer runs it after
-    slicing; run it by hand after hand-editing frames:
-    node scripts/sprite-manifests.mjs [key…]. AnchoredSprite draws a soft
-    dark ellipse (.sprite-shadow) CENTRED ON THE CONTACT BAND (so the feet —
-    near and far — or a lying body visibly meet it, not below the feet),
-    updated per frame (SpriteAnimator onFrame): wide and flat lying down,
-    smaller and fainter while airborne (hero's victory jump, Rogue's
-    pounce, hovering bosses). It's inside the sprite's positioning wrapper,
-    so slides (escape), shakes and Rogue's down-shift carry it; body motion
-    that leaves the ground animates `bodyRef` only (the hit overlay's
-    leap: the shadow shrinks via strikeMotion().shadow; a lunge carries it
-    along). `shadow={false}` turns it off (the next-foe silhouette). Why:
-    three-quarter feet (far feet higher) looked like they floated above
-    the flat ground line.
+  * NO GROUND SHADOWS (removed 2026-09-25): characters stand on the ground
+    line with no drawn shadow. There used to be a per-frame soft ellipse
+    under every character (AnchoredSprite's .sprite-shadow, sized from a
+    `shadow` map scripts/sprite-manifests.mjs wrote into every manifest)
+    and one under the hit overlay's group (.overlay-ground). With the
+    PixelLab sprites grounded frame by frame they looked worse than none,
+    so all of it is gone: no `shadow` in the manifests (sprite-manifests.mjs
+    now only versions URLs and deletes any stale `shadow` key), no shadow
+    props on AnchoredSprite, no shadow keyframes in strikeMotion(), no
+    SpriteAnimator onFrame. Don't add them back without asking.
   * Sprites are fully decoupled behind the manifests: art can be swapped
     later (new sheets → re-slice, or hand-made frames + a manifest) without
     touching game logic. Components only know manifest keys + animation
@@ -710,7 +699,7 @@ PARKED — future items, NOT to be built until asked:
   or the device's clock. REQUIREMENT: the new backgrounds need a ground
   with depth — a floor band seen slightly from above, matching the
   characters' three-quarter view — not today's thin side-on ground line
-  (the ground shadows are a stopgap for that mismatch).
+  (drawn ground shadows were tried as a stopgap and removed).
   * BUILT: the arena backdrop (components/rpg/battle/arena-backdrop.tsx,
     re-exported as ArenaBackdrop from arena-parts — battle scene + recap).
     Layers: four skies stacked (night = .arena-sky, .sky-dawn / -day /

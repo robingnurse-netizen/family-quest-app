@@ -33,63 +33,7 @@
       ],
       "fps": 6,
       "loop": true,
-      "facing": "left",
-      "shadow": {
-        "/sprites/chronosphinx/idle/frame-01.png?v=10a73304a0": [
-          29.5,
-          56.1,
-          8,
-          9
-        ],
-        "/sprites/chronosphinx/idle/frame-02.png?v=f1696ca9d4": [
-          29.5,
-          56.1,
-          9,
-          9
-        ],
-        "/sprites/chronosphinx/idle/frame-03.png?v=0679cfae45": [
-          29.5,
-          56.1,
-          10,
-          9
-        ],
-        "/sprites/chronosphinx/idle/frame-04.png?v=cc2bcfc3fe": [
-          29.5,
-          56.1,
-          12,
-          9
-        ],
-        "/sprites/chronosphinx/idle/frame-05.png?v=b43c33b14b": [
-          29.5,
-          56.1,
-          14,
-          9
-        ],
-        "/sprites/chronosphinx/idle/frame-06.png?v=6f0aa9290e": [
-          40,
-          79.2,
-          16,
-          9
-        ],
-        "/sprites/chronosphinx/idle/frame-07.png?v=a55ed3643f": [
-          29.5,
-          56.1,
-          14,
-          9
-        ],
-        "/sprites/chronosphinx/idle/frame-08.png?v=bc0a029865": [
-          29.5,
-          56.1,
-          12,
-          9
-        ],
-        "/sprites/chronosphinx/idle/frame-09.png?v=e4fbf742f5": [
-          29.5,
-          56.1,
-          10,
-          9
-        ]
-      }
+      "facing": "left"
     },
     "attack": {
       "frames": [
@@ -124,63 +68,7 @@
       "contact": 5,
       "fps": 10,
       "loop": false,
-      "facing": "left",
-      "shadow": {
-        "/sprites/chronosphinx/attack/frame-01.png?v=61e2a931cf": [
-          35,
-          59.4,
-          8,
-          11
-        ],
-        "/sprites/chronosphinx/attack/frame-02.png?v=4ac98b4eac": [
-          36,
-          57.2,
-          10,
-          11
-        ],
-        "/sprites/chronosphinx/attack/frame-03.png?v=4e0d8551f7": [
-          41,
-          55,
-          20,
-          11
-        ],
-        "/sprites/chronosphinx/attack/frame-04.png?v=a5faf18419": [
-          52,
-          37.4,
-          15,
-          11
-        ],
-        "/sprites/chronosphinx/attack/frame-05.png?v=dd1e5cf39a": [
-          56,
-          33,
-          17,
-          11
-        ],
-        "/sprites/chronosphinx/attack/frame-06.png?v=dd748c48a5": [
-          36.5,
-          69.3,
-          2,
-          11
-        ],
-        "/sprites/chronosphinx/attack/frame-07.png?v=7c6dbd5f10": [
-          30,
-          50.6,
-          0,
-          11
-        ],
-        "/sprites/chronosphinx/attack/frame-08.png?v=59bccc27b1": [
-          40.5,
-          64.9,
-          8,
-          11
-        ],
-        "/sprites/chronosphinx/attack/frame-09.png?v=dbfa8bf59f": [
-          36.5,
-          60.5,
-          9,
-          11
-        ]
-      }
+      "facing": "left"
     },
     "hurt": {
       "frames": [
@@ -214,63 +102,7 @@
       ],
       "fps": 8,
       "loop": false,
-      "facing": "left",
-      "shadow": {
-        "/sprites/chronosphinx/hurt/frame-01.png?v=5d7999f4a0": [
-          35,
-          57.2,
-          8,
-          10
-        ],
-        "/sprites/chronosphinx/hurt/frame-02.png?v=e8f6dab5c1": [
-          34.5,
-          60.5,
-          7,
-          10
-        ],
-        "/sprites/chronosphinx/hurt/frame-03.png?v=6e563ae46d": [
-          36,
-          61.6,
-          5,
-          10
-        ],
-        "/sprites/chronosphinx/hurt/frame-04.png?v=fa4ef402c6": [
-          42,
-          77,
-          7,
-          10
-        ],
-        "/sprites/chronosphinx/hurt/frame-05.png?v=198adc512c": [
-          38.5,
-          73.7,
-          10,
-          10
-        ],
-        "/sprites/chronosphinx/hurt/frame-06.png?v=735ad01d96": [
-          38,
-          70.4,
-          12,
-          10
-        ],
-        "/sprites/chronosphinx/hurt/frame-07.png?v=5a75a9b944": [
-          37,
-          74.8,
-          13,
-          10
-        ],
-        "/sprites/chronosphinx/hurt/frame-08.png?v=1cea7350af": [
-          40.5,
-          78.1,
-          16,
-          10
-        ],
-        "/sprites/chronosphinx/hurt/frame-09.png?v=ebf4c12d16": [
-          35.5,
-          58.3,
-          9,
-          10
-        ]
-      }
+      "facing": "left"
     },
     "death": {
       "frames": [
@@ -302,63 +134,7 @@
       ],
       "fps": 6,
       "loop": false,
-      "facing": "left",
-      "shadow": {
-        "/sprites/chronosphinx/death/frame-01.png?v=8080451dec": [
-          34,
-          57.2,
-          8,
-          10
-        ],
-        "/sprites/chronosphinx/death/frame-02.png?v=d57c7f8ce5": [
-          34,
-          57.2,
-          8,
-          10
-        ],
-        "/sprites/chronosphinx/death/frame-03.png?v=4aa6b20dfb": [
-          34,
-          57.2,
-          8,
-          10
-        ],
-        "/sprites/chronosphinx/death/frame-04.png?v=b44e290e86": [
-          34,
-          57.2,
-          8,
-          10
-        ],
-        "/sprites/chronosphinx/death/frame-05.png?v=605928940a": [
-          34,
-          55,
-          7,
-          10
-        ],
-        "/sprites/chronosphinx/death/frame-06.png?v=41ab13c335": [
-          33.5,
-          53.9,
-          6,
-          10
-        ],
-        "/sprites/chronosphinx/death/frame-07.png?v=621f11a9c3": [
-          31.5,
-          51.7,
-          6,
-          10
-        ],
-        "/sprites/chronosphinx/death/frame-08.png?v=7594c87c35": [
-          29.5,
-          56.1,
-          0,
-          10
-        ],
-        "/sprites/chronosphinx/death/frame-09.png?v=6c5722eb33": [
-          45.5,
-          95.7,
-          0,
-          10
-        ]
-      }
+      "facing": "left"
     },
     "move": {
       "frames": [
@@ -392,63 +168,7 @@
       ],
       "fps": 8,
       "loop": true,
-      "facing": "left",
-      "shadow": {
-        "/sprites/chronosphinx/move/frame-01.png?v=140adead7c": [
-          29.5,
-          56.1,
-          8,
-          9
-        ],
-        "/sprites/chronosphinx/move/frame-02.png?v=a7f94623a7": [
-          29.5,
-          56.1,
-          8,
-          9
-        ],
-        "/sprites/chronosphinx/move/frame-03.png?v=fb2fba7cc1": [
-          15.5,
-          25.3,
-          10,
-          9
-        ],
-        "/sprites/chronosphinx/move/frame-04.png?v=9065d4da52": [
-          29.5,
-          56.1,
-          13,
-          9
-        ],
-        "/sprites/chronosphinx/move/frame-05.png?v=c3a912b46d": [
-          29.5,
-          56.1,
-          16,
-          9
-        ],
-        "/sprites/chronosphinx/move/frame-06.png?v=0c03cf2119": [
-          29.5,
-          56.1,
-          17,
-          9
-        ],
-        "/sprites/chronosphinx/move/frame-07.png?v=f078249b0d": [
-          29.5,
-          56.1,
-          15,
-          9
-        ],
-        "/sprites/chronosphinx/move/frame-08.png?v=4246e887fe": [
-          29.5,
-          56.1,
-          13,
-          9
-        ],
-        "/sprites/chronosphinx/move/frame-09.png?v=c7f393bbbe": [
-          29.5,
-          56.1,
-          11,
-          9
-        ]
-      }
+      "facing": "left"
     }
   }
 }

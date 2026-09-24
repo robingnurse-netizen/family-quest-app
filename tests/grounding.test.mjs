@@ -4,7 +4,7 @@
 // animation lists as `airborne` (jumps, a pounce, a mid-fall frame, flying,
 // hovering) are exempt from floating, but still may not sink. Checked frame
 // by frame for the hero, Rogue and every boss (scripts/slice-sprites.mjs
-// grounds them; scripts/sprite-manifests.mjs records the same lift).
+// grounds them).
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -40,8 +40,6 @@ for (const key of CHARACTERS) {
         if (!airborne.has(i)) {
           assert.equal(low, anim.anchor.y, `${name} frame ${i}: floats ${anim.anchor.y - low}px above the line`);
         }
-        // The shadow data agrees.
-        assert.equal(anim.shadow[frame][2], anim.anchor.y - low, `${name} frame ${i}: shadow lift`);
       }
     }
   });

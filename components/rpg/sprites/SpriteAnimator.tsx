@@ -21,8 +21,6 @@ type Props = {
   frozen?: boolean;
   /** Called when a non-looping animation reaches its last frame. */
   onComplete?: () => void;
-  /** Called with each frame's src as it's shown (the first one included). */
-  onFrame?: (src: string) => void;
   /**
    * Non-looping animations (attack, hurt, death…) play once and hold their
    * last frame. Set this to replay them after holding the last frame for
@@ -51,7 +49,6 @@ export function SpriteAnimator({
   paused = false,
   frozen = false,
   onComplete,
-  onFrame,
   replayDelayMs,
 }: Props) {
   const imgRef = useRef<HTMLImageElement>(null);
@@ -63,10 +60,6 @@ export function SpriteAnimator({
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
-  const onFrameRef = useRef(onFrame);
-  useEffect(() => {
-    onFrameRef.current = onFrame;
-  }, [onFrame]);
 
   // The last frame that actually loaded in this <img>: what an error falls
   // back to.
@@ -87,7 +80,6 @@ export function SpriteAnimator({
       }
       if (img.getAttribute("src") !== src) img.src = src;
       img.style.visibility = "";
-      onFrameRef.current?.(src);
       return true;
     };
     // The server-rendered first frame may have failed before this code ran

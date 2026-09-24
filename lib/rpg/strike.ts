@@ -114,9 +114,6 @@ export const MOTION_MIN_LEAD_MS = 150;
 export type StrikeMotion = {
   /** The sprite's motion (CSS `translate`, px). */
   keyframes: Keyframe[];
-  /** His ground shadow's: it stays on the ground under a leap (shrinking
-   *  and fading while he's up) and moves along with a lunge. */
-  shadow: Keyframe[];
   duration: number;
 };
 
@@ -142,11 +139,6 @@ export function strikeMotion(
         { translate: `0 -${px(0.16)}`, offset: 0.55, easing: "cubic-bezier(0.6, 0, 0.9, 0.4)" },
         { translate: "0 0" },
       ],
-      shadow: [
-        { scale: "1", opacity: 1, easing: "cubic-bezier(0.2, 0.8, 0.4, 1)" },
-        { scale: "0.7", opacity: 0.5, offset: 0.55, easing: "cubic-bezier(0.6, 0, 0.9, 0.4)" },
-        { scale: "1", opacity: 1 },
-      ],
     };
   }
   // Lunge: a small draw back, drive forward into contact, hold through the
@@ -160,6 +152,5 @@ export function strikeMotion(
     { translate: `${px(0.09)} 0`, offset: (leadMs + hitStopMs) / duration },
     { translate: "0 0" },
   ];
-  // Horizontal only, so the shadow simply comes along.
-  return { duration, keyframes, shadow: keyframes };
+  return { duration, keyframes };
 }

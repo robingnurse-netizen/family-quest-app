@@ -22,63 +22,7 @@
       "bodyHeight": 85,
       "fps": 6,
       "loop": true,
-      "facing": "left",
-      "shadow": {
-        "/sprites/shogun_bot/idle/frame-01.png?v=37d358e4cf": [
-          32.5,
-          45.1,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/idle/frame-02.png?v=e407fb383c": [
-          32.5,
-          45.1,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/idle/frame-03.png?v=dd4686c28a": [
-          32.5,
-          45.1,
-          0,
-          6
-        ],
-        "/sprites/shogun_bot/idle/frame-04.png?v=b17c24ad64": [
-          32.5,
-          45.1,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/idle/frame-05.png?v=e829b840e8": [
-          32.5,
-          45.1,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/idle/frame-06.png?v=b3ffc10c62": [
-          32.5,
-          45.1,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/idle/frame-07.png?v=f43169fcb4": [
-          32.5,
-          45.1,
-          0,
-          6
-        ],
-        "/sprites/shogun_bot/idle/frame-08.png?v=84afff92e4": [
-          32.5,
-          45.1,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/idle/frame-09.png?v=878e61d8f1": [
-          32.5,
-          45.1,
-          0,
-          10
-        ]
-      }
+      "facing": "left"
     },
     "attack": {
       "frames": [
@@ -102,63 +46,7 @@
       "contact": 5,
       "fps": 10,
       "loop": false,
-      "facing": "left",
-      "shadow": {
-        "/sprites/shogun_bot/attack/frame-01.png?v=24e18b3b0a": [
-          38.5,
-          45.1,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/attack/frame-02.png?v=eea15ab30d": [
-          38.5,
-          45.1,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/attack/frame-03.png?v=59ca7ef545": [
-          37.5,
-          53.9,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/attack/frame-04.png?v=fe1ed31962": [
-          36,
-          63.8,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/attack/frame-05.png?v=171e91a91e": [
-          36,
-          66,
-          0,
-          6
-        ],
-        "/sprites/shogun_bot/attack/frame-06.png?v=41d5668a2e": [
-          37,
-          68.2,
-          0,
-          5
-        ],
-        "/sprites/shogun_bot/attack/frame-07.png?v=661e38558c": [
-          37,
-          68.2,
-          0,
-          5
-        ],
-        "/sprites/shogun_bot/attack/frame-08.png?v=ab3ce4e4bf": [
-          38.5,
-          62.7,
-          0,
-          5
-        ],
-        "/sprites/shogun_bot/attack/frame-09.png?v=72deafaf8f": [
-          38.5,
-          49.5,
-          0,
-          7
-        ]
-      }
+      "facing": "left"
     },
     "hurt": {
       "frames": [
@@ -181,63 +69,7 @@
       "bodyHeight": 85,
       "fps": 8,
       "loop": false,
-      "facing": "left",
-      "shadow": {
-        "/sprites/shogun_bot/hurt/frame-01.png?v=f7a3477f35": [
-          37.5,
-          45.1,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/hurt/frame-02.png?v=d21c1d82c0": [
-          37.5,
-          45.1,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/hurt/frame-03.png?v=bc678fba58": [
-          37.5,
-          47.3,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/hurt/frame-04.png?v=5f4a9d8a06": [
-          37,
-          52.8,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/hurt/frame-05.png?v=aae664637b": [
-          36.5,
-          60.5,
-          0,
-          5
-        ],
-        "/sprites/shogun_bot/hurt/frame-06.png?v=a72d4a2039": [
-          37,
-          61.6,
-          0,
-          10
-        ],
-        "/sprites/shogun_bot/hurt/frame-07.png?v=c89782f59b": [
-          37,
-          61.6,
-          0,
-          9
-        ],
-        "/sprites/shogun_bot/hurt/frame-08.png?v=f87df328bc": [
-          37,
-          59.4,
-          0,
-          5
-        ],
-        "/sprites/shogun_bot/hurt/frame-09.png?v=1930ef10a5": [
-          36.5,
-          51.7,
-          0,
-          7
-        ]
-      }
+      "facing": "left"
     },
     "death": {
       "frames": [
@@ -260,63 +92,7 @@
       "bodyHeight": 85,
       "fps": 6,
       "loop": false,
-      "facing": "left",
-      "shadow": {
-        "/sprites/shogun_bot/death/frame-01.png?v=3eec2b3950": [
-          47.5,
-          45.1,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/death/frame-02.png?v=a78a1b23ba": [
-          47,
-          46.2,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/death/frame-03.png?v=a24d0155e1": [
-          47,
-          46.2,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/death/frame-04.png?v=d07e3f6305": [
-          47,
-          48.4,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/death/frame-05.png?v=20822e3df4": [
-          45.5,
-          53.9,
-          0,
-          9
-        ],
-        "/sprites/shogun_bot/death/frame-06.png?v=0f0e753968": [
-          46.5,
-          53.9,
-          0,
-          10
-        ],
-        "/sprites/shogun_bot/death/frame-07.png?v=ab7fa0cf8e": [
-          46.5,
-          56.1,
-          0,
-          10
-        ],
-        "/sprites/shogun_bot/death/frame-08.png?v=e4b39ec3e1": [
-          48.5,
-          84.7,
-          0,
-          10
-        ],
-        "/sprites/shogun_bot/death/frame-09.png?v=39cc1a92e3": [
-          50,
-          96.8,
-          0,
-          10
-        ]
-      }
+      "facing": "left"
     },
     "move": {
       "frames": [
@@ -339,63 +115,7 @@
       "bodyHeight": 85,
       "fps": 8,
       "loop": true,
-      "facing": "left",
-      "shadow": {
-        "/sprites/shogun_bot/move/frame-01.png?v=74f9b8b001": [
-          30.5,
-          45.1,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/move/frame-02.png?v=e9880a2d00": [
-          31.5,
-          49.5,
-          0,
-          6
-        ],
-        "/sprites/shogun_bot/move/frame-03.png?v=86f9e6207e": [
-          33,
-          48.4,
-          0,
-          7
-        ],
-        "/sprites/shogun_bot/move/frame-04.png?v=bd722ee2e8": [
-          31,
-          46.2,
-          0,
-          8
-        ],
-        "/sprites/shogun_bot/move/frame-05.png?v=e3096cb4f2": [
-          25,
-          48.4,
-          0,
-          9
-        ],
-        "/sprites/shogun_bot/move/frame-06.png?v=caab1ae5a1": [
-          21.5,
-          38.5,
-          0,
-          9
-        ],
-        "/sprites/shogun_bot/move/frame-07.png?v=8c948cdd60": [
-          24,
-          37.4,
-          0,
-          10
-        ],
-        "/sprites/shogun_bot/move/frame-08.png?v=d09f70d48f": [
-          26.5,
-          31.9,
-          0,
-          10
-        ],
-        "/sprites/shogun_bot/move/frame-09.png?v=5f5de87e44": [
-          31,
-          26.4,
-          0,
-          9
-        ]
-      }
+      "facing": "left"
     }
   }
 }

@@ -730,7 +730,7 @@ for (const sheetCfg of SHEETS) {
       console.log(`${character}/${animName}: ${paths.length} frames, ${width}x${height}`);
     }
     writeFileSync(join(OUT_MANIFESTS, `${character}.json`), JSON.stringify(manifest, null, 2) + "\n");
-    // Versioned frame URLs + ground shadows (scripts/sprite-manifests.mjs).
-    await finishManifest(character);
+    // Versioned frame URLs (scripts/sprite-manifests.mjs).
+    finishManifest(character);
   }
 }

@@ -126,12 +126,7 @@ test("motion only with a run-up, and it lands on contact", () => {
   assert.equal(leap.duration, 280, "back on the ground at impact");
   assert.equal(leap.keyframes.at(-1).translate, "0 0");
 
-  // The shadow stays on the ground under a leap, shrinking while he's up.
-  assert.deepEqual(leap.shadow.map((k) => k.scale), ["1", "0.7", "1"]);
-  assert.ok(leap.shadow.every((k) => k.translate === undefined), "the shadow doesn't leave the ground");
-
   const lunge = strike.strikeMotion("lunge", 280, 150, 200);
-  assert.deepEqual(lunge.shadow, lunge.keyframes, "a lunge carries the shadow along");
   assert.ok(lunge.keyframes.every((k) => k.translate.endsWith(" 0")), "horizontal only");
   const peak = lunge.keyframes.find((k) => Math.abs((k.offset ?? -1) - 280 / lunge.duration) < 1e-9);
   assert.ok(peak, "furthest forward exactly at contact");
