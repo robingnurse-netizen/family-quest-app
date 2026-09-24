@@ -61,6 +61,40 @@ Description pattern (the pilot's, word for word):
 - Keep each boss's existing design (colours, signature features) from its
   current sprite unless we're redesigning it.
 
+## Non-humanoid bosses: describe the body plan
+
+v3 only makes humanoid characters (it rejects `body_type: quadruped`), and
+its humanoid skeleton wins over plain wording: "no legs", "hovers" and
+"four legs tucked" still produced legs, feet and upright two-legged
+poses (the first Alarm Clock Swarm stood on stubby legs; its first re-roll
+became a walking clock-robot with boxing-glove fists; the first two
+Chronosphinxes were upright lion-men). What worked was describing a
+different BODY PLAN, so there's no body for the skeleton to stand up:
+
+- A flying four-legged creature: "shown flying sideways through the air in
+  a horizontal pose like a lying sphinx statue, its long lion body
+  stretched out level from head to tail, all four legs folded underneath
+  its belly, floating high above the ground" (Chronosphinx: four legs at
+  last, crouched rather than visibly floating; the game can lift it).
+- A swarm: "a loose flock of five small separate … flying through the air
+  together like a flock of birds, scattered in a rough circle in mid-air
+  with gaps between them. Not a creature with a body: there are no legs,
+  no feet, no arms, no hands, no torso, only flying clocks." (Alarm Clock
+  Swarm: a ring of separate winged clocks.)
+- A cloud: "its main body is a big billowing cloud … soft wispy puffy
+  edges, not a solid lump" (Swamp-Bag Ooze).
+- A key prop: lead with it and say where it is ("wields a large club …
+  clearly visible, gripped in one big fist and held up ready to swing") —
+  mentioned mid-description, the Tupperware Troll's club was dropped.
+- To keep a design inside the canvas: "compact pose … with space on every
+  side" (the first Chronosphinx touched all four edges).
+
+Budget 1–2 re-rolls (2 generations each) for these. Small stray pixels can
+appear (the swarm had 9 specks inside its ring): clean them locally
+(remove clusters of < 10 px away from the art) rather than re-rolling;
+the PixelLab character keeps them, so animation frames need the same
+cleanup.
+
 ## Direction
 
 - Bosses face LEFT in 3/4 view = PixelLab direction **`south-west`**.
@@ -113,3 +147,27 @@ wind-up's key pose within ~2 frames of contact.
 - Chosen animations (9 frames each, 84×84 canvas): idle, hurt (peak frame
   3), move, attack-v2 (contact frame 5), death-v2. The first attack / death
   remain in the PixelLab character, unused.
+
+## Accepted boss characters (still images; not animated yet)
+
+South-west rotation sizes (drawn art, w × h). All v3, side view, 8
+directions; rejected attempts are still in the PixelLab account.
+
+| Boss | Tier (canvas) | PixelLab character | Size | Notes |
+|------|---------------|--------------------|------|-------|
+| Trash-Bag Slime | low (64) | a380da4d-4c2a-402f-bf6b-f1063c735e15 | 51 × 59 | animated + integrated (pilot) |
+| Alarm Clock Swarm | low (64) | fa3bd6fe-c464-43f2-bea0-24618512c504 ("v3") | 62 × 55 | ring of flying clocks; 9 stray specks inside the ring to clean from its frames; hovers |
+| Laundry Goblin | low (64) | 6319df54-b5d0-4fb3-9a43-bb8adcb345d5 | 49 × 61 | the wet sock reads as a hook/rope |
+| Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | |
+| Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | NEW boss: needs a roster migration |
+| Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | NEW boss: needs a roster migration |
+| Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 | NEW boss; no limbs: hand-guide its animation |
+| Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | NEW boss: needs a roster migration |
+| Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | very dark: check it at night |
+| Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | four-legged, crouched, near front-facing; make it hover in slicing (airborne) |
+| Abyssal Kraken | epic (88) | ab99db9a-f403-4f91-adcd-b6d77b91260b | 77 × 75 | dark: check it at night; hovers |
+| Shogun-Bot | epic (88) | 1a1a4b4d-65c1-4713-befe-5e3976ebb006 | 68 × 85 | navy/gold more than cyan |
+
+Batch cost: 22 (11 characters) + 12 (6 re-rolls) generations. Tier 1
+allows 8 PixelLab jobs at once, PixelLab's own follow-up jobs included:
+submit in waves.
