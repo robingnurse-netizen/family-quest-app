@@ -80,9 +80,10 @@ PROJECT STATUS:
     hero victory [3–5] (hop), rogue pounce [3–7], rogue bark_front [1–5],
     alarm_clock_swarm (a hovering ring: idle / attack / hurt / move all,
     death [0–6] — its heap lands; every row shares one `ground` line, the
-    idle bob's lowest point), chronosphinx idle (all:
-    it hovers, and its lowest pixel is the swinging scythe — grounding it
-    would bob it ~30px), abyssal_kraken move (all: hovers), attack [3],
+    idle bob's lowest point), chronosphinx (hovers the same way: idle /
+    attack / hurt / move all, death [0–6]; ground = its slash arc's lowest
+    point), laundry_goblin attack [5–7] / hurt [3–7] (hops), cable_spider
+    attack [3–7] (pounce), abyssal_kraken move (all: hovers), attack [3],
     defeated [1]. Biggest fixes: Magma Behemoth's defeat (18–26px) and
     attack (9px) frames, Kraken attack/defeat, the slime's idle; many 1px
     jitters. tests/grounding.test.mjs checks every frame of every
@@ -672,6 +673,9 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   Magma Behemoth — DONE: assets/magma-behemoth-pixellab.png (116px
   grid), contact 4, death-v2, 12 generations (1 death re-roll). Epic
   bosses now have their own hurt / death rows (no `defeated` strip).
+  Chronosphinx — DONE: assets/chronosphinx-pixellab.png (124px grid),
+  hovers (ground 106: frame 0 8px up, only the death lands), contact 5,
+  10 generations, no re-rolls.
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via

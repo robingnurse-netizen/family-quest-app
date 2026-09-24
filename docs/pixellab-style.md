@@ -322,6 +322,29 @@ Tools (rough helpers in scripts/pixellab-helpers/, inputs git-ignored):
   lying frames 4–8 lifted 3–4 px onto the line). No end-frame fallback
   needed.
 
+### Chronosphinx record
+
+- Character `a88b0deb-f48b-46a4-9733-e827753a7fd7`; 124×124 v3 canvas,
+  2 generations each: 10 generations, no re-rolls.
+- Sheet: assets/chronosphinx-pixellab.png (124px cells). Idle 93×79 (a
+  little over the ~90 px width guide: the wings and scythe).
+- Wording: every prompt opens with "the winged sphinx, a lion body with two
+  big dark feathered wings, a blue-and-gold pharaoh headdress and a long
+  scythe", then says it's airborne explicitly: "floating in mid-air with a
+  clear gap of empty air below its paws and scythe, never touching the
+  ground" (idle), "staying airborne" (attack / hurt), "flies in place high
+  in the air with a clear gap below it" (move). v3 still starts from the
+  crouched rotation, but idle and move rise 8–9 px on the wing beats
+  instead of settling.
+- Hover: the slicer's `ground` puts every row on cell row 106 (the attack's
+  slash arc, the lowest thing it draws), so frame 0 floats 8 px up; idle /
+  attack / hurt / move are airborne throughout.
+- Attack: scythe raised 2–4, a golden slash arc on contact frame 5. Hurt
+  peak 4. Death: "its hourglass pendant cracks and spills its sand, its
+  wings go limp and it drops out of the air" — the glowing sand spills in
+  3–6 (still hovering), then it lies slumped with its wings draped (7–8,
+  dropped 5 px onto the line: the crash). X eyes skipped again.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -338,7 +361,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 | NEW boss; no limbs: hand-guide its animation |
 | Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | NEW boss: needs a roster migration |
 | Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | animated + integrated (roster pass); very dark: check it at night |
-| Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | four-legged, crouched, near front-facing; make it hover in slicing (airborne) |
+| Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | animated + integrated (roster pass); hovers via the slicer's `ground` |
 | Abyssal Kraken | epic (88) | ab99db9a-f403-4f91-adcd-b6d77b91260b | 77 × 75 | dark: check it at night; hovers |
 | Shogun-Bot | epic (88) | 1a1a4b4d-65c1-4713-befe-5e3976ebb006 | 68 × 85 | navy/gold more than cyan |
 

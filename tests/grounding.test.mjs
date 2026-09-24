@@ -71,7 +71,13 @@ test("the airborne exemptions are the deliberate ones", () => {
     "laundry_goblin/attack": [5, 6, 7], // a small lunge hop with the sock
     "laundry_goblin/hurt": [3, 4, 5, 6, 7], // knocked back in a hop
     "cable_spider/attack": [3, 4, 5, 6, 7], // the pounce
-    "chronosphinx/idle": [0, 1, 2, 3], // hovers; the scythe swings below it
+    // The winged sphinx hovers above its shared ground line (frame 0 of
+    // every row 8px up); only the death's landing (7–8) touches it.
+    "chronosphinx/idle": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "chronosphinx/attack": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "chronosphinx/hurt": [0, 1, 2, 3, 4, 5, 6, 7, 8],
+    "chronosphinx/death": [0, 1, 2, 3, 4, 5, 6],
+    "chronosphinx/move": [0, 1, 2, 3, 4, 5, 6, 7, 8],
     "abyssal_kraken/move": [0, 1, 2, 3, 4, 5], // hovers
     "abyssal_kraken/attack": [3], // springs up
     "abyssal_kraken/defeated": [1], // blown off the ground

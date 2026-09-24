@@ -45,6 +45,10 @@ const BOSSES = {
     // The smash's lava burst (5–7) splashes below his feet.
     rows: [row('idle'), row('attack', 'attack', { clip: [5, 6, 7] }), row('hurt'), row('death', 'death-v2'), row('move')],
   },
+  chronosphinx: {
+    file: 'chronosphinx-pixellab.png', cell: 124,
+    rows: [row('idle'), row('attack'), row('hurt'), row('death'), row('move')],
+  },
 };
 
 const key = process.argv[2];

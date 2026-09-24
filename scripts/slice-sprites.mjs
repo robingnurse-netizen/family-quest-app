@@ -255,30 +255,24 @@ const SHEETS = [
     },
   },
   {
-    file: "Gemini_Generated_Image_2fyqj12fyqj12fyq.jpeg",
-    bg: [[78, 82, 92], [76, 76, 92]],
-    tol: 40,
+    // PixelLab epic (124px v3 canvas), rows idle / attack / hurt / death /
+    // move, facing left. The winged sphinx hovers: every row shares one
+    // ground line, `ground` (cell row 106, the attack's slash arc's lowest
+    // point), so frame 0 floats 8px up; only the death's landing touches it.
+    file: "chronosphinx-pixellab.png",
+    grid: { cell: 124 },
     characters: {
       chronosphinx: {
-        idle: {
-          y0: 62, y1: 372, splits: [40, 410, 760, 1117, 1560], fps: 3,
-          dropBottom: { height: 40, maxArea: 1500 }, // frame numbers
-          exclude: [{ x: 1273, y: 345, w: 24, h: 24 }], // "4" touching the scythe tip
-          // Hovers: the body stays at one height while the scythe swings
-          // below it — grounding by the lowest pixel would bob it ~30px.
-          airborne: [0, 1, 2, 3],
-        },
-        move: {
-          y0: 376, y1: 758, splits: [0, 430, 916, 1395, 1865, 2322, 2800],
-          exclude: [{ x: 0, y: 372, w: 800, h: 51 }], // "MOVE/HOVER - SIDE PROFILE VIEW"
-          dropBottom: { height: 40, maxArea: 1500 },
-        },
-        attack: {
-          y0: 762, y1: 1097, splits: [0, 345, 700, 1100, 1395, 1785, 2105, 2455, 2816],
-          exclude: [{ x: 0, y: 758, w: 560, h: 50 }], // "ATTACK - 3/4 FRONT VIEW"
-        },
-        // Numbered 1–7, 9, 10 on the sheet (there is no "8"): 9 frames.
-        defeated: { y0: 1188, y1: 1493, splits: [0, 310, 612, 901, 1190, 1500, 1837, 2175, 2485, 2816] },
+        // Wings beat, it rises and sinks.
+        idle: { row: 0, ground: 106, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        // Scythe raised high (2–4), a golden slash arc on contact (frame 5).
+        attack: { row: 1, ground: 106, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8], contact: 5 },
+        // Knocked back, wings jolting (peak 4).
+        hurt: { row: 2, ground: 106, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        // The hourglass cracks and spills glowing sand (3–6, still in the
+        // air), then it drops and lies slumped, wings draped (7–8).
+        death: { row: 3, ground: 106, airborne: [0, 1, 2, 3, 4, 5, 6] },
+        move: { row: 4, ground: 106, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
       },
     },
   },
@@ -683,7 +677,7 @@ const FACING = {
   laundry_goblin: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   cable_spider: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   magma_behemoth: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  chronosphinx: { idle: "front", move: "right", attack: "right", defeated: "right" },
+  chronosphinx: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   abyssal_kraken: { idle: "front", move: "right", attack: "front", defeated: "front" },
   shogun_bot: { idle: "right", move: "right", attack: "right", defeated: "right" },
 };
