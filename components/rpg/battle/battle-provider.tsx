@@ -24,6 +24,12 @@ type BattleContextValue = {
    */
   overlayActive: boolean;
   setOverlayActive: (active: boolean) => void;
+  /**
+   * The "while you were away" recap is playing: it goes before anything
+   * else, so the celebration cards wait for it.
+   */
+  recapActive: boolean;
+  setRecapActive: (active: boolean) => void;
   /** Quests still to do today (set by the quest board; null = unknown). */
   questsLeftToday: number | null;
   setQuestsLeftToday: (n: number | null) => void;
@@ -42,11 +48,14 @@ export function BattleProvider({
   familyId,
   initialBoss,
   initialParty,
+  recapPending = false,
   children,
 }: {
   familyId: string;
   initialBoss: Boss | null;
   initialParty: PartyHealth | null;
+  /** A recap will play on load: hold everything else back from the start. */
+  recapPending?: boolean;
   children: React.ReactNode;
 }) {
   const [emitter] = useState(createBattleEmitter);
@@ -57,6 +66,7 @@ export function BattleProvider({
 
   const [stage, dispatch] = useReducer(stageReducer, initialBoss, initialStage);
   const [overlayActive, setOverlayActive] = useState(false);
+  const [recapActive, setRecapActive] = useState(recapPending);
   const [questsLeftToday, setQuestsLeftToday] = useState<number | null>(null);
   // The stage machine is just another listener.
   useEffect(() => emitter.subscribe((event) => dispatch({ type: "event", event })), [emitter]);
@@ -97,11 +107,13 @@ export function BattleProvider({
       emit: emitter.emit,
       overlayActive,
       setOverlayActive,
+      recapActive,
+      setRecapActive,
       questsLeftToday,
       setQuestsLeftToday,
       refetch: live.refetch,
     }),
-    [boss, party, stage, onBossAnimationEnd, onBossFinished, emitter, overlayActive, questsLeftToday, live.refetch],
+    [boss, party, stage, onBossAnimationEnd, onBossFinished, emitter, overlayActive, recapActive, questsLeftToday, live.refetch],
   );
 
   return <BattleContext.Provider value={value}>{children}</BattleContext.Provider>;

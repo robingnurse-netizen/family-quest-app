@@ -12,11 +12,12 @@ type Celebration = { id: number; kind: "level_up"; level: number } | { id: numbe
 /**
  * LEVEL UP! and streak-milestone cards. Listens for the "level_up" and
  * "streak_milestone" moments (emitted by the battle scene's live stats) and
- * shows them one at a time — only while no hit sequence is playing, so a
- * level gained by a hit appears after it. Reduced motion: fade only.
+ * shows them one at a time — only while no hit sequence or recap is
+ * playing, so a level gained by a hit appears after it and the "while you
+ * were away" recap always comes first. Reduced motion: fade only.
  */
 export function Celebrations() {
-  const { overlayActive, emit } = useBattleContext();
+  const { overlayActive, recapActive, emit } = useBattleContext();
   const [queue, setQueue] = useState<Celebration[]>([]);
   const [showing, setShowing] = useState<Celebration | null>(null);
 
@@ -27,7 +28,7 @@ export function Celebrations() {
   });
 
   // Next card once the stage is clear.
-  if (!showing && !overlayActive && queue.length > 0) {
+  if (!showing && !overlayActive && !recapActive && queue.length > 0) {
     setShowing(queue[0]);
     setQueue(queue.slice(1));
   }

@@ -410,7 +410,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike, hero-stage (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage, recap-healing, recap, evening (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
@@ -440,6 +440,84 @@ PROJECT STATUS:
     arena's top-left corner; the event banner is narrowed to clear it.
     No toggle on /player/store (the setting carries over).
   * proxy.ts matcher skips sounds/ and .wav/.mp3 (as for sprites).
+- Recap, evening warning & healing: COMPLETE. Migration
+  20260926000012_recap_evening_healing.sql APPLIED to Supabase (SQL
+  editor). Verified in the browser: recap previews (including the
+  Continue card), evening mode, the heal effect, a real Small Potion
+  purchase (gold −30, party +20 HP) and Parent HQ's "Party healing" log.
+  * Tunables, one place each: miss_penalty_per_minute() (1) and
+    perfect_day_heal_hp() (10) SQL functions; the potions table (small:
+    20 HP / 30 gold, large: 50 HP / 70 gold — edit the rows);
+    EVENING_WARNING_FROM ("18:00") in lib/rpg/evening.ts; RECAP_TIMING in
+    lib/rpg/recap.ts.
+  * "While you were away" recap: run_daily_reset writes a reset_recaps row
+    per child per run that affected him (his misses / perfect days, or any
+    party damage / knock-out): missed quests + minutes, party damage, the
+    boss, perfect days + HP healed, streak before/after, knocked_out,
+    escaped + next boss, HP before/after. Snapshot, because streak changes,
+    HP before and who came next aren't recorded elsewhere. Rest days and
+    re-runs write nothing. /player loads his unseen rows (lib/rpg/queries
+    loadRecap) and summarizeRecaps() combines every night since he last
+    acknowledged into ONE story ("Yesterday" for one night that's exactly
+    yesterday, else "Since you were last here"), with lines cued to beats.
+    components/rpg/battle/recap.tsx (RecapHost) stages it before anything:
+    BattleProvider recapPending → recapActive holds Celebrations back.
+    Blow: boss attack + lunge, hero hurt (frame 5 on the blow), party
+    flash, "party_hit" moment → party-damage sound, ONE damage number, HP
+    bar; knock-out: fall, boss slides off, next boss enters, refill + he
+    gets up; perfect-day heal: green +N. No boss: text only. Perfect day
+    only: brief. The animated part plays by itself (≤ ~7s) and always ends
+    on the SUMMARY CARD (every line + the closing line), which stays up
+    until he taps Continue — no auto-close, so the explanation can't be
+    missed. A tap (anywhere) / Escape / the Skip button during the
+    animation jumps to the summary card (recapFinalState: final HP, every
+    line, the next boss after a knock-out, else the striking boss); on the
+    summary only Continue closes it. Reduced motion: the summary card at
+    once. (Level-up / streak cards keep their auto-close.)
+    SEEN is in the database: acknowledge_recaps(p_through) (server action
+    acknowledgeRecaps) runs as soon as it starts (skip counts; other
+    devices won't replay) and marks only auth.uid()'s unseen rows up to
+    the newest shown (a reset landing meanwhile isn't swallowed). No write
+    policies on reset_recaps; the child reads his own, parents the family.
+  * Evening warning: from 18:00 family time (isEvening, re-checked every
+    minute), while HE has open quests today and a boss is active, the boss
+    charges up (.boss-charging glow + .boss-aura-charging, gentle; static
+    under reduced motion) and the stats row's nudge becomes "<Boss> is
+    powering up! N quests left before midnight, or the party takes D
+    damage[ and gets knocked out][ — and your N-day streak ends]." — it
+    replaces the streak nudge (never both). D comes from tonight_stakes()
+    (lib/hooks/use-evening-warning.ts): every open quest up to today in
+    family time × miss_penalty_per_minute(), 0 with no boss — the reset's
+    own rule and constant, so it's what the reset would deal.
+  * Potions (/player/store, PotionShelf above the real-life rewards, which
+    are now headed "Real-life rewards"): buy_potion(p_potion_id) — child
+    only, auth.uid()'s gold, priced from the table, heal capped at max,
+    refused at full HP (potion_party_full) or short (potion_insufficient_
+    gold); locks party_health → player_stats; logged in party_log (gold
+    spent, potion). Bought and drunk in one tap, no inventory, no parent.
+    Server action buyPotion checks the price he saw first (like rewards).
+    Feedback: the shelf's party HP bar + green +N, "potion" moment →
+    item-purchased sound; the battle scene shows a green +N for every
+    party_log heal over Realtime ("heal" events). Parent HQ /parent/rewards:
+    "Party healing" log (potions: who, which, gold; perfect-day heals).
+    Potion icons are PLACEHOLDER pixel art (PotionIcon in
+    components/ui/icons.tsx) — replace in the PixelLab art pass.
+  * Perfect-day heal: evaluate_streaks() also returns each perfect day
+    (every scheduled quest done — the streak's +1 condition) plus the
+    streak before; run_daily_reset heals perfect_day_heal_hp() per day, in
+    order, after penalties and the knock-out refill, capped at max (party
+    row already locked; lock order unchanged). Idempotent and catches up
+    over missed nights via streak_through, like streaks. Logged per day in
+    party_log (only when it healed something).
+  * Dev console (next dev only): __fqBattle.recap("blow" | "ko" | "nights"
+    | "text" | "perfect") — the same RecapHost → Recap component and
+    RECAP_TIMING as the real recap, fed fake rows through the same
+    summarizeRecaps(); differences: never acknowledged (no database
+    writes), fixed Slime → Alarm Clock Swarm bosses, it holds celebration
+    cards back only once it starts (the real one from the first render,
+    via recapPending), and a new call replaces one already playing / evening(true | false | null, stakes?) (force evening;
+    pass `stakes` — e.g. {} or { damage: 60, party_hp: 30 } — to preview
+    without the database) / heal(20) (heal event + party HP, no gold).
 
 TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
 - Connected as the `pixellab` MCP server (~94 tools: characters, objects,
@@ -476,9 +554,11 @@ PARKED — future items, NOT to be built until asked:
   Streak"). Covered so far: slot guard, XP, levels, streaks, the boss
   engine + instant damage (roster, activation order, strike, defeat, gold
   split, escape, nightly reset, API access) and the rewards store (ledger
-  triggers + RLS). Still to add before production use: pool integrity
+  triggers + RLS), recaps (scope, show-once, acknowledgement security),
+  evening stakes, potions and perfect-day heals. Still to add before
+  production use: pool integrity
   (allocation / week bounds). Not testable in PGlite: true concurrency
-  (row-lock serialization of redemptions / strikes).
+  (row-lock serialization of redemptions / strikes / potion buys).
 
 DATABASE SCHEMA (Supabase/Postgres):
 - families: id, name, timezone, created_at
@@ -505,6 +585,15 @@ DATABASE SCHEMA (Supabase/Postgres):
 - reward_redemptions: id, family_id, child_id, reward_id, gold_spent,
   status ('pending'|'approved'|'fulfilled'|'denied'), redeemed_at,
   resolved_by
+
+- potions: id (text: small/large), name, heal_hp, gold_cost, sort_order,
+  active (global catalogue; read-only via the API)
+- party_log: id, family_id, child_id, event_type ('potion'|'perfect_day'),
+  amount (HP healed), hp_after, potion_id, gold_spent, day, created_at
+- reset_recaps: id, family_id, child_id, created_at, day_from, day_to,
+  missed_quests, missed_minutes, party_damage, boss_id, perfect_days,
+  healed, streak_before, streak_after, knocked_out, escaped_boss_id,
+  next_boss_id, hp_before, hp_after, max_hp, seen_at
 
 RLS: every table scopes on family_id matching the caller's profile.
 Parents can write to bosses/calendar_events/weekly_pools/rewards.

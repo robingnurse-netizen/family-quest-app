@@ -12,19 +12,14 @@ import { SoundToggle } from "@/components/ui/sound-toggle";
 import { HudBar } from "./hud-bar";
 import { usePlayerStats, type LiveStats } from "@/lib/hooks/use-player-stats";
 import { levelProgress } from "@/lib/rpg/levels";
+import { useEveningWarning } from "@/lib/hooks/use-evening-warning";
+import type { TonightStakes } from "@/lib/supabase/types";
 import { shopProgress } from "@/lib/rewards/progress";
 import type { Reward } from "@/lib/supabase/types";
 import { createNoRepeatPicker } from "@/lib/random";
-import { STRIKE_VARIANTS, contactAnimation } from "@/lib/rpg/strike";
-import {
-  BOSS_ATTACK_IMPACT_MS,
-  DOWN_HOLD_MS,
-  HURT_PEAK_FRAME,
-  heroReducer,
-  initialHero,
-  type HeroState,
-} from "@/lib/rpg/hero-stage";
-import type { SpriteAnimation } from "@/components/rpg/sprites/types";
+import { STRIKE_VARIANTS } from "@/lib/rpg/strike";
+import { BOSS_ATTACK_IMPACT_MS, DOWN_HOLD_MS, heroReducer, initialHero } from "@/lib/rpg/hero-stage";
+import { ArenaBackdrop, HERO_POSES } from "./arena-parts";
 import {
   ARENA_CLASS,
   ARENA_STYLE,
@@ -61,6 +56,7 @@ export function BattleScene({
   childId,
   stats: initialStats,
   rewards,
+  timeZone,
 }: {
   heroName: string;
   childId: string;
@@ -68,9 +64,59 @@ export function BattleScene({
   stats: PlayerStats;
   /** The shop's rewards, for the Gold stat's "N within reach" badge. */
   rewards: Reward[];
+  /** The family's timezone: the evening warning starts at 18:00 there. */
+  timeZone: string;
 }) {
-  const { party, stage, onBossAnimationEnd, onBossFinished, emit, questsLeftToday } = useBattleContext();
+  const { party, boss, stage, onBossAnimationEnd, onBossFinished, emit, questsLeftToday } = useBattleContext();
   const stats = usePlayerStats(childId, initialStats);
+
+  // Evening warning (lib/rpg/evening.ts): from 18:00 family time, while he
+  // still has quests today and a boss is active, the boss charges up and a
+  // line states tonight's stakes.
+  const [eveningDev, setEveningDev] = useState<{ force: boolean | null; stakes: TonightStakes | null }>({
+    force: null,
+    stakes: null,
+  });
+  const evening = useEveningWarning({
+    timeZone,
+    bossId: boss?.id ?? null,
+    questsLeftToday,
+    streak: stats.streak,
+    force: eveningDev.force,
+    devStakes: eveningDev.stakes,
+  });
+  const charging = evening.line !== null;
+
+  // Heals (potions, perfect days; party_log over Realtime): a green +N over
+  // the party while the HP bar refills.
+  const [healPop, setHealPop] = useState<{ key: number; amount: number } | null>(null);
+  useBattleEvents((event) => {
+    if (event.type === "heal") setHealPop((h) => ({ key: (h?.key ?? 0) + 1, amount: event.amount }));
+  });
+  useEffect(() => {
+    if (!healPop) return;
+    const t = setTimeout(() => setHealPop(null), 1600);
+    return () => clearTimeout(t);
+  }, [healPop]);
+
+  // Development only: evening mode and heals on demand (see CLAUDE.md).
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return;
+    return registerDevTools({
+      /** Force evening on / off (null: follow the clock). Pass `stakes` to preview without the database. */
+      evening: (on: boolean | null = true, stakes?: Partial<TonightStakes>) =>
+        setEveningDev({
+          force: on,
+          stakes: stakes
+            ? {
+                today: "", timezone: timeZone, boss_active: true, boss_name: boss?.name ?? "The boss",
+                my_open_quests: 2, open_quests: 2, open_minutes: 45, damage: 45, party_hp: party?.current_hp ?? 100,
+                ...stakes,
+              }
+            : null,
+        }),
+    });
+  }, [timeZone, boss?.name, party?.current_hp]);
 
   // LEVEL UP: announced when the live level rises (not on first load). The
   // celebration overlay queues it until any hit sequence has finished.
@@ -132,6 +178,15 @@ export function BattleScene({
             />
           </FeetSpot>
           <FeetSpot x={FEET_X.hero}>
+            {healPop && (
+              <p
+                key={healPop.key}
+                aria-hidden
+                className="heal-pop absolute bottom-[calc(var(--arena)*0.66)] left-0 z-20 w-max -translate-x-1/2 font-body text-3xl font-black leading-none sm:text-4xl"
+              >
+                +{healPop.amount}
+              </p>
+            )}
             <AnchoredSprite
               key={hero.state.key}
               animation={hero.animation}
@@ -144,7 +199,8 @@ export function BattleScene({
           </FeetSpot>
         </div>
 
-        {/* The boss, facing left, with a pulsing aura behind it. */}
+        {/* The boss, facing left, with a pulsing aura behind it — glowing
+            and pulsing a little faster while it charges up (evening). */}
         <div className="absolute inset-x-0 bottom-(--ground) top-0 z-10">
           {shown ? (
             <FeetSpot key={shown.id} x={FEET_X.boss} className="boss-enter">
@@ -152,19 +208,22 @@ export function BattleScene({
                 aria-hidden
                 className={`boss-aura absolute bottom-[-10%] left-0 aspect-square -translate-x-1/2 rounded-full ${
                   shown.tier === "epic" ? "boss-aura-epic" : ""
-                }`}
+                } ${charging ? "boss-aura-charging" : ""}`}
                 style={{ height: `calc(${bossHeight(shown)} * 1.45)` }}
               />
-              <BossSprite
-                spriteKey={shown.sprite_key}
-                name={shown.name}
-                mode={stage.mode}
-                playKey={stage.playKey}
-                height={bossHeight(shown)}
-                face="left"
-                onReactionDone={onBossAnimationEnd}
-                onFinishDone={onBossFinished}
-              />
+              {/* Zero-width like the feet spot, so the sprite stands where it would. */}
+              <div className={`absolute inset-0 ${charging ? "boss-charging" : ""}`}>
+                <BossSprite
+                  spriteKey={shown.sprite_key}
+                  name={shown.name}
+                  mode={stage.mode}
+                  playKey={stage.playKey}
+                  height={bossHeight(shown)}
+                  face="left"
+                  onReactionDone={onBossAnimationEnd}
+                  onFinishDone={onBossFinished}
+                />
+              </div>
             </FeetSpot>
           ) : (
             <p className="absolute inset-y-0 right-0 flex w-1/2 items-center justify-center px-2 text-center font-display text-base font-semibold text-parchment text-shadow-pixel">
@@ -232,6 +291,7 @@ export function BattleScene({
             stats={stats}
             withinReach={shopProgress(rewards, stats.gold).affordable}
             questsLeftToday={questsLeftToday}
+            eveningLine={evening.line}
           />
         </div>
       </div>
@@ -240,20 +300,6 @@ export function BattleScene({
 }
 
 const heroAnims = SPRITES.hero.animations;
-
-/** The hero's poses as playable animations (stable objects: SpriteAnimator
- *  restarts when its animation changes). */
-const HERO_POSES = {
-  idle: heroAnims.idle,
-  // Timed so the flinch peaks as the boss's blow lands.
-  hurt: contactAnimation(heroAnims.hurt, HURT_PEAK_FRAME, BOSS_ATTACK_IMPACT_MS),
-  ko: heroAnims.ko,
-  // Lying flat: the K.O.'s last frame, held.
-  down: { ...heroAnims.ko, frames: heroAnims.ko.frames.slice(-1) },
-  // Getting up: the K.O. in reverse.
-  rise: { ...heroAnims.ko, frames: [...heroAnims.ko.frames].reverse() },
-  victory: heroAnims.victory,
-} satisfies Record<Exclude<HeroState["pose"], "attack">, SpriteAnimation>;
 
 /**
  * The scene's hero: the pose machine fed from the battle events, the
@@ -321,6 +367,14 @@ function useHero(partyHp: number | null, shownBossId: string | null) {
         if (b) emit({ type: "miss", bossId: b.id, amount, childId: null, slotId: null, at: new Date().toISOString() });
         setHp((hp) => hp - amount);
       },
+      // A heal (as a potion's party_log row sends it), without spending gold:
+      // the green +N and the HP bar refilling, capped at max HP.
+      heal: (amount = 20) => {
+        const p = latest.current.party;
+        const healed = p ? Math.min(amount, p.max_hp - p.current_hp) : amount;
+        setHp((hp) => hp + healed);
+        emit({ type: "heal", amount: healed, source: "potion", childId: null });
+      },
       // Party HP to 0 / back to full, as the nightly reset sends them.
       knockOut: () => setHp(() => 0),
       standUp: () => setHp((_, max) => max),
@@ -346,25 +400,6 @@ function useHero(partyHp: number | null, shownBossId: string | null) {
     hero: { state, animation, onComplete: oneShot ? () => dispatch({ type: "end" }) : undefined },
     partyRef,
   };
-}
-
-/** Night sky with twinkling stars and drifting clouds, far and near pixel
- *  hills, then the ground strip. CSS only. */
-function ArenaBackdrop() {
-  return (
-    <div aria-hidden className="absolute inset-0">
-      <div className="arena-sky absolute inset-0" />
-      {/* Twinkling stars (two layers out of step) and slow clouds drifting
-          at two speeds for parallax. Static under reduced motion. */}
-      <div className="arena-stars arena-stars-a absolute inset-0" />
-      <div className="arena-stars arena-stars-b absolute inset-0" />
-      <div className="arena-clouds arena-clouds-far top-[6%]" />
-      <div className="arena-clouds arena-clouds-near top-[24%]" />
-      <div className="arena-hills-far absolute inset-x-0 bottom-(--ground) h-[38%]" />
-      <div className="arena-hills-near absolute inset-x-0 bottom-(--ground) h-[24%]" />
-      <div className="absolute inset-x-0 bottom-0 h-(--ground) border-t-[3px] border-[#69db7c] bg-[#2b8a3e] shadow-[inset_0_calc(var(--ground)*-0.45)_0_#5c3b1e]" />
-    </div>
-  );
 }
 
 /** Event captions as a parchment banner across the top of the arena. */
@@ -420,10 +455,13 @@ function StatsStrip({
   stats,
   withinReach,
   questsLeftToday,
+  eveningLine,
 }: {
   stats: PlayerStats;
   withinReach: number;
   questsLeftToday: number | null;
+  /** The evening warning (it includes the streak, so it replaces the nudge). */
+  eveningLine: string | null;
 }) {
   const cell =
     "flex min-w-0 flex-col items-center rounded-[3px] border-2 border-stone-edge bg-well px-1 py-1.5 shadow-[inset_2px_2px_0_rgb(0_0_0/0.5)]";
@@ -431,6 +469,7 @@ function StatsStrip({
   const value = "text-lg font-black leading-none tabular-nums";
   const xp = levelProgress(stats.xp);
   const nudge = stats.streak > 0 && questsLeftToday !== null && questsLeftToday > 0;
+  const nudgeLine = eveningLine ?? (nudge ? `Keep your ${stats.streak}-day streak: ${questsLeftToday} quest${questsLeftToday === 1 ? "" : "s"} left today` : null);
 
   return (
     <div>
@@ -506,11 +545,12 @@ function StatsStrip({
           </div>
         </li>
       </ul>
-      {nudge && (
-        // A gentle nudge under the row, pointing at the streak cell.
+      {nudgeLine && (
+        // One nudge under the row: the evening warning (tonight's stakes,
+        // streak included) or, before evening, the streak nudge.
         <p className="mt-1.5 flex items-center justify-end gap-1.5 text-right text-sm font-bold text-gold text-shadow-pixel">
-          <FlameIcon className="h-4 w-4 shrink-0" />
-          Keep your {stats.streak}-day streak: {questsLeftToday} quest{questsLeftToday === 1 ? "" : "s"} left today
+          {eveningLine ? <HeartIcon className="h-4 w-4 shrink-0" /> : <FlameIcon className="h-4 w-4 shrink-0" />}
+          {nudgeLine}
         </p>
       )}
     </div>

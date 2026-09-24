@@ -1,14 +1,15 @@
 // Battle events: the one typed stream every battle reaction listens to.
 //
-// Realtime rows (bosses, boss_log, party_health) are translated into these in
+// Realtime rows (bosses, boss_log, party_health, party_log) are translated into these in
 // lib/hooks/use-battle.ts; the BattleProvider fans them out. The battle
 // scene, the stage machine, the centre-screen hit overlay and anything added
 // later (sound effects) subscribe with useBattleEvents — nothing needs
 // rewiring to add a listener. The overlay also emits named "moment" events
 // (impact, combo, ko, victory, coin), the item shop a "purchase" one, the
 // stats HUD "level_up" / "streak_milestone", the celebration cards a
-// "celebration" as each card appears, and the quest board "quest_complete" /
-// "quest_dropped", into the same stream. Sound effects map these in
+// "celebration" as each card appears, the quest board "quest_complete" /
+// "quest_dropped", the recap "party_hit" (its boss's blow) and the store
+// "potion", into the same stream. Sound effects map these in
 // components/rpg/battle/battle-sounds.tsx.
 
 import type { Boss, BossLog } from "@/lib/supabase/types";
@@ -30,6 +31,8 @@ export type BattleEvent =
    * refill arrive back to back: as events, neither is lost to batching.
    */
   | { type: "party"; hp: number; max: number }
+  /** The party was healed (a party_log row): a potion, or a perfect day. */
+  | { type: "heal"; amount: number; source: "potion" | "perfect_day"; childId: string | null }
   /** A beat in the hit overlay's show, for sound effects. */
   | { type: "moment"; name: OverlayMoment; combo: number; damage: number }
   /** The item shop: a reward was bought (sent to a grown-up), for sounds. */
@@ -43,7 +46,11 @@ export type BattleEvent =
   /** The quest board: the player ticked a quest done (before the server says so). */
   | { type: "moment"; name: "quest_complete"; slotId: string }
   /** The quest board: a quest or weekly quest was dropped somewhere that takes it. */
-  | { type: "moment"; name: "quest_dropped" };
+  | { type: "moment"; name: "quest_dropped" }
+  /** The "while you were away" recap: the boss's blow lands on the party. */
+  | { type: "moment"; name: "party_hit" }
+  /** The item shop: a potion was bought and drunk. */
+  | { type: "moment"; name: "potion" };
 
 /** Named beats of the hit overlay (components/rpg/battle/hit-overlay.tsx). */
 export type OverlayMoment = "impact" | "combo" | "ko" | "victory" | "coin";

@@ -69,7 +69,12 @@ export function BattleSounds({ childId }: { childId: string }) {
             playSound(event.kind === "level_up" ? "levelUp" : "streakMilestone");
             return;
           case "purchase":
+          case "potion":
             playSound("itemPurchased");
+            return;
+          // The recap stages its own blow and emits this as it lands.
+          case "party_hit":
+            playSound("partyDamage");
             return;
         }
     }

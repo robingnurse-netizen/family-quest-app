@@ -495,3 +495,45 @@ const COINSTACK: PixelArt = {
 };
 /** A stack of gold (the coin purse) */
 export const CoinStackIcon = (p: IconProps) => <PixelIcon art={COINSTACK} {...p} />;
+
+// PLACEHOLDER art for the potions (store): a simple flask, red liquid for
+// the small potion and a taller, fuller one for the large. To be replaced in
+// the PixelLab art pass (see CLAUDE.md).
+const POTION_SMALL: PixelArt = {
+  colors: { o: "#2b1d0e", c: "#8a5a2b", g: "#dee2e6", h: "#ffffff", f: "#e03131", s: "#a51d1d", l: "#ff8787" },
+  rows: [
+    "....ooo....",
+    "....oco....",
+    "....ogo....",
+    "...oogoo...",
+    "..oggghgo..",
+    ".oggggghgo.",
+    ".offlffffo.",
+    ".offfffffo.",
+    ".offfffsso.",
+    "..offsssso.",
+    "...oooooo..",
+  ],
+};
+const POTION_LARGE: PixelArt = {
+  colors: { o: "#2b1d0e", c: "#8a5a2b", g: "#dee2e6", h: "#ffffff", f: "#e03131", s: "#a51d1d", l: "#ff8787" },
+  rows: [
+    "....ooo....",
+    "....oco....",
+    "...ooooo...",
+    "...ogggo...",
+    "..oogghoo..",
+    ".oggggghgo.",
+    ".offlffhfo.",
+    "offlffffffo",
+    "offfffffffo",
+    "offffffffso",
+    "offfffffsso",
+    ".offffsssso",
+    "..ooooooooo",
+  ],
+};
+/** Potions (placeholder art). */
+export const PotionIcon = ({ size = "small", ...p }: IconProps & { size?: "small" | "large" }) => (
+  <PixelIcon art={size === "large" ? POTION_LARGE : POTION_SMALL} {...p} />
+);

@@ -115,7 +115,7 @@ export function useDevicePixelStep() {
 export const arenaHeight = (share: number) => `calc(var(--arena) * ${share})`;
 
 /** A boss's idle display height as a CSS length (tier size, capped by width). */
-export function bossHeight(boss: Boss) {
+export function bossHeight(boss: Pick<Boss, "sprite_key" | "tier">) {
   const idle = bossAnimations(boss.sprite_key)?.idle;
   const aspect = idle ? idle.width / idle.height : 1;
   return `min(${arenaHeight(HEIGHT.boss[boss.tier])}, ${((BOSS_MAX_WIDTH * 100) / aspect).toFixed(2)}cqw)`;

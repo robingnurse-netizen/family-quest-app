@@ -102,3 +102,14 @@ export async function setSlotStatus(
   if (!data) return { ok: false, error: "That quest is locked in and can't be changed." };
   return { ok: true, data };
 }
+
+/**
+ * He's seen (or skipped) his "while you were away" recap, up to `through`
+ * (the newest reset shown). The database function only marks his own
+ * recaps seen — it can't change anything else.
+ */
+export async function acknowledgeRecaps(through: string): Promise<void> {
+  await requireRole("child");
+  const supabase = await createClient();
+  await supabase.rpc("acknowledge_recaps", { p_through: through });
+}

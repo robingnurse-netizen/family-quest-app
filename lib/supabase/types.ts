@@ -156,6 +156,87 @@ export type RewardRedemption = {
   resolved_by: string | null;
 };
 
+/** A potion in the store's catalogue (20260926000012; tune it there). */
+export type Potion = {
+  id: string;
+  name: string;
+  heal_hp: number;
+  gold_cost: number;
+  sort_order: number;
+  active: boolean;
+};
+
+/** A heal: a potion bought, or a perfect day at the nightly reset. */
+export type PartyLog = {
+  id: string;
+  family_id: string;
+  child_id: string | null;
+  event_type: "potion" | "perfect_day";
+  /** HP actually healed (capped at max HP). */
+  amount: number;
+  hp_after: number;
+  potion_id: string | null;
+  gold_spent: number;
+  /** Perfect day: the day (YYYY-MM-DD). */
+  day: string | null;
+  created_at: string;
+};
+
+/**
+ * One nightly reset run that affected a child (his misses, perfect days, or
+ * party damage / a knock-out). Written by run_daily_reset; seen_at is set by
+ * acknowledge_recaps(). Read-only through the API.
+ */
+export type ResetRecap = {
+  id: string;
+  family_id: string;
+  child_id: string;
+  created_at: string;
+  day_from: string | null;
+  day_to: string | null;
+  missed_quests: number;
+  missed_minutes: number;
+  /** The whole party's damage that run (0 with no active boss). */
+  party_damage: number;
+  boss_id: string | null;
+  perfect_days: number;
+  healed: number;
+  streak_before: number;
+  streak_after: number;
+  knocked_out: boolean;
+  escaped_boss_id: string | null;
+  next_boss_id: string | null;
+  hp_before: number;
+  hp_after: number;
+  max_hp: number;
+  seen_at: string | null;
+};
+
+/** What tonight's reset would deal right now (tonight_stakes()). */
+export type TonightStakes = {
+  today: string;
+  timezone: string;
+  boss_active: boolean;
+  boss_name: string | null;
+  /** The caller's own open quests up to today. */
+  my_open_quests: number;
+  open_quests: number;
+  open_minutes: number;
+  /** Party damage if nothing else gets done (0 with no active boss). */
+  damage: number;
+  party_hp: number;
+};
+
+/** buy_potion() result. */
+export type PotionPurchase = {
+  potion_id: string;
+  healed: number;
+  hp: number;
+  max_hp: number;
+  gold: number;
+  gold_spent: number;
+};
+
 /**
  * Summary returned by run_daily_reset() for one family. Boss damage isn't
  * part of the nightly run any more — it's dealt instantly on completion.
@@ -166,12 +247,24 @@ export type DailyResetResult = {
   boss_id: string | null;
   missed_minutes: number;
   party_damage: number;
+  knocked_out?: boolean;
+  /** HP healed by perfect days this run. */
+  party_healed?: number;
   party_hp: number;
   defeated: string | null;
   escaped: string | null;
   gold_awarded: { child_id: string; gold: number }[];
   activated: string | null;
-  streaks?: { child_id: string; streak: number; best: number; through: string }[];
+  streaks?: {
+    child_id: string;
+    before?: number;
+    streak: number;
+    best: number;
+    from?: string;
+    through: string;
+    perfect_days?: string[];
+  }[];
+  recaps?: number;
 };
 
 // Columns with a database default (or nullable) are optional on insert.
@@ -247,6 +340,13 @@ export type Database = {
         RewardRedemption,
         "id" | "gold_spent" | "status" | "redeemed_at" | "resolved_by"
       >;
+      // Read-only through the API (writes happen in the functions below).
+      potions: Table<Potion, "sort_order" | "active">;
+      party_log: Table<
+        PartyLog,
+        "id" | "child_id" | "potion_id" | "gold_spent" | "day" | "created_at"
+      >;
+      reset_recaps: Table<ResetRecap, "id" | "created_at" | "seen_at">;
     };
     Views: Record<string, never>;
     Functions: {
@@ -258,6 +358,10 @@ export type Database = {
         Args: { p_family_id: string; p_today?: string };
         Returns: DailyResetResult;
       };
+      // Signed-in users (20260926000012_recap_evening_healing.sql).
+      buy_potion: { Args: { p_potion_id: string }; Returns: PotionPurchase };
+      acknowledge_recaps: { Args: { p_through: string }; Returns: number };
+      tonight_stakes: { Args: Record<string, never>; Returns: TonightStakes | null };
       run_daily_reset_all: {
         Args: Record<string, never>;
         Returns: (DailyResetResult | { family_id: string; error: string })[];

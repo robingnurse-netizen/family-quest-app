@@ -5,13 +5,14 @@ import { loadCalendar } from "@/lib/calendar/queries";
 import { monthKeyOf } from "@/lib/calendar/dates";
 import { loadWeekBoard } from "@/lib/backlog/queries";
 import { WeekBoard } from "@/components/kanban/week-board";
-import { createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
-import { loadBattle } from "@/lib/rpg/queries";
+import { acknowledgeRecaps, createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
+import { loadBattle, loadRecap } from "@/lib/rpg/queries";
 import { BattleProvider } from "@/components/rpg/battle/battle-provider";
 import { BattleScene } from "@/components/rpg/battle/battle-scene";
 import { HitOverlay } from "@/components/rpg/battle/hit-overlay";
 import { Celebrations } from "@/components/rpg/battle/celebrations";
 import { BattleSounds } from "@/components/rpg/battle/battle-sounds";
+import { RecapHost } from "@/components/rpg/battle/recap";
 import { ShopBanner } from "@/components/rewards/shop-banner";
 import { loadRewardStore } from "@/lib/rewards/queries";
 import { GameHeading } from "@/components/ui/game-heading";
@@ -35,6 +36,8 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
     loadBattle(profile.family_id),
     loadRewardStore(profile),
   ]);
+  // "While you were away": resets since he last saw a recap.
+  const recap = await loadRecap(profile.id, board.today);
 
   const playerStats = {
     level: stats?.level ?? 1,
@@ -51,7 +54,12 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
       {/* Live battle state + event stream for everything on the page (the
           scene now; the hit overlay and sounds later). One spacing scale:
           gap-6 between sections. */}
-      <BattleProvider familyId={battle.familyId} initialBoss={battle.boss} initialParty={battle.party}>
+      <BattleProvider
+        familyId={battle.familyId}
+        initialBoss={battle.boss}
+        initialParty={battle.party}
+        recapPending={recap !== null}
+      >
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
           <header className="flex items-center justify-between gap-4">
             <GameHeading as="h1" size="lg">
@@ -68,7 +76,11 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
             childId={profile.id}
             stats={playerStats}
             rewards={store.rewards}
+            timeZone={calendar.timeZone}
           />
+          {/* "While you were away": the nights since his last visit, before
+              anything else (the celebration cards wait for it). */}
+          <RecapHost initial={recap} acknowledge={acknowledgeRecaps} />
           {/* Centre-screen replay of Reuben's own hits, wherever he's scrolled. */}
           <HitOverlay childId={profile.id} />
           {/* LEVEL UP! and streak milestones, after any hit sequence. */}

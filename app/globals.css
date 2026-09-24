@@ -200,7 +200,36 @@ body {
 }
 .event-banner { animation: event-banner 3.5s ease-out forwards; }
 
+/* Evening warning: the boss charges up — a slow, soft glow that swells and
+   ebbs, and its aura pulses a little quicker and warmer. Deliberately gentle:
+   a heads-up, not a threat. */
+@keyframes boss-charge {
+  0%, 100% { filter: drop-shadow(0 0 2px rgb(252 196 25 / 0.35)); }
+  50% { filter: drop-shadow(0 0 10px rgb(252 196 25 / 0.75)) brightness(1.08); }
+}
+.boss-charging { animation: boss-charge 2.4s ease-in-out infinite; }
+.boss-aura-charging {
+  background: radial-gradient(closest-side, rgb(252 196 25 / 0.6), rgb(224 49 49 / 0.3) 55%, transparent);
+  animation-duration: 1.6s;
+}
+
+/* A heal: a green "+N" that pops and floats up, fading (battle scene, recap,
+   potion shelf). Numbers in the body font (Stage 1's digit rule). */
+@keyframes heal-float {
+  0% { opacity: 0; translate: 0 6px; scale: 0.6; }
+  15% { opacity: 1; translate: 0 0; scale: 1.15; }
+  70% { opacity: 1; translate: 0 -14px; scale: 1; }
+  100% { opacity: 0; translate: 0 -26px; scale: 1; }
+}
+.heal-pop {
+  color: #8ce99a;
+  text-shadow: 2px 2px 0 #12141f, -1px -1px 0 #12141f;
+  animation: heal-float 1600ms ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .boss-charging { animation: none; filter: drop-shadow(0 0 6px rgb(252 196 25 / 0.6)); }
+  .heal-pop { animation: overlay-fade-out 1600ms ease-in forwards; }
   .boss-aura { animation: none; opacity: 0.8; }
   .hero-hit { animation: hero-hit-flash 700ms ease-out var(--impact, 0ms) backwards; }
   .event-banner { animation: event-banner-fade 3.5s linear forwards; }
