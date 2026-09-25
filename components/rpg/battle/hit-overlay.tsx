@@ -381,7 +381,7 @@ export function HitOverlay({ childId }: { childId: string }) {
           style={{ animationDuration: `${T.out}ms` }}
         >
           <div
-            className={`overlay-vignette absolute inset-0 ${show.phase === "fly" ? "overlay-vignette-out" : ""}`}
+            className={`overlay-dim absolute inset-0 ${show.phase === "fly" ? "overlay-dim-out" : ""}`}
             style={show.phase === "fly" ? { animationDuration: `${T.fly}ms` } : undefined}
           />
           {/* A brief white flash on contact, for medium and heavy hits. */}

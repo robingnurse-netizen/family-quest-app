@@ -53,7 +53,9 @@ export function Celebrations() {
       </p>
       {showing && (
         <div aria-hidden className="pointer-events-none fixed inset-0 z-40 flex items-center justify-center p-4">
-          <div key={showing.id} className="celebration-card panel panel-stone px-6 py-5 text-center">
+          {/* The flat dim behind every result overlay, fading with the card. */}
+          <div key={`dim-${showing.id}`} className="celebration-dim overlay-dim absolute inset-0" />
+          <div key={showing.id} className="celebration-card panel panel-stone relative px-6 py-5 text-center">
             {showing.kind === "level_up" ? (
               <>
                 <p className="flex items-center justify-center gap-2 font-display text-4xl font-semibold text-gold text-shadow-pixel sm:text-5xl">

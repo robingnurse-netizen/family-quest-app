@@ -441,11 +441,19 @@ img.sprite-pixelated { color: transparent; font-size: 0; }
    ------------------------------------------------------------------------- */
 @keyframes overlay-fade-in { from { opacity: 0; } to { opacity: 1; } }
 @keyframes overlay-fade-out { from { opacity: 1; } to { opacity: 0; } }
-.overlay-vignette {
-  background: radial-gradient(ellipse at center, rgb(10 6 24 / 0.45) 20%, rgb(10 6 24 / 0.88) 100%);
+/* The dim behind every centre-screen result overlay (hit overlay, recap,
+   celebration cards): one flat near-opaque black (95%), the same every
+   time — dark enough to hide the arena and HUD behind the overlay's own
+   sprites and numbers (60% only tinted them: the HUD text read through).
+   It fades with its overlay: in over 180ms; out as the hit overlay flies
+   back (.overlay-dim-out, its duration set to OVERLAY_TIMING.fly inline)
+   or with the whole layer (.overlay-out). Opacity only, so reduced motion
+   keeps the fade, like .reduced-card. */
+.overlay-dim {
+  background: rgb(0 0 0 / 0.95);
   animation: overlay-fade-in 180ms ease-out both;
 }
-.overlay-vignette-out { animation: overlay-fade-out 500ms ease-in forwards; }
+.overlay-dim-out { animation: overlay-fade-out 500ms ease-in forwards; }
 .overlay-out { animation: overlay-fade-out 260ms ease-in forwards; }
 
 /* The party dashes in from the left edge. */
@@ -945,6 +953,13 @@ img.sprite-pixelated { color: transparent; font-size: 0; }
   100% { opacity: 0; }
 }
 .celebration-card { animation: celebration 2600ms ease-out both; }
+/* Its dim fades in and out with the card (the card's opacity stops). */
+@keyframes celebration-dim {
+  0% { opacity: 0; }
+  12%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.celebration-dim { animation: celebration-dim 2600ms ease-out both; }
 /* The streak cell glows gently while today's quests are still to do. */
 @keyframes streak-nudge {
   0%, 100% { box-shadow: inset 2px 2px 0 rgb(0 0 0 / 0.5), 0 0 0 0 rgb(245 159 0 / 0); }
@@ -953,5 +968,6 @@ img.sprite-pixelated { color: transparent; font-size: 0; }
 .streak-nudge { animation: streak-nudge 2.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) {
   .celebration-card { animation: celebration-fade 2600ms linear both; }
+  .celebration-dim { animation: celebration-fade 2600ms linear both; }
   .streak-nudge { animation: none; box-shadow: inset 2px 2px 0 rgb(0 0 0 / 0.5), 0 0 8px 1px rgb(245 159 0 / 0.5); }
 }

@@ -228,7 +228,7 @@ function Recap({
       onClick={atSummary ? undefined : skip}
       className={`fixed inset-0 z-50 flex items-center ${atSummary ? "" : "cursor-pointer"} justify-center p-3 ${leaving ? "overlay-out" : ""}`}
     >
-      <div aria-hidden className="overlay-vignette absolute inset-0" />
+      <div aria-hidden className="overlay-dim absolute inset-0" />
       <div className="reduced-card panel panel-stone relative w-full max-w-xl p-3 sm:p-4 [container-type:inline-size]">
         <h2 id="recap-title" className="mb-2 text-center font-display text-2xl font-semibold text-gold text-shadow-pixel sm:text-3xl">
           {title}
