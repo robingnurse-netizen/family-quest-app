@@ -765,6 +765,7 @@ const DEV_ROSTER: [string, string, Boss["tier"]][] = [
   ["cable_spider", "Cable Spider", "low"],
   ["swamp_bag_ooze", "Swamp-Bag Ooze", "mid"],
   ["tupperware_troll", "Tupperware Troll", "mid"],
+  ["mud_track_minotaur", "Mud-Track Minotaur", "mid"],
   ["magma_behemoth", "Magma Behemoth", "epic"],
   ["chronosphinx", "Chronosphinx", "epic"],
   ["abyssal_kraken", "Abyssal Kraken", "epic"],

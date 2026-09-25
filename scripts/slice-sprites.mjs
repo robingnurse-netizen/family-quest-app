@@ -361,6 +361,29 @@ const SHEETS = [
       },
     },
   },
+  {
+    // PixelLab mid, facing left; 96px cells (rows aligned on frame 0 by
+    // build-boss-sheet.cjs: animated from a puddle-free start frame, so the
+    // v3 canvases differed per animation).
+    file: "mud-track-minotaur-pixellab.png",
+    grid: { cell: 96 },
+    characters: {
+      mud_track_minotaur: {
+        idle: { row: 0 },
+        // Drops his horned head (3–4) and butts forward in a burst of mud
+        // clods: contact frame 5 (the biggest spray; clipped at the ground
+        // line).
+        attack: { row: 1, contact: 5 },
+        // Head snaps back, bellowing (peak 4–5).
+        hurt: { row: 2 },
+        // Buckles and topples forward (4–6), tumbles (7) and lies as a
+        // broken heap of mud chunks, head down, a horn snapped off (holds
+        // frame 8: hand-drawn end frame, minotaur-heap.cjs).
+        death: { row: 3 },
+        move: { row: 4 },
+      },
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -720,6 +743,7 @@ const FACING = {
   shogun_bot: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   swamp_bag_ooze: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   tupperware_troll: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
+  mud_track_minotaur: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
 };
 
 const only = new Set(process.argv.slice(2));

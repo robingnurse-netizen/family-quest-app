@@ -671,8 +671,17 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   Shogun-Bot — DONE: assets/shogun-bot-pixellab.png (124px grid),
   contact 5, hurt-v2, 12 generations (1 hurt re-roll). All ten roster
   bosses in the database are now PixelLab art; the Gemini boss sheets in
-  assets/ are no longer sliced (kept as source history). The four mid
-  bosses are still unanimated (not seeded yet).
+  assets/ are no longer sliced (kept as source history).
+  Mid-tier pass (style guide "Mid-tier pass", 52 generations): Swamp-Bag
+  Ooze (104px cells; attack contact 8 at 16 fps; death holds frame 7),
+  Tupperware Troll (104px; contact 5), Mud-Track Minotaur (96px; contact
+  5; animated from a PUDDLE-FREE start frame, minotaur-start.cjs — the
+  rotation's mud puddle read as a ground shadow; death animates into a
+  hand-drawn heap, minotaur-heap.cjs) — DONE, all grounded, no airborne
+  frames. build-boss-sheet.cjs gained `work`, a row's `frames` and
+  `align`. Scatter-Brick Serpent: still unanimated (its death needs the
+  hand-guided end-frame treatment). Mid bosses are seeded for new
+  families only (migration …13).
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via

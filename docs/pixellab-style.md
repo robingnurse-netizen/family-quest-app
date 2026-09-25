@@ -471,6 +471,56 @@ to a hand-drawn end frame. build-boss-sheet.cjs now takes a per-boss
   crashes face-down (helmet landing back on him). No end-frame fallback.
 - Unused: attack, hurt, death stay in the PixelLab character.
 
+### Mud-Track Minotaur record
+
+- Character `46a04b65-be1f-4e65-be04-0689bb42db67`; 2 generations each:
+  5 + 5 (idle-v2, attack-v2, death-v2, death-v3, and death-v4 into the
+  end frame) = 20 generations.
+- Sheet: assets/mud-track-minotaur-pixellab.png (96px cells). Idle 61×70.
+- NO PUDDLE: the rotation stands in a wide mud puddle — on the flat
+  ground line that reads exactly like the removed ground shadows, and v3
+  would carry it through lunges and the escape. minotaur-start.cjs erases
+  it (the two hooves kept and re-outlined) and every animation is
+  generated from that frame (`custom_start_frame_base64`), so frame 0 of
+  every row is puddle-free. Side effect: each v3 canvas is sized
+  separately (84–100 wide), so the builder aligns rows on frame 0
+  (`align`).
+- Tail: v3 grew a mossy tail that popped in and out (the first idle,
+  attack v1, faint in hurt / move). Prompts say "(no tail)"; idle-v2
+  ("keeping exactly the same pose, only its chest and huge shoulders
+  gently rising and falling") has none; hurt / move keep a faint tip.
+- Attack re-rolled: v1 barely charged, and a dark swoosh ring appeared
+  around him. attack-v2 ("crouches and drops its head low with both horns
+  pointed forward, then rams far forward … a spray of brown mud clods
+  bursting forward off its horns … No tail, no whip, no rope"): head down
+  (3–4), a mud spray at his hooves, contact frame 5 (clipped at the
+  ground row). A modest butt rather than a charge; frame 4's splat is a
+  wide flat mud patch for one frame.
+- Hurt (first try): head snaps back, bellowing (peak 4–5).
+- Death needed the END-FRAME fallback after the two allowed re-rolls:
+  v1 (drops to its knees, topples face-down, "crumbles apart into loose
+  clods") fell into an intact mossy mound; death-v2 ("dries out and
+  cracks … shatters apart into many separate loose chunks") cracked and
+  shed chunks but stayed standing; death-v3 (the fall first, then "breaks
+  apart into big cracked chunks") sank into an intact crouch.
+  minotaur-heap.cjs builds the end frame from the start frame: the body
+  below the head cut into Voronoi chunks (cut edges inked as cracks,
+  slivers dropped), piled Tetris-style (each chunk where it rests lowest,
+  so the heap is wide and 43 px tall), the head lying in front with its
+  eye shut and the far horn snapped off and lying on the ground, a few
+  mud clods. death-v4 animates into it: he buckles and topples (4–6),
+  tumbles (7), and ends on the heap (8, exempt from speck cleanup).
+- Unused: idle, attack, death, death-v2, death-v3 stay in the PixelLab
+  character.
+
+### Mid-tier pass totals
+
+52 generations (Ooze 16, Troll 16, Minotaur 20; balance 1753 → 1701).
+Re-rolls: Ooze attack, hurt ×2; Troll attack, hurt, death; Minotaur
+idle, attack, death ×2; one end-frame fallback (the Minotaur's death).
+Hand fixes: the Minotaur's puddle (start frame), the Ooze's last death
+frame (held frame 7).
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -485,7 +535,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
 | Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
 | Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 | NEW boss; no limbs: hand-guide its animation |
-| Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | NEW boss: needs a roster migration |
+| Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | animated + integrated (mid-tier pass) from a puddle-free start frame; seeded for new families only |
 | Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | animated + integrated (roster pass); very dark: check it at night |
 | Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | animated + integrated (roster pass); hovers via the slicer's `ground` |
 | Abyssal Kraken | epic (88) | ab99db9a-f403-4f91-adcd-b6d77b91260b | 77 × 75 | animated + integrated (roster pass); hovers; dark: check it at night |

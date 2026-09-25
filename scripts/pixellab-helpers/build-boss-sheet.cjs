@@ -78,6 +78,14 @@ const BOSSES = {
     // The club's ground burst (5–7) splashes below his feet.
     rows: [row('idle'), row('attack', 'attack-v2', { clip: [5, 6, 7] }), row('hurt', 'hurt-v2'), row('death', 'death-v2'), row('move')],
   },
+  mud_track_minotaur: {
+    // Animated from a custom start frame (minotaur-start.cjs: the rotation's
+    // mud puddle erased), so each v3 canvas differs: rows are aligned on
+    // frame 0. death-v4 animates into the hand-drawn heap (minotaur-heap.cjs).
+    file: 'mud-track-minotaur-pixellab.png', cell: 96, work: 'mud_track_minotaur', align: [20, 84],
+    // The attack's mud spray (5–7) splashes below his hooves.
+    rows: [row('idle', 'idle-v2'), row('attack', 'attack-v2', { clip: [5, 6, 7] }), row('hurt'), row('death', 'death-v4', { keepAll: [8] }), row('move')],
+  },
 };
 
 const key = process.argv[2];

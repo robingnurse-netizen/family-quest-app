@@ -1,0 +1,121 @@
+{
+  "character": "mud_track_minotaur",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/mud_track_minotaur/idle/frame-01.png?v=b08a534df6",
+        "/sprites/mud_track_minotaur/idle/frame-02.png?v=fa315d4e6c",
+        "/sprites/mud_track_minotaur/idle/frame-03.png?v=dc89dfa75c",
+        "/sprites/mud_track_minotaur/idle/frame-04.png?v=9d79e4fb73",
+        "/sprites/mud_track_minotaur/idle/frame-05.png?v=770d375b93",
+        "/sprites/mud_track_minotaur/idle/frame-06.png?v=8eead40d41",
+        "/sprites/mud_track_minotaur/idle/frame-07.png?v=2ebb2ac60c",
+        "/sprites/mud_track_minotaur/idle/frame-08.png?v=21154d1c9a",
+        "/sprites/mud_track_minotaur/idle/frame-09.png?v=afb3de2046"
+      ],
+      "width": 61,
+      "height": 70,
+      "anchor": {
+        "x": 32,
+        "y": 69
+      },
+      "bodyHeight": 68,
+      "fps": 6,
+      "loop": true,
+      "facing": "left"
+    },
+    "attack": {
+      "frames": [
+        "/sprites/mud_track_minotaur/attack/frame-01.png?v=67e28d4597",
+        "/sprites/mud_track_minotaur/attack/frame-02.png?v=d40098d4f0",
+        "/sprites/mud_track_minotaur/attack/frame-03.png?v=fa41cd0aa0",
+        "/sprites/mud_track_minotaur/attack/frame-04.png?v=73079182d0",
+        "/sprites/mud_track_minotaur/attack/frame-05.png?v=7d4a378936",
+        "/sprites/mud_track_minotaur/attack/frame-06.png?v=1fb649e155",
+        "/sprites/mud_track_minotaur/attack/frame-07.png?v=3e14ac85a5",
+        "/sprites/mud_track_minotaur/attack/frame-08.png?v=ef6f475998",
+        "/sprites/mud_track_minotaur/attack/frame-09.png?v=5e8e6895a3"
+      ],
+      "width": 70,
+      "height": 68,
+      "anchor": {
+        "x": 42,
+        "y": 67
+      },
+      "bodyHeight": 68,
+      "contact": 5,
+      "fps": 10,
+      "loop": false,
+      "facing": "left"
+    },
+    "hurt": {
+      "frames": [
+        "/sprites/mud_track_minotaur/hurt/frame-01.png?v=7edbfcb2d6",
+        "/sprites/mud_track_minotaur/hurt/frame-02.png?v=9aaf390f2a",
+        "/sprites/mud_track_minotaur/hurt/frame-03.png?v=cdb951133e",
+        "/sprites/mud_track_minotaur/hurt/frame-04.png?v=bebe8a11f6",
+        "/sprites/mud_track_minotaur/hurt/frame-05.png?v=d878b6e7a7",
+        "/sprites/mud_track_minotaur/hurt/frame-06.png?v=536c35ced7",
+        "/sprites/mud_track_minotaur/hurt/frame-07.png?v=656faeb1cc",
+        "/sprites/mud_track_minotaur/hurt/frame-08.png?v=921ecd4b63",
+        "/sprites/mud_track_minotaur/hurt/frame-09.png?v=429930a340"
+      ],
+      "width": 64,
+      "height": 71,
+      "anchor": {
+        "x": 35,
+        "y": 70
+      },
+      "bodyHeight": 68,
+      "fps": 8,
+      "loop": false,
+      "facing": "left"
+    },
+    "death": {
+      "frames": [
+        "/sprites/mud_track_minotaur/death/frame-01.png?v=b21cf1101e",
+        "/sprites/mud_track_minotaur/death/frame-02.png?v=578599eb5a",
+        "/sprites/mud_track_minotaur/death/frame-03.png?v=678701ffc1",
+        "/sprites/mud_track_minotaur/death/frame-04.png?v=44dadbeeb1",
+        "/sprites/mud_track_minotaur/death/frame-05.png?v=b3e8fd89df",
+        "/sprites/mud_track_minotaur/death/frame-06.png?v=b6811185a1",
+        "/sprites/mud_track_minotaur/death/frame-07.png?v=f2600515aa",
+        "/sprites/mud_track_minotaur/death/frame-08.png?v=eedd247d12",
+        "/sprites/mud_track_minotaur/death/frame-09.png?v=9cd78f48ea"
+      ],
+      "width": 74,
+      "height": 68,
+      "anchor": {
+        "x": 40,
+        "y": 67
+      },
+      "bodyHeight": 68,
+      "fps": 6,
+      "loop": false,
+      "facing": "left"
+    },
+    "move": {
+      "frames": [
+        "/sprites/mud_track_minotaur/move/frame-01.png?v=0721685c89",
+        "/sprites/mud_track_minotaur/move/frame-02.png?v=edb8956bf9",
+        "/sprites/mud_track_minotaur/move/frame-03.png?v=94481ee7b6",
+        "/sprites/mud_track_minotaur/move/frame-04.png?v=1921255ebe",
+        "/sprites/mud_track_minotaur/move/frame-05.png?v=841025727c",
+        "/sprites/mud_track_minotaur/move/frame-06.png?v=54700f9259",
+        "/sprites/mud_track_minotaur/move/frame-07.png?v=0f96337f58",
+        "/sprites/mud_track_minotaur/move/frame-08.png?v=f8cd737f6c",
+        "/sprites/mud_track_minotaur/move/frame-09.png?v=cbd9ab970b"
+      ],
+      "width": 56,
+      "height": 68,
+      "anchor": {
+        "x": 30,
+        "y": 67
+      },
+      "bodyHeight": 68,
+      "fps": 8,
+      "loop": true,
+      "facing": "left"
+    }
+  }
+}
