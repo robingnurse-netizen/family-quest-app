@@ -376,9 +376,8 @@ const SHEETS = [
         attack: { row: 1, contact: 5 },
         // Head snaps back, bellowing (peak 4–5).
         hurt: { row: 2 },
-        // Buckles and topples forward (4–6), tumbles (7) and lies as a
-        // broken heap of mud chunks, head down, a horn snapped off (holds
-        // frame 8: hand-drawn end frame, minotaur-heap.cjs).
+        // Knees buckle (3–4), he collapses forward and lies flat on his face
+        // in one piece, knocked out (5–8; holds frame 8).
         death: { row: 3 },
         move: { row: 4 },
       },

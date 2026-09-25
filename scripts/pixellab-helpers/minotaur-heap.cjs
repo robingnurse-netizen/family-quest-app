@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-// Rough helper (like spider-heap.cjs): the hand-assembled END FRAME for the
-// Mud-Track Minotaur's death (docs/pixellab-style.md, Minotaur record) —
+// Rough helper (like spider-heap.cjs), NO LONGER USED: after review the
+// shattered heap read as an object breaking apart, not a humanoid collapse,
+// so his death is now the first-generation knockdown (kept for reference).
+// It was the hand-assembled END FRAME for the Mud-Track Minotaur's death (docs/pixellab-style.md, Minotaur record) —
 // three generated deaths either fell without breaking, broke without falling
 // or sank into an intact crouch. Same 76×76 canvas as his start frame
 // (PIXELLAB_WORK/mud_track_minotaur/start.png, the puddle-free rotation from

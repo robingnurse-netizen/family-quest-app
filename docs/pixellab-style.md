@@ -474,8 +474,7 @@ to a hand-drawn end frame. build-boss-sheet.cjs now takes a per-boss
 ### Mud-Track Minotaur record
 
 - Character `46a04b65-be1f-4e65-be04-0689bb42db67`; 2 generations each:
-  5 + 5 (idle-v2, attack-v2, death-v2, death-v3, and death-v4 into the
-  end frame) = 20 generations.
+  5 + 6 (idle-v2, attack-v2, death-v2 … death-v5) = 22 generations.
 - Sheet: assets/mud-track-minotaur-pixellab.png (96px cells). Idle 61×70.
 - NO PUDDLE: the rotation stands in a wide mud puddle — on the flat
   ground line that reads exactly like the removed ground shadows, and v3
@@ -497,27 +496,31 @@ to a hand-drawn end frame. build-boss-sheet.cjs now takes a per-boss
   ground row). A modest butt rather than a charge; frame 4's splat is a
   wide flat mud patch for one frame.
 - Hurt (first try): head snaps back, bellowing (peak 4–5).
-- Death needed the END-FRAME fallback after the two allowed re-rolls:
-  v1 (drops to its knees, topples face-down, "crumbles apart into loose
-  clods") fell into an intact mossy mound; death-v2 ("dries out and
-  cracks … shatters apart into many separate loose chunks") cracked and
-  shed chunks but stayed standing; death-v3 (the fall first, then "breaks
-  apart into big cracked chunks") sank into an intact crouch.
-  minotaur-heap.cjs builds the end frame from the start frame: the body
-  below the head cut into Voronoi chunks (cut edges inked as cracks,
-  slivers dropped), piled Tetris-style (each chunk where it rests lowest,
-  so the heap is wide and 43 px tall), the head lying in front with its
-  eye shut and the far horn snapped off and lying on the ground, a few
-  mud clods. death-v4 animates into it: he buckles and topples (4–6),
-  tumbles (7), and ends on the heap (8, exempt from speck cleanup).
-- Unused: idle, attack, death, death-v2, death-v3 stay in the PixelLab
-  character.
+- Death — REVISED after browser review: the first pass took the END-FRAME
+  fallback (death-v2 cracked but stayed standing, death-v3 sank into an
+  intact crouch; minotaur-heap.cjs piled his body as cracked mud chunks and
+  death-v4 animated into it), but a shattered heap read as an object
+  breaking apart, not a horned humanoid being knocked out. The brief is
+  now a knockdown that lands roughly intact (like the Troll's). death-v5
+  ("knocked out … topples over backward … crashing flat onto its back …
+  its whole body in one piece") only sat down, slumped. The FIRST
+  generation (death: "staggers, drops to its knees, then topples forward
+  and crashes face-down flat onto the ground …") is exactly that — knees
+  buckle (3–4), he collapses forward and lies flat on his face in one
+  piece (5–8, lifted 2–3 px onto the line) — so it's the one used, no
+  third re-roll and no end frame. Lesson: "crumble / shatter" wording
+  suits objects (the Behemoth's rocks); a humanoid boss wants a plain
+  knockdown.
+- Unused: idle, attack, death-v2 … death-v5 stay in the PixelLab
+  character (death-v4 = the heap).
 
 ### Mid-tier pass totals
 
-52 generations (Ooze 16, Troll 16, Minotaur 20; balance 1753 → 1701).
+52 generations (Ooze 16, Troll 16, Minotaur 20; balance 1753 → 1701),
++2 for the Minotaur's revised death (death-v5; 1701 → 1699).
 Re-rolls: Ooze attack, hurt ×2; Troll attack, hurt, death; Minotaur
-idle, attack, death ×2; one end-frame fallback (the Minotaur's death).
+idle, attack, death ×3. The Minotaur's end-frame fallback was replaced
+after review by his first-generation knockdown.
 Hand fixes: the Minotaur's puddle (start frame), the Ooze's last death
 frame (held frame 7).
 

@@ -81,10 +81,12 @@ const BOSSES = {
   mud_track_minotaur: {
     // Animated from a custom start frame (minotaur-start.cjs: the rotation's
     // mud puddle erased), so each v3 canvas differs: rows are aligned on
-    // frame 0. death-v4 animates into the hand-drawn heap (minotaur-heap.cjs).
+    // frame 0. The death is the first-generation knockdown (a collapse
+    // face-down, in one piece); death-v4 (into minotaur-heap.cjs's shattered
+    // heap) was replaced after review.
     file: 'mud-track-minotaur-pixellab.png', cell: 96, work: 'mud_track_minotaur', align: [20, 84],
     // The attack's mud spray (5–7) splashes below his hooves.
-    rows: [row('idle', 'idle-v2'), row('attack', 'attack-v2', { clip: [5, 6, 7] }), row('hurt'), row('death', 'death-v4', { keepAll: [8] }), row('move')],
+    rows: [row('idle', 'idle-v2'), row('attack', 'attack-v2', { clip: [5, 6, 7] }), row('hurt'), row('death', 'death'), row('move')],
   },
 };
 

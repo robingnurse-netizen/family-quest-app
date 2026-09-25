@@ -73,20 +73,20 @@
     },
     "death": {
       "frames": [
-        "/sprites/mud_track_minotaur/death/frame-01.png?v=b21cf1101e",
-        "/sprites/mud_track_minotaur/death/frame-02.png?v=578599eb5a",
-        "/sprites/mud_track_minotaur/death/frame-03.png?v=678701ffc1",
-        "/sprites/mud_track_minotaur/death/frame-04.png?v=44dadbeeb1",
-        "/sprites/mud_track_minotaur/death/frame-05.png?v=b3e8fd89df",
-        "/sprites/mud_track_minotaur/death/frame-06.png?v=b6811185a1",
-        "/sprites/mud_track_minotaur/death/frame-07.png?v=f2600515aa",
-        "/sprites/mud_track_minotaur/death/frame-08.png?v=eedd247d12",
-        "/sprites/mud_track_minotaur/death/frame-09.png?v=9cd78f48ea"
+        "/sprites/mud_track_minotaur/death/frame-01.png?v=779cd42d17",
+        "/sprites/mud_track_minotaur/death/frame-02.png?v=64fefdc280",
+        "/sprites/mud_track_minotaur/death/frame-03.png?v=2826b0232b",
+        "/sprites/mud_track_minotaur/death/frame-04.png?v=f1a330b9db",
+        "/sprites/mud_track_minotaur/death/frame-05.png?v=5f83e41680",
+        "/sprites/mud_track_minotaur/death/frame-06.png?v=f0bae73b91",
+        "/sprites/mud_track_minotaur/death/frame-07.png?v=a08f3f30b9",
+        "/sprites/mud_track_minotaur/death/frame-08.png?v=59bb1c16ad",
+        "/sprites/mud_track_minotaur/death/frame-09.png?v=49d6879154"
       ],
-      "width": 74,
+      "width": 68,
       "height": 68,
       "anchor": {
-        "x": 40,
+        "x": 36,
         "y": 67
       },
       "bodyHeight": 68,
