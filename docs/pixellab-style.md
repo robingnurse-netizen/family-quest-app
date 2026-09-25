@@ -524,6 +524,33 @@ after review by his first-generation knockdown.
 Hand fixes: the Minotaur's puddle (start frame), the Ooze's last death
 frame (held frame 7).
 
+### Scatter-Brick Serpent record
+
+- Character `1419f66d-8535-4fea-a557-795c17d499c7` (76 px, no limbs).
+- REFERENCE FRAME FIX (before any animation), locked as
+  assets/scatter-brick-serpent-reference.png (63 × 71): the rotation's
+  coil read as a thick uniform ring with a thin tail stuck on, and the
+  random brick speckle gave the eye no path from head to tail.
+  1. PixelLab Pixen edit of the south-west rotation (1 generation; job
+     `55021f59-efd4-4c84-a707-a6e4bda25c9b`, saved as fix-v1.png): a
+     continuous cream belly stripe from the neck round the coil and brick
+     rows following the body — the continuity cue. It kept the silhouette
+     (no taper), made the neck thinner than the coil and closed the mouth
+     (the red forked tongue gone).
+  2. serpent-taper.cjs (hand): erodes the body inward, 0 px along the neck
+     and the coil's left, 1–3 px along the back coil and the front loop
+     toward the right where the tail joins, and trims the tail row by row
+     to a smooth 6 → 2 px point at its full length ("taper B", the
+     stronger of two tried).
+  3. serpent-head.cjs (hand): puts the original's open mouth, teeth and
+     tongue back, then the whole lower jaw band — chin to the hinge at the
+     back of the skull — over the new neck (only filling empty space left
+     it floating under the chin), with a 1 px brown throat shadow.
+  Inputs (git-ignored, PIXELLAB_WORK/scatter_brick_serpent/): rotation-sw.png
+  (the rotation) and fix-v1.png (the Pixen result); outputs fix-v2.png
+  (taper) and fix-v3.png (= the reference). Every animation is generated
+  from the reference as its custom start frame.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -537,7 +564,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | animated + integrated (roster pass) |
 | Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
 | Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
-| Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 | NEW boss; no limbs: hand-guide its animation |
+| Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 (reference 63 × 71) | no limbs; reference frame fixed (see its record); animation hand-guided |
 | Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | animated + integrated (mid-tier pass) from a puddle-free start frame; seeded for new families only |
 | Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | animated + integrated (roster pass); very dark: check it at night |
 | Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | animated + integrated (roster pass); hovers via the slicer's `ground` |
