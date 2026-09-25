@@ -575,6 +575,12 @@ frame (held frame 7).
   bends the neck and sags onto the coils (4–7) into it; its last frame
   matches the drawing except the two loose ground bricks, so it's kept
   (pasting the drawing back would pop them in).
+- Hand fix after browser review (serpent-fixes.cjs, the builder's `fix`
+  hook): the end frame left a wedge of the coil's cream belly stripe
+  poking out under the jaw at ground level, carried into death frames 6–8
+  where it read as a floating shard. It's cleared (columns 27–38 from row
+  82 in frames 7–8; 27–41 from row 75 in frame 6, where it starts higher)
+  and the cut edges outlined.
 - Passing images inline: long base64 strings got garbled in transcription
   (three rejected calls, nothing charged). A lossless palette PNG
   (end frame < 32 colours: 2320 chars) sent in checked 100-char lines

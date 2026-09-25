@@ -96,6 +96,7 @@ const BOSSES = {
     // kept (it matches the drawing except two loose bricks it left out).
     file: 'scatter-brick-serpent-pixellab.png', cell: 96, work: 'scatter_brick_serpent', align: [12, 86],
     rows: [row('idle'), row('attack', 'attack-v2'), row('hurt'), row('death'), row('move')],
+    fix: require('./serpent-fixes.cjs'), // the belly-stripe wedge under the jaw (death 6–8)
   },
 };
 
