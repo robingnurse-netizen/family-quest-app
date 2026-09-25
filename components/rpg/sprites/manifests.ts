@@ -9,6 +9,7 @@ import laundry_goblin from "./manifests/laundry_goblin.json";
 import magma_behemoth from "./manifests/magma_behemoth.json";
 import rogue from "./manifests/rogue.json";
 import shogun_bot from "./manifests/shogun_bot.json";
+import swamp_bag_ooze from "./manifests/swamp_bag_ooze.json";
 import trash_bag_slime from "./manifests/trash_bag_slime.json";
 import type { SpriteAnimation, SpriteManifest } from "./types";
 
@@ -26,6 +27,7 @@ export const SPRITES = {
   alarm_clock_swarm: typed(alarm_clock_swarm),
   laundry_goblin: typed(laundry_goblin),
   cable_spider: typed(cable_spider),
+  swamp_bag_ooze: typed(swamp_bag_ooze),
   magma_behemoth: typed(magma_behemoth),
   chronosphinx: typed(chronosphinx),
   abyssal_kraken: typed(abyssal_kraken),

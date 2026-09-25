@@ -23,6 +23,14 @@
 //     ground, which grounding would otherwise answer by lifting the body).
 // A boss's `fix(px, w, h, row, frame)` then applies its own hand fixes
 // (goblin-fixes.cjs, kraken-fixes.cjs), returning px counts to log.
+// Mid-tier options (from the Swamp-Bag Ooze on):
+//   - `work`: the boss's own folder under PIXELLAB_WORK (so several bosses'
+//     downloads can sit side by side);
+//   - a row's `frames`: source frame per column (e.g. [0..7, 7] holds frame 7
+//     as the end frame instead of a weak last frame);
+//   - `align: [x, y]`: every row is placed so its frame 0's bounding box has
+//     its left edge at x and its lowest row at y — for characters animated
+//     from a custom start frame, whose v3 canvases differ per animation.
 const sharp = require('sharp');
 const path = require('node:path');
 const { load, clusters, MIN, S } = require('./specks.cjs');
@@ -58,6 +66,13 @@ const BOSSES = {
     file: 'shogun-bot-pixellab.png', cell: 124,
     rows: [row('idle'), row('attack'), row('hurt', 'hurt-v2'), row('death'), row('move')],
   },
+  swamp_bag_ooze: {
+    file: 'swamp-bag-ooze-pixellab.png', cell: 104, work: 'swamp_bag_ooze',
+    // The death's last frame fades the puddle to a hollow outline ring:
+    // hold frame 7 (the full spill) instead.
+    rows: [row('idle'), row('attack', 'attack-v2'), row('hurt', 'hurt-v3'),
+      row('death', 'death', { frames: [0, 1, 2, 3, 4, 5, 6, 7, 7] }), row('move')],
+  },
 };
 
 const key = process.argv[2];
@@ -66,12 +81,22 @@ if (!cfg) throw new Error(`Unknown boss ${key}; one of ${Object.keys(BOSSES).joi
 
 (async () => {
   const { cell: CELL, rows: ROWS } = cfg;
+  const DIR = cfg.work ? path.join(S, cfg.work) : S;
+  const bbox = (im) => {
+    let x0 = 1e9, y1 = -1;
+    for (let i = 0; i < im.w * im.h; i++) if (im.px[i * 4 + 3]) { x0 = Math.min(x0, i % im.w); y1 = Math.max(y1, (i / im.w) | 0); }
+    return [x0, y1];
+  };
   const SW = CELL * 9;
   const sheet = Buffer.alloc(SW * CELL * ROWS.length * 4);
   for (const [r, rw] of ROWS.entries()) {
     let removed = 0, kept = 0, groundY = Infinity, fixed = '';
+    if (cfg.align) {
+      const [x0, y1] = bbox(await load(`${DIR}/${rw.dir}/0.png`));
+      rw.off = [cfg.align[0] - x0, cfg.align[1] - y1];
+    }
     for (let f = 0; f < 9; f++) {
-      const im = await load(`${S}/${rw.dir}/${f}.png`);
+      const im = await load(`${DIR}/${rw.dir}/${rw.frames ? rw.frames[f] : f}.png`);
       const px = Buffer.from(im.px);
       if (!rw.keepAll?.includes(f)) {
         const cs = clusters(im);

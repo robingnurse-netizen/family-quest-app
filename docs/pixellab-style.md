@@ -404,6 +404,48 @@ goblin's sock drips and ear speck (goblin-fixes.cjs), the kraken's loose
 tentacle piece (kraken-fixes.cjs). Every accepted boss in the database
 is now PixelLab art; the four mid bosses (not seeded) remain.
 
+## Mid-tier pass (Ooze, Troll, Minotaur; one autonomous run)
+
+The three grounded mid bosses (76px characters). The Scatter-Brick Serpent
+is left for hand-guided work (its death needs the end-frame technique).
+v3 animated each at a 104px canvas, 2 generations per animation. Rule for
+the run: 1 generation per animation, up to 2 re-rolls if weak; a death
+that still doesn't both land and look broken after 2 re-rolls falls back
+to a hand-drawn end frame. build-boss-sheet.cjs now takes a per-boss
+`work` folder, a row's `frames` remap and `align` (see its header).
+
+### Swamp-Bag Ooze record
+
+- Character `d8dc412c-48a9-46f8-952f-5b40429913cb`; 104×104 v3 canvas:
+  5 + 3 re-rolls (attack-v2, hurt-v2, hurt-v3) = 16 generations.
+- Sheet: assets/swamp-bag-ooze-pixellab.png (104px cells). Idle 59×71.
+- Body plan: a green ooze cloud rising out of a navy gym bag, no legs.
+  Every prompt says "not a person, no legs, the bag stays on the ground";
+  no humanoid drift, the bag stayed planted in all five. Grounded (the
+  bag is its feet), no hover.
+- The small yellow stink-wisp squiggles are specks to the builder, so
+  they're gone from idle / move / every frame 0 (consistently: they'd
+  flicker otherwise).
+- Attack re-rolled: v1 barely moved, its splatter arriving only at frame
+  7. attack-v2 ("leans far back and puffs up … lunges far forward toward
+  the left out of the bag, head thrust way out ahead, mouth wide open …
+  a big glob of green slime spraying out in front of it"): the mouth
+  opens wide (3–6), then a big glob bursts forward (7–8). It never
+  retracts, so the contact is the last frame (8) at 16 fps: the game
+  plays the roar (5–7) into the glob on the blow, then the idle takes
+  over like a spit.
+- Hurt re-rolled twice (the limit): v1 changed only the expression, v2
+  flung a sock but hardly flinched. hurt-v3 ("takes a hard blow on its
+  head and gets squashed: pressed down low and flattened wide like a
+  squashed jelly, sinking halfway down into the gym bag") squashes into
+  the bag, eyes shut (peak 4–5). Still modest; accepted.
+- Death (first try): melts, the bag tips over and the ooze spills into a
+  flat puddle with the socks limp. Its frame 8 faded the puddle's fill to
+  a hollow outline ring (read like a drawn ground shadow), so the sheet
+  holds frame 7 as the end frame (`frames: [0..7, 7]`). The spill spreads
+  toward the camera, so lying frames lift 4–5 px onto the line.
+- Unused: attack, hurt, hurt-v2 stay in the PixelLab character.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -415,7 +457,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Alarm Clock Swarm | low (64) | fa3bd6fe-c464-43f2-bea0-24618512c504 ("v3") | 62 × 55 | animated + integrated (see its record above) |
 | Laundry Goblin | low (64) | 6319df54-b5d0-4fb3-9a43-bb8adcb345d5 | 49 × 61 | animated + integrated (roster pass); the wet sock reads as a hook/rope |
 | Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | animated + integrated (roster pass) |
-| Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | NEW boss: needs a roster migration |
+| Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
 | Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | NEW boss: needs a roster migration |
 | Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 | NEW boss; no limbs: hand-guide its animation |
 | Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | NEW boss: needs a roster migration |

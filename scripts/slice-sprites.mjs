@@ -319,6 +319,28 @@ const SHEETS = [
       },
     },
   },
+  {
+    // PixelLab mid (76px character; 104px v3 canvas), rows idle / attack /
+    // hurt / death / move, facing left, built by build-boss-sheet.cjs. A
+    // green ooze cloud rising out of a gym bag (no legs): the bag is its feet.
+    file: "swamp-bag-ooze-pixellab.png",
+    grid: { cell: 104 },
+    characters: {
+      swamp_bag_ooze: {
+        idle: { row: 0 },
+        // Roars, mouth wide (3–6), then a big glob of slime bursts forward:
+        // contact frame 8 (the glob at its biggest). 16 fps so the roar
+        // (5–7) plays before the blow, like the slime's attack.
+        attack: { row: 1, contact: 8, fps: 16 },
+        // Squashed down into the bag, eyes shut (peak 4–5), springs back.
+        hurt: { row: 2 },
+        // Melts down, the bag tips over and the ooze spills into a flat
+        // puddle, socks limp (holds frame 8 = sheet frame 7).
+        death: { row: 3 },
+        move: { row: 4 },
+      },
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -676,6 +698,7 @@ const FACING = {
   chronosphinx: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   abyssal_kraken: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   shogun_bot: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
+  swamp_bag_ooze: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
 };
 
 const only = new Set(process.argv.slice(2));

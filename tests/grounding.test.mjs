@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 const sharp = createRequire(import.meta.url)("sharp");
 const CHARACTERS = [
   "hero", "rogue", "trash_bag_slime", "alarm_clock_swarm", "laundry_goblin", "cable_spider",
-  "magma_behemoth", "chronosphinx", "abyssal_kraken", "shogun_bot",
+  "swamp_bag_ooze", "magma_behemoth", "chronosphinx", "abyssal_kraken", "shogun_bot",
 ];
 const manifest = (key) =>
   JSON.parse(readFileSync(fileURLToPath(new URL(`../components/rpg/sprites/manifests/${key}.json`, import.meta.url)), "utf8"));

@@ -1,0 +1,121 @@
+{
+  "character": "swamp_bag_ooze",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/swamp_bag_ooze/idle/frame-01.png?v=047646bdfa",
+        "/sprites/swamp_bag_ooze/idle/frame-02.png?v=5d0d8550e4",
+        "/sprites/swamp_bag_ooze/idle/frame-03.png?v=c18a58db0f",
+        "/sprites/swamp_bag_ooze/idle/frame-04.png?v=1c1bcfd62f",
+        "/sprites/swamp_bag_ooze/idle/frame-05.png?v=032740f586",
+        "/sprites/swamp_bag_ooze/idle/frame-06.png?v=d0f8ff7f7a",
+        "/sprites/swamp_bag_ooze/idle/frame-07.png?v=96d71308f5",
+        "/sprites/swamp_bag_ooze/idle/frame-08.png?v=a0618a9093",
+        "/sprites/swamp_bag_ooze/idle/frame-09.png?v=9cbe788f21"
+      ],
+      "width": 59,
+      "height": 71,
+      "anchor": {
+        "x": 33,
+        "y": 70
+      },
+      "bodyHeight": 71,
+      "fps": 6,
+      "loop": true,
+      "facing": "left"
+    },
+    "attack": {
+      "frames": [
+        "/sprites/swamp_bag_ooze/attack/frame-01.png?v=3337c0f276",
+        "/sprites/swamp_bag_ooze/attack/frame-02.png?v=728b194492",
+        "/sprites/swamp_bag_ooze/attack/frame-03.png?v=93aaa95611",
+        "/sprites/swamp_bag_ooze/attack/frame-04.png?v=3753d98cd0",
+        "/sprites/swamp_bag_ooze/attack/frame-05.png?v=b0f2ce01de",
+        "/sprites/swamp_bag_ooze/attack/frame-06.png?v=e8f6e63aa6",
+        "/sprites/swamp_bag_ooze/attack/frame-07.png?v=5a58916080",
+        "/sprites/swamp_bag_ooze/attack/frame-08.png?v=299c83ceb8",
+        "/sprites/swamp_bag_ooze/attack/frame-09.png?v=91902014d5"
+      ],
+      "width": 79,
+      "height": 71,
+      "anchor": {
+        "x": 39,
+        "y": 70
+      },
+      "bodyHeight": 71,
+      "contact": 8,
+      "fps": 16,
+      "loop": false,
+      "facing": "left"
+    },
+    "hurt": {
+      "frames": [
+        "/sprites/swamp_bag_ooze/hurt/frame-01.png?v=fa295e3369",
+        "/sprites/swamp_bag_ooze/hurt/frame-02.png?v=ff81326bd1",
+        "/sprites/swamp_bag_ooze/hurt/frame-03.png?v=d76e5d31b2",
+        "/sprites/swamp_bag_ooze/hurt/frame-04.png?v=fd4c0992c5",
+        "/sprites/swamp_bag_ooze/hurt/frame-05.png?v=39bd886141",
+        "/sprites/swamp_bag_ooze/hurt/frame-06.png?v=fbe4800635",
+        "/sprites/swamp_bag_ooze/hurt/frame-07.png?v=8a45dc0ffa",
+        "/sprites/swamp_bag_ooze/hurt/frame-08.png?v=0d29f9954c",
+        "/sprites/swamp_bag_ooze/hurt/frame-09.png?v=58cfcebebe"
+      ],
+      "width": 62,
+      "height": 74,
+      "anchor": {
+        "x": 33,
+        "y": 73
+      },
+      "bodyHeight": 71,
+      "fps": 8,
+      "loop": false,
+      "facing": "left"
+    },
+    "death": {
+      "frames": [
+        "/sprites/swamp_bag_ooze/death/frame-01.png?v=879cc754cf",
+        "/sprites/swamp_bag_ooze/death/frame-02.png?v=bf49f39b90",
+        "/sprites/swamp_bag_ooze/death/frame-03.png?v=bcc594f0f4",
+        "/sprites/swamp_bag_ooze/death/frame-04.png?v=6b233d3dc4",
+        "/sprites/swamp_bag_ooze/death/frame-05.png?v=8b677ef976",
+        "/sprites/swamp_bag_ooze/death/frame-06.png?v=7ab59b2cc9",
+        "/sprites/swamp_bag_ooze/death/frame-07.png?v=f02427c942",
+        "/sprites/swamp_bag_ooze/death/frame-08.png?v=bcd3e3991a",
+        "/sprites/swamp_bag_ooze/death/frame-09.png?v=bcd3e3991a"
+      ],
+      "width": 77,
+      "height": 71,
+      "anchor": {
+        "x": 37,
+        "y": 70
+      },
+      "bodyHeight": 71,
+      "fps": 6,
+      "loop": false,
+      "facing": "left"
+    },
+    "move": {
+      "frames": [
+        "/sprites/swamp_bag_ooze/move/frame-01.png?v=82971247bf",
+        "/sprites/swamp_bag_ooze/move/frame-02.png?v=b804738de7",
+        "/sprites/swamp_bag_ooze/move/frame-03.png?v=ce2f9c1623",
+        "/sprites/swamp_bag_ooze/move/frame-04.png?v=b9a1ef0e1b",
+        "/sprites/swamp_bag_ooze/move/frame-05.png?v=34006d852b",
+        "/sprites/swamp_bag_ooze/move/frame-06.png?v=e5187c8ba0",
+        "/sprites/swamp_bag_ooze/move/frame-07.png?v=1e1913a50b",
+        "/sprites/swamp_bag_ooze/move/frame-08.png?v=0c9e78e3ba",
+        "/sprites/swamp_bag_ooze/move/frame-09.png?v=10c37bfc91"
+      ],
+      "width": 59,
+      "height": 74,
+      "anchor": {
+        "x": 31,
+        "y": 73
+      },
+      "bodyHeight": 71,
+      "fps": 8,
+      "loop": true,
+      "facing": "left"
+    }
+  }
+}

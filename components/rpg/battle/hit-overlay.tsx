@@ -763,6 +763,7 @@ const DEV_ROSTER: [string, string, Boss["tier"]][] = [
   ["alarm_clock_swarm", "Alarm Clock Swarm", "low"],
   ["laundry_goblin", "Laundry Goblin", "low"],
   ["cable_spider", "Cable Spider", "low"],
+  ["swamp_bag_ooze", "Swamp-Bag Ooze", "mid"],
   ["magma_behemoth", "Magma Behemoth", "epic"],
   ["chronosphinx", "Chronosphinx", "epic"],
   ["abyssal_kraken", "Abyssal Kraken", "epic"],
