@@ -550,6 +550,35 @@ frame (held frame 7).
   (the rotation) and fix-v1.png (the Pixen result); outputs fix-v2.png
   (taper) and fix-v3.png (= the reference). Every animation is generated
   from the reference as its custom start frame.
+- ANIMATION (hand-guided, the swarm's technique): v3 from the reference
+  (`custom_start_frame_base64`), 2 generations each: 6 + 1 re-roll
+  (attack-v2) = 12 generations (13 with the Pixen edit). Sheet:
+  assets/scatter-brick-serpent-pixellab.png (96px cells, rows aligned on
+  frame 0). Idle 67 × 73. Every prompt says "the coiled snake made of
+  colourful toy bricks, not a person, no arms or legs, its coils staying on
+  the ground" — no limbs appeared.
+- Idle: head sways, tongue flicks, tail twitches; coils still.
+- Attack re-rolled: v1 only gaped. attack-v2 ("pulls its head far back and
+  up, then its whole neck shoots straight out forward toward the left …
+  the open-mouthed head lunging far past the front of its coils") pulls
+  back (3–4) and snaps forward jaws wide (contact frame 6) — still no long
+  neck lunge (v3 holds the coil pose); the CSS lunge carries the forward
+  motion, as for the Kraken and the swarm. One re-roll left unspent.
+- Hurt (first try): the head whips back to the right and turns toward the
+  camera for 5–7, bricks knocked loose (peak 5–6). Accepted despite the
+  turn (Shogun-Bot's was re-rolled, but his barely moved; this recoil
+  reads).
+- Death: a hand-drawn END FRAME (serpent-heap.cjs, from the reference's
+  pixels): the coils stay, the neck and head drop to lie on the ground in
+  front, eye shut, tongue out, the tail laid flat, loose bricks — a
+  collapse, not a shattering (a creature, like the Minotaur). v3 sways,
+  bends the neck and sags onto the coils (4–7) into it; its last frame
+  matches the drawing except the two loose ground bricks, so it's kept
+  (pasting the drawing back would pop them in).
+- Passing images inline: long base64 strings got garbled in transcription
+  (three rejected calls, nothing charged). A lossless palette PNG
+  (end frame < 32 colours: 2320 chars) sent in checked 100-char lines
+  worked.
 
 ## Accepted boss characters (still images; not animated yet)
 
@@ -564,7 +593,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | animated + integrated (roster pass) |
 | Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
 | Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
-| Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 (reference 63 × 71) | no limbs; reference frame fixed (see its record); animation hand-guided |
+| Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 (reference 63 × 71) | animated + integrated (mid-tier pass) from its fixed reference frame; seeded for new families only |
 | Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | animated + integrated (mid-tier pass) from a puddle-free start frame; seeded for new families only |
 | Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | animated + integrated (roster pass); very dark: check it at night |
 | Chronosphinx | epic (88) | a88b0deb-f48b-46a4-9733-e827753a7fd7 ("v3") | 83 × 79 | animated + integrated (roster pass); hovers via the slicer's `ground` |

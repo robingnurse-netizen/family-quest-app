@@ -383,6 +383,28 @@ const SHEETS = [
       },
     },
   },
+  {
+    // PixelLab mid, facing left; 96px cells (rows aligned on frame 0: every
+    // animation starts from the fixed reference frame). A coiled brick
+    // snake: the coils are its feet.
+    file: "scatter-brick-serpent-pixellab.png",
+    grid: { cell: 96 },
+    characters: {
+      scatter_brick_serpent: {
+        idle: { row: 0 },
+        // Head pulled back and up, mouth opening (3–4), then snaps forward
+        // jaws wide: contact frame 6.
+        attack: { row: 1, contact: 6 },
+        // Head whips back to the right, bricks knocked loose (peak 5–6).
+        hurt: { row: 2 },
+        // Sways, the neck bends and the head sags onto the coils, eye shut
+        // (holds frame 8: animated into a hand-drawn end frame,
+        // serpent-heap.cjs).
+        death: { row: 3 },
+        move: { row: 4 },
+      },
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -743,6 +765,7 @@ const FACING = {
   swamp_bag_ooze: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   tupperware_troll: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   mud_track_minotaur: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
+  scatter_brick_serpent: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
 };
 
 const only = new Set(process.argv.slice(2));

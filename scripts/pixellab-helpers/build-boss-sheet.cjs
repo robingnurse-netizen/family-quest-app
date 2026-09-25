@@ -88,6 +88,15 @@ const BOSSES = {
     // The attack's mud spray (5–7) splashes below his hooves.
     rows: [row('idle', 'idle-v2'), row('attack', 'attack-v2', { clip: [5, 6, 7] }), row('hurt'), row('death', 'death'), row('move')],
   },
+  scatter_brick_serpent: {
+    // Every animation starts from the fixed reference frame
+    // (assets/scatter-brick-serpent-reference.png), so the v3 canvases
+    // differ per animation: rows are aligned on frame 0. The death animates
+    // into the hand-drawn end frame (serpent-heap.cjs); v3's last frame is
+    // kept (it matches the drawing except two loose bricks it left out).
+    file: 'scatter-brick-serpent-pixellab.png', cell: 96, work: 'scatter_brick_serpent', align: [12, 86],
+    rows: [row('idle'), row('attack', 'attack-v2'), row('hurt'), row('death'), row('move')],
+  },
 };
 
 const key = process.argv[2];

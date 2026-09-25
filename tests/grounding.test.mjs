@@ -14,7 +14,7 @@ import { fileURLToPath } from "node:url";
 const sharp = createRequire(import.meta.url)("sharp");
 const CHARACTERS = [
   "hero", "rogue", "trash_bag_slime", "alarm_clock_swarm", "laundry_goblin", "cable_spider",
-  "swamp_bag_ooze", "tupperware_troll", "mud_track_minotaur",
+  "swamp_bag_ooze", "tupperware_troll", "scatter_brick_serpent", "mud_track_minotaur",
   "magma_behemoth", "chronosphinx", "abyssal_kraken", "shogun_bot",
 ];
 const manifest = (key) =>

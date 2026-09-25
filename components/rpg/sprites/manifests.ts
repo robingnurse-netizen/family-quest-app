@@ -9,6 +9,7 @@ import laundry_goblin from "./manifests/laundry_goblin.json";
 import magma_behemoth from "./manifests/magma_behemoth.json";
 import mud_track_minotaur from "./manifests/mud_track_minotaur.json";
 import rogue from "./manifests/rogue.json";
+import scatter_brick_serpent from "./manifests/scatter_brick_serpent.json";
 import shogun_bot from "./manifests/shogun_bot.json";
 import swamp_bag_ooze from "./manifests/swamp_bag_ooze.json";
 import trash_bag_slime from "./manifests/trash_bag_slime.json";
@@ -32,6 +33,7 @@ export const SPRITES = {
   swamp_bag_ooze: typed(swamp_bag_ooze),
   tupperware_troll: typed(tupperware_troll),
   mud_track_minotaur: typed(mud_track_minotaur),
+  scatter_brick_serpent: typed(scatter_brick_serpent),
   magma_behemoth: typed(magma_behemoth),
   chronosphinx: typed(chronosphinx),
   abyssal_kraken: typed(abyssal_kraken),

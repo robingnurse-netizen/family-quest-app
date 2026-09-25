@@ -1,0 +1,121 @@
+{
+  "character": "scatter_brick_serpent",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/scatter_brick_serpent/idle/frame-01.png?v=b036d782c2",
+        "/sprites/scatter_brick_serpent/idle/frame-02.png?v=12cc7a53fe",
+        "/sprites/scatter_brick_serpent/idle/frame-03.png?v=ce6836945a",
+        "/sprites/scatter_brick_serpent/idle/frame-04.png?v=294d2cd169",
+        "/sprites/scatter_brick_serpent/idle/frame-05.png?v=10a741afd6",
+        "/sprites/scatter_brick_serpent/idle/frame-06.png?v=f6ffe96efa",
+        "/sprites/scatter_brick_serpent/idle/frame-07.png?v=382a622e8a",
+        "/sprites/scatter_brick_serpent/idle/frame-08.png?v=88e043436b",
+        "/sprites/scatter_brick_serpent/idle/frame-09.png?v=c44f58b2cc"
+      ],
+      "width": 67,
+      "height": 73,
+      "anchor": {
+        "x": 32,
+        "y": 72
+      },
+      "bodyHeight": 71,
+      "fps": 6,
+      "loop": true,
+      "facing": "left"
+    },
+    "attack": {
+      "frames": [
+        "/sprites/scatter_brick_serpent/attack/frame-01.png?v=93026dfc62",
+        "/sprites/scatter_brick_serpent/attack/frame-02.png?v=a3e6a67d08",
+        "/sprites/scatter_brick_serpent/attack/frame-03.png?v=5a0cf2f651",
+        "/sprites/scatter_brick_serpent/attack/frame-04.png?v=60eb03ff0b",
+        "/sprites/scatter_brick_serpent/attack/frame-05.png?v=9ca09f3a15",
+        "/sprites/scatter_brick_serpent/attack/frame-06.png?v=dcc4229036",
+        "/sprites/scatter_brick_serpent/attack/frame-07.png?v=21ce92fedb",
+        "/sprites/scatter_brick_serpent/attack/frame-08.png?v=e4e647e5af",
+        "/sprites/scatter_brick_serpent/attack/frame-09.png?v=0fe570bca4"
+      ],
+      "width": 73,
+      "height": 72,
+      "anchor": {
+        "x": 37,
+        "y": 71
+      },
+      "bodyHeight": 71,
+      "contact": 6,
+      "fps": 10,
+      "loop": false,
+      "facing": "left"
+    },
+    "hurt": {
+      "frames": [
+        "/sprites/scatter_brick_serpent/hurt/frame-01.png?v=3df8cccafc",
+        "/sprites/scatter_brick_serpent/hurt/frame-02.png?v=1f77f82c23",
+        "/sprites/scatter_brick_serpent/hurt/frame-03.png?v=42f14b21ee",
+        "/sprites/scatter_brick_serpent/hurt/frame-04.png?v=8e0b4b4024",
+        "/sprites/scatter_brick_serpent/hurt/frame-05.png?v=646972ac47",
+        "/sprites/scatter_brick_serpent/hurt/frame-06.png?v=18b05dd740",
+        "/sprites/scatter_brick_serpent/hurt/frame-07.png?v=f4e95e740c",
+        "/sprites/scatter_brick_serpent/hurt/frame-08.png?v=19fc945ec0",
+        "/sprites/scatter_brick_serpent/hurt/frame-09.png?v=2df64b5600"
+      ],
+      "width": 74,
+      "height": 71,
+      "anchor": {
+        "x": 37,
+        "y": 70
+      },
+      "bodyHeight": 71,
+      "fps": 8,
+      "loop": false,
+      "facing": "left"
+    },
+    "death": {
+      "frames": [
+        "/sprites/scatter_brick_serpent/death/frame-01.png?v=44338804d5",
+        "/sprites/scatter_brick_serpent/death/frame-02.png?v=5b36c69e06",
+        "/sprites/scatter_brick_serpent/death/frame-03.png?v=b6463a4fa1",
+        "/sprites/scatter_brick_serpent/death/frame-04.png?v=1760c86d67",
+        "/sprites/scatter_brick_serpent/death/frame-05.png?v=2481fa8552",
+        "/sprites/scatter_brick_serpent/death/frame-06.png?v=8b9ad0eff8",
+        "/sprites/scatter_brick_serpent/death/frame-07.png?v=1f848c3d0c",
+        "/sprites/scatter_brick_serpent/death/frame-08.png?v=2fc0e4f5a2",
+        "/sprites/scatter_brick_serpent/death/frame-09.png?v=3881b310a4"
+      ],
+      "width": 74,
+      "height": 71,
+      "anchor": {
+        "x": 35,
+        "y": 70
+      },
+      "bodyHeight": 71,
+      "fps": 6,
+      "loop": false,
+      "facing": "left"
+    },
+    "move": {
+      "frames": [
+        "/sprites/scatter_brick_serpent/move/frame-01.png?v=6943a28a8c",
+        "/sprites/scatter_brick_serpent/move/frame-02.png?v=2bbbf7e336",
+        "/sprites/scatter_brick_serpent/move/frame-03.png?v=f9817cf604",
+        "/sprites/scatter_brick_serpent/move/frame-04.png?v=9ab313859a",
+        "/sprites/scatter_brick_serpent/move/frame-05.png?v=8c2fd09dd0",
+        "/sprites/scatter_brick_serpent/move/frame-06.png?v=82819b58ee",
+        "/sprites/scatter_brick_serpent/move/frame-07.png?v=93e93bdcff",
+        "/sprites/scatter_brick_serpent/move/frame-08.png?v=7be3d78ed3",
+        "/sprites/scatter_brick_serpent/move/frame-09.png?v=f682978f00"
+      ],
+      "width": 71,
+      "height": 71,
+      "anchor": {
+        "x": 35,
+        "y": 70
+      },
+      "bodyHeight": 71,
+      "fps": 8,
+      "loop": true,
+      "facing": "left"
+    }
+  }
+}

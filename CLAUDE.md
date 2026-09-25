@@ -684,8 +684,11 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   one piece — a shattered heap, minotaur-heap.cjs, was rejected: humanoid
   bosses fall, objects shatter) — DONE, all grounded, no airborne
   frames. build-boss-sheet.cjs gained `work`, a row's `frames` and
-  `align`. Scatter-Brick Serpent: still unanimated (its death needs the
-  hand-guided end-frame treatment). Mid bosses are seeded for new
+  `align`. Scatter-Brick Serpent — DONE (96px; contact 6): its reference
+  frame was fixed first (assets/scatter-brick-serpent-reference.png:
+  tapered body, belly stripe, restored jaw — serpent-taper.cjs,
+  serpent-head.cjs) and every animation starts from it; the death animates
+  into a hand-drawn end frame (serpent-heap.cjs: head down, eye shut). Mid bosses are seeded for new
   families only (migration …13).
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
