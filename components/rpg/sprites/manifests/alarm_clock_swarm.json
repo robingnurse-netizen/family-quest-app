@@ -169,6 +169,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/alarm_clock_swarm/front/frame-01.png?v=870a8bd218"
+      ],
+      "width": 62,
+      "height": 55,
+      "anchor": {
+        "x": 30,
+        "y": 54
+      },
+      "bodyHeight": 55,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

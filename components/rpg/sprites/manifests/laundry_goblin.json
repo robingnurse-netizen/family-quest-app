@@ -128,6 +128,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/laundry_goblin/front/frame-01.png?v=1143b6376c"
+      ],
+      "width": 54,
+      "height": 60,
+      "anchor": {
+        "x": 29,
+        "y": 59
+      },
+      "bodyHeight": 60,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

@@ -116,6 +116,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/magma_behemoth/front/frame-01.png?v=cf3b436bc3"
+      ],
+      "width": 82,
+      "height": 76,
+      "anchor": {
+        "x": 41,
+        "y": 75
+      },
+      "bodyHeight": 76,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

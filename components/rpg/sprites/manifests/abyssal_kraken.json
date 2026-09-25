@@ -169,6 +169,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/abyssal_kraken/front/frame-01.png?v=4a4ea952fd"
+      ],
+      "width": 79,
+      "height": 74,
+      "anchor": {
+        "x": 39,
+        "y": 73
+      },
+      "bodyHeight": 74,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

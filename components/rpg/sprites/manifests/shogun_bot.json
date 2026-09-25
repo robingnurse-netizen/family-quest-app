@@ -116,6 +116,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/shogun_bot/front/frame-01.png?v=854cc1cb1f"
+      ],
+      "width": 76,
+      "height": 83,
+      "anchor": {
+        "x": 41,
+        "y": 82
+      },
+      "bodyHeight": 83,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

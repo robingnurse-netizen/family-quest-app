@@ -116,6 +116,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/scatter_brick_serpent/front/frame-01.png?v=b21dc2d286"
+      ],
+      "width": 70,
+      "height": 69,
+      "anchor": {
+        "x": 36,
+        "y": 68
+      },
+      "bodyHeight": 69,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

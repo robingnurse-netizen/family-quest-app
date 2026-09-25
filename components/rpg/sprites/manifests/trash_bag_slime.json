@@ -123,6 +123,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/trash_bag_slime/front/frame-01.png?v=d5dbf4d707"
+      ],
+      "width": 54,
+      "height": 59,
+      "anchor": {
+        "x": 27,
+        "y": 58
+      },
+      "bodyHeight": 59,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

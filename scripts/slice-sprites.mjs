@@ -72,7 +72,17 @@ const PLAYBACK = {
   victory: { fps: 10, loop: false },
   death: { fps: 6, loop: false },
   defeated: { fps: 8, loop: false },
+  // The Trophy Case's statue: a boss's south-facing still.
+  front: { fps: 1, loop: false },
 };
+
+// Trophy Case statues (bosses): each boss's south-facing (front) PixelLab
+// rotation, one 96px cell per boss in assets/boss-fronts-pixellab.png
+// (scripts/pixellab-helpers/build-fronts.cjs). An animation's own `sheet`
+// reads from that file instead of the boss's battle sheet; the battle never
+// uses "front". Grounded like any row: the still's lowest pixel sits on its
+// ground line (hovering bosses too — a statue stands on its plinth).
+const FRONT = (column) => ({ sheet: { file: "boss-fronts-pixellab.png", cell: 96 }, row: 0, frames: [column] });
 
 // ---------------------------------------------------------------------------
 // Sheet config
@@ -163,6 +173,7 @@ const SHEETS = [
         // A small squash-and-hop (frame 4 just leaves the ground); the escape
         // slide does the travelling.
         move: { row: 4, airborne: [4] },
+        front: FRONT(0),
       },
     },
   },
@@ -188,6 +199,7 @@ const SHEETS = [
         // a heap of broken clocks on the ground (7–8; 8 is hand-drawn).
         death: { row: 3, ground: 78, airborne: [0, 1, 2, 3, 4, 5, 6] },
         move: { row: 4, ground: 78, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        front: FRONT(1),
       },
     },
   },
@@ -210,6 +222,7 @@ const SHEETS = [
         // Topples over backward and lies flat on his back (holds frame 8).
         death: { row: 3 },
         move: { row: 4 },
+        front: FRONT(2),
       },
     },
   },
@@ -231,6 +244,7 @@ const SHEETS = [
         // frame, scripts/pixellab-helpers/spider-heap.cjs).
         death: { row: 3 },
         move: { row: 4 },
+        front: FRONT(3),
       },
     },
   },
@@ -251,6 +265,7 @@ const SHEETS = [
         // breaking off (holds frame 8).
         death: { row: 3 },
         move: { row: 4 },
+        front: FRONT(8),
       },
     },
   },
@@ -273,6 +288,7 @@ const SHEETS = [
         // air), then it drops and lies slumped, wings draped (7–8).
         death: { row: 3, ground: 106, airborne: [0, 1, 2, 3, 4, 5, 6] },
         move: { row: 4, ground: 106, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        front: FRONT(9),
       },
     },
   },
@@ -295,6 +311,7 @@ const SHEETS = [
         // in the air), then lies sprawled flat on the ground (7–8).
         death: { row: 3, ground: 100, airborne: [0, 1, 2, 3, 4, 5, 6] },
         move: { row: 4, ground: 100, airborne: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+        front: FRONT(10),
       },
     },
   },
@@ -316,6 +333,7 @@ const SHEETS = [
         // pieces scattered (holds frame 8).
         death: { row: 3 },
         move: { row: 4 },
+        front: FRONT(11),
       },
     },
   },
@@ -338,6 +356,7 @@ const SHEETS = [
         // puddle, socks limp (holds frame 8 = sheet frame 7).
         death: { row: 3 },
         move: { row: 4 },
+        front: FRONT(4),
       },
     },
   },
@@ -358,6 +377,7 @@ const SHEETS = [
         // crashes face-down (holds frame 8).
         death: { row: 3 },
         move: { row: 4 },
+        front: FRONT(5),
       },
     },
   },
@@ -380,6 +400,7 @@ const SHEETS = [
         // in one piece, knocked out (5–8; holds frame 8).
         death: { row: 3 },
         move: { row: 4 },
+        front: FRONT(7),
       },
     },
   },
@@ -402,6 +423,7 @@ const SHEETS = [
         // serpent-heap.cjs).
         death: { row: 3 },
         move: { row: 4 },
+        front: FRONT(6),
       },
     },
   },
@@ -754,22 +776,29 @@ const FACING = {
     idle: "right", bark: "right", hurt: "right", pounce: "right", ko: "right",
     bark_front: "front", idle_front: "front",
   },
-  trash_bag_slime: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  alarm_clock_swarm: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  laundry_goblin: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  cable_spider: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  magma_behemoth: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  chronosphinx: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  abyssal_kraken: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  shogun_bot: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  swamp_bag_ooze: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  tupperware_troll: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  mud_track_minotaur: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
-  scatter_brick_serpent: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
+  trash_bag_slime: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  alarm_clock_swarm: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  laundry_goblin: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  cable_spider: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  magma_behemoth: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  chronosphinx: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  abyssal_kraken: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  shogun_bot: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  swamp_bag_ooze: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  tupperware_troll: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  mud_track_minotaur: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
+  scatter_brick_serpent: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left", front: "front" },
 };
 
 const only = new Set(process.argv.slice(2));
 mkdirSync(OUT_MANIFESTS, { recursive: true });
+
+// Grid sheets an animation names itself (`sheet: { file, cell }`), loaded once.
+const ownSheets = new Map();
+async function ownSheet(file) {
+  if (!ownSheets.has(file)) ownSheets.set(file, await loadGridSheet(file));
+  return ownSheets.get(file);
+}
 
 for (const sheetCfg of SHEETS) {
   const wanted = Object.keys(sheetCfg.characters).filter((c) => !only.size || only.has(c));
@@ -787,9 +816,11 @@ for (const sheetCfg of SHEETS) {
       const facing = FACING[character]?.[animName];
       if (!facing) throw new Error(`No FACING entry for ${character}/${animName}`);
       const label = `${character}/${animName}`;
-      const { buffers, width, height, anchor, bodyHeight } = grid
-        ? sliceGridAnimation(sheet, grid.cell, label, anim)
-        : await sliceAnimation(sheet, isBg, label, anim);
+      const { buffers, width, height, anchor, bodyHeight } = anim.sheet
+        ? sliceGridAnimation(await ownSheet(anim.sheet.file), anim.sheet.cell, label, anim)
+        : grid
+          ? sliceGridAnimation(sheet, grid.cell, label, anim)
+          : await sliceAnimation(sheet, isBg, label, anim);
       const dir = join(charDir, animName);
       mkdirSync(dir, { recursive: true });
       const paths = [];
@@ -798,7 +829,7 @@ for (const sheetCfg of SHEETS) {
         await sharp(buffers[i], { raw: { width, height, channels: 4 } })
           // Grid sheets are clean pixel art (too many colours for a
           // palette PNG to keep exactly): lossless.
-          .png(grid ? { compressionLevel: 9 } : { compressionLevel: 9, palette: true, quality: 95 })
+          .png(grid || anim.sheet ? { compressionLevel: 9 } : { compressionLevel: 9, palette: true, quality: 95 })
           .toFile(join(dir, fileName));
         paths.push(`/sprites/${character}/${animName}/${fileName}`);
       }

@@ -123,6 +123,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/cable_spider/front/frame-01.png?v=18896d8c40"
+      ],
+      "width": 62,
+      "height": 59,
+      "anchor": {
+        "x": 38,
+        "y": 58
+      },
+      "bodyHeight": 59,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

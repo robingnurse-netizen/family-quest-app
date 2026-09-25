@@ -116,6 +116,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/tupperware_troll/front/frame-01.png?v=a885184864"
+      ],
+      "width": 71,
+      "height": 72,
+      "anchor": {
+        "x": 30,
+        "y": 71
+      },
+      "bodyHeight": 72,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

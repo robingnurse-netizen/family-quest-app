@@ -116,6 +116,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/swamp_bag_ooze/front/frame-01.png?v=c58239dc3a"
+      ],
+      "width": 70,
+      "height": 71,
+      "anchor": {
+        "x": 35,
+        "y": 70
+      },
+      "bodyHeight": 71,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }

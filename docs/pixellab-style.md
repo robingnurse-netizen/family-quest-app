@@ -586,6 +586,21 @@ frame (held frame 7).
   (end frame < 32 colours: 2320 chars) sent in checked 100-char lines
   worked.
 
+## Trophy Case fronts (statues)
+
+The Trophy Case shows each boss's **south** (front-facing) rotation, not
+battle art. build-fronts.cjs takes each character's rotations/south.png
+from its download ZIP (free), removes specks (< 10 px clusters: the
+swarm's 14, the ooze's stink wisps), erases the Minotaur's mud puddle, and
+centres it in a 96px cell of assets/boss-fronts-pixellab.png; the slicer
+makes a one-frame `front` animation per boss (facing "front", grounded).
+The Serpent's south view was the unfixed design: serpent-front.cjs reworks
+it (1 Pixen generation: belly stripe + brick rows, mouth and tongue kept;
+then a hand taper of the tail to a point and the coil edge by the tail) —
+approved and in. The Cable Spider's front touches down on one plug tip
+(its other plugs end 3+ rows higher), so it sinks 3 rows behind its plinth
+(STATUE_SINK_ROWS, lib/rpg/trophies.ts).
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8

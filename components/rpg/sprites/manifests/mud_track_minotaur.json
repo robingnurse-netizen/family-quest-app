@@ -116,6 +116,21 @@
       "fps": 8,
       "loop": true,
       "facing": "left"
+    },
+    "front": {
+      "frames": [
+        "/sprites/mud_track_minotaur/front/frame-01.png?v=7383d8ec83"
+      ],
+      "width": 69,
+      "height": 68,
+      "anchor": {
+        "x": 34,
+        "y": 67
+      },
+      "bodyHeight": 68,
+      "fps": 1,
+      "loop": false,
+      "facing": "front"
     }
   }
 }
