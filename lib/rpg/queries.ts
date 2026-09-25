@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { Boss, PartyHealth } from "@/lib/supabase/types";
 import { summarizeRecaps, type RecapBoss, type RecapSummary } from "@/lib/rpg/recap";
 import { addDays } from "@/lib/calendar/dates";
+import { buildTrophyCase, type Trophy, type TrophyLogRow } from "@/lib/rpg/trophies";
 
 export type BattleData = {
   familyId: string;
@@ -46,4 +47,49 @@ export async function loadRecap(childId: string, today: string): Promise<RecapSu
     : { data: [] as RecapBoss[] };
   const byId = Object.fromEntries((bosses ?? []).map((b) => [b.id, b]));
   return summarizeRecaps(rows, byId, addDays(today, -1));
+}
+
+export type TrophyCaseData = {
+  trophies: Trophy[];
+  /** His best-ever streak (player_stats.best_streak; a child reads only his own). */
+  bestStreak: number;
+  timeZone: string;
+};
+
+/**
+ * The Trophy Case: the family's roster with each boss's damage and defeat
+ * date from boss_log (read-only). boss_log grows by a row per hit, so it's
+ * read in pages (the API returns at most 1000 rows per request).
+ */
+export async function loadTrophyCase(familyId: string, childId: string): Promise<TrophyCaseData> {
+  const supabase = await createClient();
+  const [{ data: bosses }, { data: stats }, { data: family }] = await Promise.all([
+    supabase
+      .from("bosses")
+      .select("id, name, tier, sprite_key, status, queue_position, created_at")
+      .eq("family_id", familyId),
+    supabase.from("player_stats").select("best_streak").eq("child_id", childId).maybeSingle(),
+    supabase.from("families").select("timezone").eq("id", familyId).maybeSingle(),
+  ]);
+
+  const ids = (bosses ?? []).map((b) => b.id);
+  const logs: TrophyLogRow[] = [];
+  const PAGE = 1000;
+  for (let from = 0; ids.length > 0; from += PAGE) {
+    const { data } = await supabase
+      .from("boss_log")
+      .select("boss_id, event_type, amount, created_at")
+      .in("boss_id", ids)
+      .in("event_type", ["damage", "defeated"])
+      .order("id")
+      .range(from, from + PAGE - 1);
+    logs.push(...(data ?? []));
+    if (!data || data.length < PAGE) break;
+  }
+
+  return {
+    trophies: buildTrophyCase(bosses ?? [], logs),
+    bestStreak: stats?.best_streak ?? 0,
+    timeZone: family?.timezone ?? "Europe/London",
+  };
 }

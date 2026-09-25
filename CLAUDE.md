@@ -517,7 +517,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-healing, recap, evening, sun-times, meadow-key (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-healing, recap, evening, sun-times, meadow-key, trophies (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
@@ -543,6 +543,10 @@ PROJECT STATUS:
     streak card appears, so the sound matches the card, not the XP row) →
     level-up / streak; quest board "quest_complete" (tick) and
     "quest_dropped" (pool → day, slot → other day or tray) moments.
+    Trophy Case taps: trophyUnlocked / trophyLocked (public/sounds/
+    trophy-unlocked.wav / trophy-locked.wav, copied from
+    assets/Sounds/trophycase/unlocked.wav / locked.wav), played by
+    trophy-statue.tsx directly.
   * Mute: SoundToggle (components/ui/sound-toggle.tsx) in the battle
     arena's top-left corner; the event banner is narrowed to clear it.
     No toggle on /player/store (the setting carries over).
@@ -625,6 +629,44 @@ PROJECT STATUS:
     via recapPending), and a new call replaces one already playing / evening(true | false | null, stakes?) (force evening;
     pass `stakes` — e.g. {} or { damage: 60, party_hp: 30 } — to preview
     without the database) / heal(20) (heal event + party HP, no gold).
+
+- Trophy Case (bestiary): /player/trophies, read-only. Every roster boss
+  on one horizontally scrolling shelf (low → mid → epic) in a wooden cabinet
+  (the shop's .shop-wall / .shelf-plank + glass); statues are each boss's
+  first idle frame. Defeated: full colour, gold glow (.trophy-lit), defeat
+  date (boss_log "defeated" row) and the family's total damage (sum of its
+  "damage" rows). Every unbeaten boss (not reached, active, escaped) is the
+  same silhouette with a faint glow (.trophy-silhouette) and a scratched-out
+  name bar (.trophy-redacted; the name isn't sent until defeated), with only
+  the status line differing ("Not yet faced" / "Now fighting" / "Escaped").
+  Plus his best_streak (a child reads only his own player_stats). Pure
+  logic in lib/rpg/trophies.ts (tests/trophies.test.mjs); loadTrophyCase in
+  lib/rpg/queries.ts pages boss_log (1000-row API limit). Statues are each
+  boss's FRONT (south-facing) still: a one-frame "front" animation in its
+  manifest (facing "front"; the battle never uses it), sliced from
+  assets/boss-fronts-pixellab.png (one 96px cell per boss) built by
+  scripts/pixellab-helpers/build-fronts.cjs from the PixelLab south
+  rotations (speck cleanup; the Minotaur's puddle erased). A slicer
+  animation may name its own grid sheet (`sheet: { file, cell }`). A boss
+  with no "front" falls back to its battle idle frame (none do now: the
+  Scatter-Brick Serpent's reworked front — serpent-front.cjs, Pixen + hand
+  taper — was approved; build-fronts.cjs PENDING gates any future one).
+  By-eye sink behind the plinth: STATUE_SINK_ROWS (the Cable Spider, 3 rows:
+  it touched down on one plug tip and looked like it floated). Reached from the
+  gear menu — TEMPORARY until the Camp hub (backlog Tier 3) exists.
+  Statues are buttons (components/rpg/trophy-statue.tsx): a beaten one's
+  gold glow breathes (3.2s), and a tap presses it down (.trophy-press,
+  restarted by re-adding the class) and chimes (sound trophyUnlocked); an
+  unbeaten one stays rigid (aria-disabled, still clickable) and clunks
+  (trophyLocked). Reduced motion: no pulse, the press is a brief brighten.
+  Each statue stands flush on a stone plinth (no top border: it stacked
+  with the feet's black outline into a band that read as a gap; hovering
+  statue frames are grounded by the slicer, so STATUE_EMPTY_ROWS_BELOW in
+  lib/rpg/trophies.ts is empty; tests/trophies.test.mjs re-measures every
+  statue frame against it — a floating frame fails there); silhouettes get
+  a dim cool halo;
+  plaques are light brass (dark text ≥7.4:1); the frame has an inner
+  shadow (.trophy-recess).
 
 TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
 - Connected as the `pixellab` MCP server (~94 tools: characters, objects,

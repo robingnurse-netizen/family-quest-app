@@ -715,6 +715,99 @@ img.sprite-pixelated { color: transparent; font-size: 0; }
   border-block: 2px solid var(--color-wood-edge);
   box-shadow: 0 4px 0 rgb(0 0 0 / 0.35);
 }
+/* ---------------------------------------------------------------------------
+   Trophy Case (components/rpg/trophy-case.tsx, trophy-statue.tsx): a wooden
+   cabinet (the shop's wall and plank) behind glass, one shelf of boss
+   statues on plinths. Beaten ones pulse gently and press down when tapped.
+   Reduced motion: the pulse holds still and the press is a brief brighten
+   instead of a movement.
+   ------------------------------------------------------------------------- */
+/* The glass front: a faint diagonal sheen over the shelf, clicks pass through. */
+.trophy-glass {
+  background: linear-gradient(115deg, transparent 0 18%, rgb(255 255 255 / 0.07) 18% 24%, transparent 24% 58%, rgb(255 255 255 / 0.04) 58% 61%, transparent 61%);
+}
+/* The frame's inner shadow: the case is recessed into the wood. */
+.trophy-recess {
+  box-shadow:
+    inset 0 10px 14px -6px rgb(0 0 0 / 0.75),
+    inset 10px 0 14px -8px rgb(0 0 0 / 0.6),
+    inset -10px 0 14px -8px rgb(0 0 0 / 0.6),
+    inset 0 -6px 10px -6px rgb(0 0 0 / 0.55);
+}
+/* Horizontal shelf scrollbar in the cabinet's wood. */
+.trophy-shelf { scrollbar-color: var(--color-wood-hi) rgb(0 0 0 / 0.35); scrollbar-width: thin; }
+/* Not beaten yet: a black silhouette with only a faint cool glow, and a
+   dim cool light behind it so it separates from the dark wood. */
+.trophy-silhouette {
+  filter: brightness(0) drop-shadow(0 0 2px rgb(150 165 220 / 0.45));
+}
+.trophy-cool-halo {
+  background: radial-gradient(ellipse at 50% 68%, rgb(120 150 230 / 0.2), transparent 62%);
+}
+/* Beaten: full colour and an obvious gold trophy glow that breathes slowly
+   (the pool of light behind it breathes with it). */
+@keyframes trophy-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgb(252 196 25 / 0.85)) drop-shadow(0 0 8px rgb(252 196 25 / 0.45)); }
+  50% { filter: drop-shadow(0 0 4px rgb(252 196 25 / 1)) drop-shadow(0 0 14px rgb(252 196 25 / 0.7)); }
+}
+@keyframes trophy-halo-breathe {
+  0%, 100% { opacity: 0.75; }
+  50% { opacity: 1; }
+}
+.trophy-lit {
+  filter: drop-shadow(0 0 3px rgb(252 196 25 / 0.95)) drop-shadow(0 0 10px rgb(252 196 25 / 0.55));
+  animation: trophy-glow 3.2s ease-in-out infinite;
+}
+.trophy-halo {
+  background: radial-gradient(ellipse at 50% 70%, rgb(252 196 25 / 0.28), transparent 65%);
+  animation: trophy-halo-breathe 3.2s ease-in-out infinite;
+}
+/* Tapping a beaten statue: it shrinks a little and dips, like a button
+   being pressed, then springs back. */
+@keyframes trophy-press {
+  0% { transform: none; }
+  35% { transform: translateY(3px) scale(0.93); }
+  100% { transform: none; }
+}
+.trophy-press { animation: trophy-press 220ms ease-out; }
+/* The plinth each statue stands on: a stepped stone block on the plank.
+   No top border: a dark edge there stacked with the sprite's own black foot
+   outline into a band that read as a gap under the feet. Its lit top face
+   meets the feet directly. */
+.trophy-plinth {
+  background: linear-gradient(to bottom, var(--color-stone-hi), var(--color-stone) 55%, var(--color-stone-shade));
+  border: 2px solid var(--color-stone-edge);
+  border-top: 0;
+  border-radius: 2px 2px 0 0;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.22);
+}
+@media (prefers-reduced-motion: reduce) {
+  .trophy-lit, .trophy-halo { animation: none; }
+  @keyframes trophy-press-still {
+    50% { filter: brightness(1.35); }
+  }
+  .trophy-press { animation: trophy-press-still 220ms ease-out; }
+}
+/* An unbeaten boss's name, scratched out of the brass: a dark bar with pale
+   scratches. One fixed width, so it doesn't hint at the name's length. */
+.trophy-redacted {
+  display: block;
+  width: 80%;
+  height: 0.95em;
+  border-radius: 1px;
+  background-color: #2a1a0a;
+  background-image: repeating-linear-gradient(-35deg, transparent 0 5px, rgb(232 196 120 / 0.4) 5px 6px, transparent 6px 9px);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.45), 0 1px 0 rgb(255 240 200 / 0.25);
+}
+/* The brass nameplate under each statue. */
+.trophy-plaque {
+  /* Light brass: its dark engraved text reads at 7.4:1 or better (the
+     darker #b8893a → #8a6224 plate fell to 3.2:1 at the bottom). */
+  background: linear-gradient(to bottom, #e3c47e, #c9a45c);
+  border: 2px solid #4a3212;
+  box-shadow: inset 1px 1px 0 rgb(255 240 200 / 0.35);
+}
+
 /* An inset pixel slot an item sits in (also frames legacy emoji icons). */
 .item-slot {
   border: 3px solid var(--color-stone-edge);

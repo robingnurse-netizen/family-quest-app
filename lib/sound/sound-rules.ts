@@ -11,7 +11,9 @@ export type SoundName =
   | "streakMilestone"
   | "partyDamage"
   | "itemPurchased"
-  | "dragDrop";
+  | "dragDrop"
+  | "trophyUnlocked"
+  | "trophyLocked";
 
 export type SoundSpec = {
   /** One file, or a pool picked at random (never the same twice running;
@@ -52,6 +54,10 @@ export const SOUNDS: Record<SoundName, SoundSpec> = {
   partyDamage: { files: ["/sounds/party-damage.wav"], volume: 0.75, minGapMs: 1500 },
   itemPurchased: { files: ["/sounds/item-purchased.wav"], volume: 0.8, minGapMs: 300 },
   dragDrop: { files: ["/sounds/drag-drop.wav"], volume: 0.5, minGapMs: 90 },
+  // The Trophy Case: tapping a beaten boss's statue chimes; an unbeaten
+  // one clunks (it can't be activated yet). Taps can come quickly.
+  trophyUnlocked: { files: ["/sounds/trophy-unlocked.wav"], volume: 0.7, minGapMs: 120 },
+  trophyLocked: { files: ["/sounds/trophy-locked.wav"], volume: 0.7, minGapMs: 120 },
 };
 
 /** Per-sound rate limit: `allow(name, now)` is false within its minGapMs. */

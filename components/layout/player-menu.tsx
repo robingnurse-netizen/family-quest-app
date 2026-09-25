@@ -1,13 +1,15 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
 import { GearIcon } from "@/components/ui/icons";
 import { pixelButtonClass } from "@/components/ui/pixel-button";
 import { SignOutButton } from "./sign-out-button";
 
 /**
  * The player's settings menu: a small gear button with a dropdown holding
- * Sign out, so signing out isn't a prominent button on the dashboard.
+ * the Trophy Case link (temporary, see below) and Sign out, so signing out
+ * isn't a prominent button on the dashboard.
  * Closes on Escape, on a click outside, or when focus leaves it.
  */
 export function PlayerMenu() {
@@ -59,8 +61,13 @@ export function PlayerMenu() {
         <div
           id={menuId}
           role="menu"
-          className="panel panel-stone absolute right-0 top-full z-40 mt-1 w-40 p-2"
+          className="panel panel-stone absolute right-0 top-full z-40 mt-1 w-40 space-y-2 p-2"
         >
+          {/* TEMPORARY: the Trophy Case lives here until the Camp hub screen
+              exists (backlog, Tier 3); then it moves into the Camp. */}
+          <Link href="/player/trophies" className={`${pixelButtonClass("stone", "sm")} w-full`}>
+            Trophy Case
+          </Link>
           <SignOutButton className={`${pixelButtonClass("stone", "sm")} w-full`} />
         </div>
       )}
