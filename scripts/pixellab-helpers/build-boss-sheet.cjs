@@ -73,6 +73,11 @@ const BOSSES = {
     rows: [row('idle'), row('attack', 'attack-v2'), row('hurt', 'hurt-v3'),
       row('death', 'death', { frames: [0, 1, 2, 3, 4, 5, 6, 7, 7] }), row('move')],
   },
+  tupperware_troll: {
+    file: 'tupperware-troll-pixellab.png', cell: 104, work: 'tupperware_troll',
+    // The club's ground burst (5–7) splashes below his feet.
+    rows: [row('idle'), row('attack', 'attack-v2', { clip: [5, 6, 7] }), row('hurt', 'hurt-v2'), row('death', 'death-v2'), row('move')],
+  },
 };
 
 const key = process.argv[2];

@@ -446,6 +446,31 @@ to a hand-drawn end frame. build-boss-sheet.cjs now takes a per-boss
   toward the camera, so lying frames lift 4–5 px onto the line.
 - Unused: attack, hurt, hurt-v2 stay in the PixelLab character.
 
+### Tupperware Troll record
+
+- Character `6541a691-639b-410e-ace9-e2d882b04490`; 104×104 v3 canvas:
+  5 + 3 re-rolls (attack-v2, hurt-v2, death-v2) = 16 generations.
+- Sheet: assets/tupperware-troll-pixellab.png (104px cells). Idle 71×75.
+- The club is the round orange one resting on his shoulder (what looks
+  like a club in his low fist is his forearm armour).
+- Attack re-rolled: v1 went off-model mid-swing (turned to the camera,
+  slimmed down, the club became a thin staff). attack-v2 opens "still
+  facing left the whole time, keeping its bulky plastic container armour
+  and big round orange club": club overhead (3–4), slammed into the
+  ground in an orange burst on contact frame 5, crumbs (6–7; the burst
+  clipped at the ground row). It ends with the club down in front (a
+  small snap back to the idle).
+- Hurt re-rolled: v1 barely hunched. hurt-v2 ("struck hard in the face:
+  its head snaps back and its whole body rocks far backward … a plastic
+  lid flying off"): head back, helmet jolting, mouth open (peak 4–5).
+- Death re-rolled: v1 fell flat face-down but only 2–3 crumbs came off —
+  knocked out, not broken. death-v2 spells the break-up out ("the clear
+  tub helmet flies off and rolls away, the shoulder containers crack open
+  and tumble off, lids and broken plastic pieces scatter, the big orange
+  club rolls away"): the helmet flies, the club rolls, bits scatter, he
+  crashes face-down (helmet landing back on him). No end-frame fallback.
+- Unused: attack, hurt, death stay in the PixelLab character.
+
 ## Accepted boss characters (still images; not animated yet)
 
 South-west rotation sizes (drawn art, w × h). All v3, side view, 8
@@ -458,7 +483,7 @@ directions; rejected attempts are still in the PixelLab account.
 | Laundry Goblin | low (64) | 6319df54-b5d0-4fb3-9a43-bb8adcb345d5 | 49 × 61 | animated + integrated (roster pass); the wet sock reads as a hook/rope |
 | Cable Spider | low (64) | 66d961db-4910-4fd5-a730-d7204ec457bc | 55 × 60 | animated + integrated (roster pass) |
 | Swamp-Bag Ooze | mid (76) | d8dc412c-48a9-46f8-952f-5b40429913cb ("v2") | 57 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
-| Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | NEW boss: needs a roster migration |
+| Tupperware Troll | mid (76) | 6541a691-639b-410e-ace9-e2d882b04490 ("v2") | 70 × 71 | animated + integrated (mid-tier pass); seeded for new families only |
 | Scatter-Brick Serpent | mid (76) | 1419f66d-8535-4fea-a557-795c17d499c7 | 66 × 71 | NEW boss; no limbs: hand-guide its animation |
 | Mud-Track Minotaur | mid (76) | 46a04b65-be1f-4e65-be04-0689bb42db67 | 57 × 71 | NEW boss: needs a roster migration |
 | Magma Behemoth | epic (88) | 7f1f6a34-a937-4d44-901b-d41c4c98edce | 71 × 78 | animated + integrated (roster pass); very dark: check it at night |

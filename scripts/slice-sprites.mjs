@@ -341,6 +341,26 @@ const SHEETS = [
       },
     },
   },
+  {
+    // PixelLab mid (104px v3 canvas), same rows, facing left.
+    file: "tupperware-troll-pixellab.png",
+    grid: { cell: 104 },
+    characters: {
+      tupperware_troll: {
+        idle: { row: 0 },
+        // Heaves the orange club overhead (3–4), slams it into the ground in
+        // an orange burst on contact (frame 5), crumbs fly (6–7; the burst
+        // is clipped at the ground line).
+        attack: { row: 1, contact: 5 },
+        // Head snaps back, helmet jolts, mouth open (peak 4–5).
+        hurt: { row: 2 },
+        // Helmet flies off, club rolls away, plastic bits scatter, he
+        // crashes face-down (holds frame 8).
+        death: { row: 3 },
+        move: { row: 4 },
+      },
+    },
+  },
 ];
 
 // ---------------------------------------------------------------------------
@@ -699,6 +719,7 @@ const FACING = {
   abyssal_kraken: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   shogun_bot: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
   swamp_bag_ooze: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
+  tupperware_troll: { idle: "left", attack: "left", hurt: "left", death: "left", move: "left" },
 };
 
 const only = new Set(process.argv.slice(2));

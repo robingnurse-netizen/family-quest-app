@@ -11,6 +11,7 @@ import rogue from "./manifests/rogue.json";
 import shogun_bot from "./manifests/shogun_bot.json";
 import swamp_bag_ooze from "./manifests/swamp_bag_ooze.json";
 import trash_bag_slime from "./manifests/trash_bag_slime.json";
+import tupperware_troll from "./manifests/tupperware_troll.json";
 import type { SpriteAnimation, SpriteManifest } from "./types";
 
 // JSON imports widen each animation's `facing` to string; the slicer only
@@ -28,6 +29,7 @@ export const SPRITES = {
   laundry_goblin: typed(laundry_goblin),
   cable_spider: typed(cable_spider),
   swamp_bag_ooze: typed(swamp_bag_ooze),
+  tupperware_troll: typed(tupperware_troll),
   magma_behemoth: typed(magma_behemoth),
   chronosphinx: typed(chronosphinx),
   abyssal_kraken: typed(abyssal_kraken),

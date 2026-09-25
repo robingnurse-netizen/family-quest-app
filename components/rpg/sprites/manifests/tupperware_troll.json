@@ -1,0 +1,121 @@
+{
+  "character": "tupperware_troll",
+  "animations": {
+    "idle": {
+      "frames": [
+        "/sprites/tupperware_troll/idle/frame-01.png?v=5c1ec06a5f",
+        "/sprites/tupperware_troll/idle/frame-02.png?v=68ec753a93",
+        "/sprites/tupperware_troll/idle/frame-03.png?v=59bb0a6878",
+        "/sprites/tupperware_troll/idle/frame-04.png?v=c6b53e93ad",
+        "/sprites/tupperware_troll/idle/frame-05.png?v=0b3adcfa70",
+        "/sprites/tupperware_troll/idle/frame-06.png?v=8e2d4489cd",
+        "/sprites/tupperware_troll/idle/frame-07.png?v=e84e46b9b0",
+        "/sprites/tupperware_troll/idle/frame-08.png?v=0918263c29",
+        "/sprites/tupperware_troll/idle/frame-09.png?v=c2077ded64"
+      ],
+      "width": 71,
+      "height": 75,
+      "anchor": {
+        "x": 38,
+        "y": 74
+      },
+      "bodyHeight": 71,
+      "fps": 6,
+      "loop": true,
+      "facing": "left"
+    },
+    "attack": {
+      "frames": [
+        "/sprites/tupperware_troll/attack/frame-01.png?v=17c32eb12a",
+        "/sprites/tupperware_troll/attack/frame-02.png?v=40cb4050c8",
+        "/sprites/tupperware_troll/attack/frame-03.png?v=031c44ec32",
+        "/sprites/tupperware_troll/attack/frame-04.png?v=81b272026c",
+        "/sprites/tupperware_troll/attack/frame-05.png?v=66f2d9824b",
+        "/sprites/tupperware_troll/attack/frame-06.png?v=650291e823",
+        "/sprites/tupperware_troll/attack/frame-07.png?v=8de783c763",
+        "/sprites/tupperware_troll/attack/frame-08.png?v=4225a1327c",
+        "/sprites/tupperware_troll/attack/frame-09.png?v=4285702828"
+      ],
+      "width": 80,
+      "height": 76,
+      "anchor": {
+        "x": 40,
+        "y": 75
+      },
+      "bodyHeight": 71,
+      "contact": 5,
+      "fps": 10,
+      "loop": false,
+      "facing": "left"
+    },
+    "hurt": {
+      "frames": [
+        "/sprites/tupperware_troll/hurt/frame-01.png?v=5532b6bc38",
+        "/sprites/tupperware_troll/hurt/frame-02.png?v=b719b452de",
+        "/sprites/tupperware_troll/hurt/frame-03.png?v=3dde262305",
+        "/sprites/tupperware_troll/hurt/frame-04.png?v=5465a36a75",
+        "/sprites/tupperware_troll/hurt/frame-05.png?v=612c1c0ac0",
+        "/sprites/tupperware_troll/hurt/frame-06.png?v=0610709ce7",
+        "/sprites/tupperware_troll/hurt/frame-07.png?v=7c8a13b2f8",
+        "/sprites/tupperware_troll/hurt/frame-08.png?v=9d7261c849",
+        "/sprites/tupperware_troll/hurt/frame-09.png?v=6a9a8b221d"
+      ],
+      "width": 80,
+      "height": 76,
+      "anchor": {
+        "x": 42,
+        "y": 75
+      },
+      "bodyHeight": 71,
+      "fps": 8,
+      "loop": false,
+      "facing": "left"
+    },
+    "death": {
+      "frames": [
+        "/sprites/tupperware_troll/death/frame-01.png?v=dca9b7c7c9",
+        "/sprites/tupperware_troll/death/frame-02.png?v=aaca47d237",
+        "/sprites/tupperware_troll/death/frame-03.png?v=76fea9e7cc",
+        "/sprites/tupperware_troll/death/frame-04.png?v=357fd03cd8",
+        "/sprites/tupperware_troll/death/frame-05.png?v=7aa9e57731",
+        "/sprites/tupperware_troll/death/frame-06.png?v=88bb1ed222",
+        "/sprites/tupperware_troll/death/frame-07.png?v=5fd298df83",
+        "/sprites/tupperware_troll/death/frame-08.png?v=b1a3c04ab1",
+        "/sprites/tupperware_troll/death/frame-09.png?v=6f656324cf"
+      ],
+      "width": 85,
+      "height": 77,
+      "anchor": {
+        "x": 44,
+        "y": 76
+      },
+      "bodyHeight": 71,
+      "fps": 6,
+      "loop": false,
+      "facing": "left"
+    },
+    "move": {
+      "frames": [
+        "/sprites/tupperware_troll/move/frame-01.png?v=da477234f8",
+        "/sprites/tupperware_troll/move/frame-02.png?v=1071a79570",
+        "/sprites/tupperware_troll/move/frame-03.png?v=1b5cb965bf",
+        "/sprites/tupperware_troll/move/frame-04.png?v=6d16355253",
+        "/sprites/tupperware_troll/move/frame-05.png?v=a5ae318c94",
+        "/sprites/tupperware_troll/move/frame-06.png?v=0966259ff4",
+        "/sprites/tupperware_troll/move/frame-07.png?v=a182d6ba8d",
+        "/sprites/tupperware_troll/move/frame-08.png?v=90d8ec047a",
+        "/sprites/tupperware_troll/move/frame-09.png?v=739e3c1a6b"
+      ],
+      "width": 71,
+      "height": 74,
+      "anchor": {
+        "x": 38,
+        "y": 73
+      },
+      "bodyHeight": 71,
+      "fps": 8,
+      "loop": true,
+      "facing": "left"
+    }
+  }
+}
