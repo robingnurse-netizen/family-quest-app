@@ -55,8 +55,9 @@ import {
 /**
  * Every duration in the show, in ms — tune here. A normal hit runs
  * dash + hitStop + hold + fly ≈ 2.5s; a final blow runs
- * dash + hitStop + koDelay + ko + victory + teaser + out ≈ 5.3s. Reduced
- * motion uses the same phases (no dash), as fading cards.
+ * dash + hitStop + the boss's death animation + deathHold + ko + victory +
+ * teaser + out ≈ 6.5s. Reduced motion uses the same phases (no dash, no
+ * sprites: koDelay stands in for the death), as fading cards.
  */
 export const OVERLAY_TIMING = {
   /** First hit only: the party dashes in from the left. */
@@ -70,8 +71,16 @@ export const OVERLAY_TIMING = {
   hold: 1300,
   /** Shrinking and flying back up to the battle scene, fading out. */
   fly: 800,
-  /** Final blow: after the hit-stop, before the K.O. slam. */
+  /** Final blow, reduced motion only (no death animation to wait for):
+   *  after the hit-stop, before the K.O. slam. */
   koDelay: 650,
+  /** Final blow: the boss's death animation plays out in full, then its
+   *  last frame holds this long before the K.O. slam (the arena scene's
+   *  DEFEAT_HOLD_MS). */
+  deathHold: 1200,
+  /** Final blow: the K.O. comes by now even if the death animation never
+   *  reports its end (a boss without art). */
+  deathMax: 4000,
   ko: 700,
   /** Victory card + coin shower (the gold moment). */
   victory: 2300,
@@ -251,8 +260,11 @@ export function HitOverlay({ childId }: { childId: string }) {
           setShow((s) => s && { ...s, frozen: false });
           shake(HIT_TIERS[tier].shake + (counts.hits > 1 ? 3 : 0));
         });
-        at(delay + hitStop + T.koDelay, () => setShow((s) => (s?.defeated ? { ...s, phase: "ko" } : s)));
-        at(delay + hitStop + T.hold, () => setShow((s) => s && { ...s, phase: s.defeated ? "ko" : "fly" }));
+        // A final blow waits for the boss's death animation (onDeathDone);
+        // reduced motion has none, so it keeps the fixed delay.
+        if (reduced) at(delay + hitStop + T.koDelay, () => setShow((s) => (s?.defeated ? { ...s, phase: "ko" } : s)));
+        else at(delay + hitStop + T.deathMax, () => setShow((s) => (s?.defeated && s.phase === "hit" ? { ...s, phase: "ko" } : s)));
+        at(delay + hitStop + T.hold, () => setShow((s) => s && (s.defeated ? (reduced ? { ...s, phase: "ko" } : s) : { ...s, phase: "fly" })));
         break;
       }
       case "fly":
@@ -278,6 +290,18 @@ export function HitOverlay({ childId }: { childId: string }) {
     return () => timers.forEach(clearTimeout);
   }, [phase, impactKey, hits, total, tier, reduced, moment, shake, setOverlayActive]);
 
+  // Final blow: the boss's death animation has played out; hold its last
+  // frame, then the K.O.
+  const deathHold = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(deathHold.current), []);
+  const onDeathDone = useCallback(() => {
+    clearTimeout(deathHold.current);
+    deathHold.current = setTimeout(
+      () => setShow((s) => (s?.defeated && s.phase === "hit" ? { ...s, phase: "ko" } : s)),
+      T.deathHold,
+    );
+  }, []);
+
   // Preload what the overlay draws, so the first hit doesn't stutter.
   useEffect(() => {
     const hero = SPRITES.hero.animations;
@@ -287,7 +311,7 @@ export function HitOverlay({ childId }: { childId: string }) {
   const shownKey = stage.shown?.sprite_key;
   useEffect(() => {
     const anims = shownKey ? bossAnimations(shownKey) : null;
-    if (anims) preload([anims.idle, anims.hurt]);
+    if (anims) preload([anims.idle, anims.hurt, anims.death]);
   }, [shownKey]);
   const nextKey = show?.next?.sprite_key;
   useEffect(() => {
@@ -369,7 +393,7 @@ export function HitOverlay({ childId }: { childId: string }) {
             />
           )}
           <div ref={layerRef} className="relative w-[min(calc(100vw-1rem),768px)] [container-type:inline-size]">
-            {reduced ? <ReducedCard show={show} /> : <Theatre show={show} />}
+            {reduced ? <ReducedCard show={show} /> : <Theatre show={show} onDeathDone={onDeathDone} />}
           </div>
           {!reduced && show.phase === "victory" && <CoinShower />}
         </div>
@@ -379,8 +403,8 @@ export function HitOverlay({ childId }: { childId: string }) {
 }
 
 /** The full-motion show for the current phase. */
-function Theatre({ show }: { show: Show }) {
-  if (show.phase === "hit" || show.phase === "fly") return <Strike show={show} />;
+function Theatre({ show, onDeathDone }: { show: Show; onDeathDone: () => void }) {
+  if (show.phase === "hit" || show.phase === "fly") return <Strike show={show} onDeathDone={onDeathDone} />;
   if (show.phase === "ko" || show.phase === "victory")
     return (
       // One tree for both phases (keyed children), so the hero's victory
@@ -435,12 +459,14 @@ function HeroVictory() {
   );
 }
 
-/** Hero and Rogue dash in and strike; the boss flinches; impact effects. */
-function Strike({ show }: { show: Show }) {
-  const { boss, struck, frozen, impactKey, phase, tier } = show;
+/** Hero and Rogue dash in and strike; the boss flinches (or, on a final
+ *  blow, plays its death through, then onDeathDone); impact effects. */
+function Strike({ show, onDeathDone }: { show: Show; onDeathDone: () => void }) {
+  const { boss, struck, frozen, impactKey, phase, tier, defeated } = show;
   const weight = HIT_TIERS[tier];
   const anims = bossAnimations(boss.sprite_key);
-  const bossAnim = anims ? (struck ? anims.hurt : anims.idle) : null;
+  const dying = struck && defeated;
+  const bossAnim = anims ? (dying ? anims.death : struck ? anims.hurt : anims.idle) : null;
   const impact = impactPoint(boss);
   return (
     <div className={`relative ${ARENA_CLASS}`} style={ARENA_STYLE}>
@@ -472,11 +498,12 @@ function Strike({ show }: { show: Show }) {
         <FeetSpot x={FEET_X.boss} className="overlay-boss-in">
           {anims && bossAnim && (
             <AnchoredSprite
-              key={`boss-${impactKey}-${struck}`}
+              key={`boss-${impactKey}-${struck}-${dying}`}
               animation={bossAnim}
               height={`calc(${bossHeight(boss)} * ${bossAnim.height / anims.idle.height})`}
               mirror={needsMirror(bossAnim.facing, "left")}
               frozen={frozen}
+              onComplete={dying ? onDeathDone : undefined}
               alt=""
             />
           )}

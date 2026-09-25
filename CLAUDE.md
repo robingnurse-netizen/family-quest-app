@@ -325,9 +325,13 @@ PROJECT STATUS:
     starburst, slash, debris, damage number, layer shake (Web Animations,
     never the page), then fly up and fade (~2.5s). More hits during the hold
     or fly-back extend it (COMBO xN, total adds up). Final blow (a
-    "defeated" event for the hit boss): K.O. → victory card + coin shower +
-    his share from the "gold" event (boss_log gold_awarded) → next-foe
-    silhouette (~5.3s). ALL durations live in OVERLAY_TIMING (hit-overlay.tsx).
+    "defeated" event for the hit boss): the boss plays its DEATH animation
+    through (onComplete) and holds its last frame OVERLAY_TIMING.deathHold
+    (1.2s, = the scene's DEFEAT_HOLD_MS) → K.O. → victory card + coin
+    shower + his share from the "gold" event (boss_log gold_awarded) →
+    next-foe silhouette (~6.5s). It used to cut to K.O. on a fixed 650ms
+    timer mid-hurt (the death never showed); reduced motion keeps that
+    timer (koDelay), deathMax (4s) covers a boss without art. ALL durations live in OVERLAY_TIMING (hit-overlay.tsx).
     While it plays, BattleProvider.overlayActive mutes the scene's
     screen-reader caption, so each own hit is announced once.
     After the K.O. slam (OVERLAY_TIMING.heroVictory, 380ms) the hero plays
