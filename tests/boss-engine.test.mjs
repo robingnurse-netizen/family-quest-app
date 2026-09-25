@@ -40,14 +40,16 @@ async function quest(familyId, childId, day, minutes) {
 
 // --- Roster & activation ------------------------------------------------------
 
-test("a new family gets the 8-boss roster, with Trash-Bag Slime active at full HP", async () => {
+test("a new family gets the 12-boss roster, with Trash-Bag Slime active at full HP", async () => {
   const { familyId } = await makeFamily(db);
   const { rows } = await db.query(
-    "select name, tier, status from public.bosses where family_id = $1 order by tier desc, queue_position",
+    "select name, tier, status from public.bosses where family_id = $1 order by case tier when 'low' then 1 when 'mid' then 2 else 3 end, queue_position",
     [familyId],
   );
-  assert.equal(rows.length, 8);
-  assert.deepEqual(rows.map((r) => r.tier), ["low", "low", "low", "low", "epic", "epic", "epic", "epic"]);
+  assert.equal(rows.length, 12);
+  assert.deepEqual(rows.map((r) => r.tier), [
+    "low", "low", "low", "low", "mid", "mid", "mid", "mid", "epic", "epic", "epic", "epic",
+  ]);
   assert.deepEqual(rows.filter((r) => r.status === "active").map((r) => r.name), ["Trash-Bag Slime"]);
 
   const boss = await activeBoss(db, familyId);
@@ -57,17 +59,18 @@ test("a new family gets the 8-boss roster, with Trash-Bag Slime active at full H
   assert.equal((await log(boss.id, "activated")).length, 1);
 });
 
-test("bosses activate low tier first, in queue order, then epic; then none", async () => {
+test("bosses activate low tier first, in queue order, then mid, then epic; then none", async () => {
   const { familyId } = await makeFamily(db);
   const today = await londonToday(db);
   const order = [];
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 12; i++) {
     const boss = await activeBoss(db, familyId);
     order.push(boss.name);
     await finish(boss.id, i % 2 ? "escaped" : "defeated", today);
   }
   assert.deepEqual(order, [
     "Trash-Bag Slime", "Alarm Clock Swarm", "Laundry Goblin", "Cable Spider",
+    "Swamp-Bag Ooze", "Tupperware Troll", "Scatter-Brick Serpent", "Mud-Track Minotaur",
     "Magma Behemoth", "Chronosphinx", "Abyssal Kraken", "Shogun-Bot",
   ]);
   assert.equal(await activeBoss(db, familyId), null);
@@ -196,7 +199,7 @@ test("gold is split by damage share; the rounding remainder goes to the top dama
 test("epic bosses pay 100 gold", async () => {
   const { familyId, childIds: [kid] } = await makeFamily(db);
   const today = await londonToday(db);
-  for (let i = 0; i < 4; i++) await finish((await activeBoss(db, familyId)).id, "escaped", today);
+  for (let i = 0; i < 8; i++) await finish((await activeBoss(db, familyId)).id, "escaped", today);
   const epic = await activeBoss(db, familyId);
   assert.equal(epic.tier, "epic");
   await setBossHp(db, familyId, 10);
