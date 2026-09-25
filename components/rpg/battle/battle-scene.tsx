@@ -17,7 +17,7 @@ import type { TonightStakes } from "@/lib/supabase/types";
 import { shopProgress } from "@/lib/rewards/progress";
 import type { Reward } from "@/lib/supabase/types";
 import { createNoRepeatPicker } from "@/lib/random";
-import { STRIKE_VARIANTS } from "@/lib/rpg/strike";
+import { HIT_TIERS, STRIKE_VARIANTS, hitTier } from "@/lib/rpg/strike";
 import { BOSS_ATTACK_IMPACT_MS, DOWN_HOLD_MS, heroReducer, initialHero, roguePoseFor } from "@/lib/rpg/hero-stage";
 import { ArenaBackdrop, HERO_POSES, RogueSprite } from "./arena-parts";
 import { previewSky, previewSkyCycle, useArenaSky } from "./arena-backdrop";
@@ -44,6 +44,19 @@ const BOSS_SEGMENTS: Record<Boss["tier"], number> = { low: 10, mid: 15, epic: 20
 const PARTY_SEGMENTS = 10;
 
 export type PlayerStats = LiveStats;
+
+/**
+ * Arena screen shake (the framed arena only — never the page or the HUD):
+ * every hit shakes it by its tier's distance (HIT_TIERS[tier].shake: the
+ * same light / medium / heavy scale as the hit overlay's shake, from the
+ * hit's minutes), briefly; the final blow rumbles longer than any hit.
+ */
+const ARENA_SHAKE = {
+  /** A hit's shake (ms): the hit overlay's own layer shake. */
+  hitMs: 320,
+  /** The final blow's rumble (ms), at the heavy tier's distance, decaying. */
+  rumbleMs: 1400,
+} as const;
 
 /** Streak lengths worth a celebration. */
 const STREAK_MILESTONES = [3, 7, 14, 30];
@@ -150,6 +163,7 @@ export function BattleScene({
   // damage, a flinch on a missed quest, knocked out when the party hits 0 HP
   // (and back up when it refills), a victory pose when a boss falls.
   const { hero, partyRef } = useHero(party?.current_hp ?? null, shown?.id ?? null);
+  const arenaRef = useArenaShake(shown?.id ?? null);
   useDevicePixelStep();
   // The day/night sky (and the party's night tint), in the family's timezone.
   const sky = useArenaSky(timeZone);
@@ -161,6 +175,7 @@ export function BattleScene({
       className="panel panel-stone border-4 p-2 shadow-[inset_3px_3px_0_var(--panel-hi),inset_-3px_-3px_0_var(--panel-shade)] [container-type:inline-size] sm:p-3"
     >
       <div
+        ref={arenaRef}
         className={`relative overflow-hidden rounded-[2px] border-2 border-stone-edge ${ARENA_CLASS}`}
         style={{ ...ARENA_STYLE, ...sky }}
         suppressHydrationWarning
@@ -403,6 +418,63 @@ function useHero(partyHp: number | null, shownBossId: string | null) {
     hero: { state, animation, onComplete: oneShot ? () => dispatch({ type: "end" }) : undefined },
     partyRef,
   };
+}
+
+/**
+ * Shakes the arena box on hits (by tier) and rumbles it on the final blow
+ * (a "defeated" event for the boss on stage). Web Animations on `translate`,
+ * so it never fights a class's `transform`. Skipped under reduced motion,
+ * like the hit overlay's shake (checked when it would play, as the sprite
+ * animator does). A hit landing during the rumble doesn't cut it short:
+ * Realtime can deliver the defeat and its final damage in either order.
+ */
+function useArenaShake(shownBossId: string | null) {
+  const ref = useRef<HTMLDivElement>(null);
+  const shownId = useRef(shownBossId);
+  useEffect(() => {
+    shownId.current = shownBossId;
+  }, [shownBossId]);
+  const running = useRef<{ anim: Animation; rumble: boolean } | null>(null);
+
+  useBattleEvents((event) => {
+    const el = ref.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const rumble = event.type === "defeated" && event.boss.id === shownId.current;
+    const hitAmount = event.type === "damage" ? event.amount : null;
+    if (!rumble && hitAmount === null) return;
+    const current = running.current;
+    if (current && current.rumble && current.anim.playState === "running" && !rumble) return;
+    current?.anim.cancel();
+
+    let keyframes: Keyframe[];
+    let duration: number;
+    if (rumble) {
+      // A long, decaying rumble from the heavy tier's distance.
+      const k = HIT_TIERS.heavy.shake;
+      const steps = 18;
+      keyframes = Array.from({ length: steps + 1 }, (_, i) => {
+        const a = i === steps ? 0 : k * (1 - i / steps);
+        const dir = i % 2 ? 1 : -1;
+        return { translate: `${Math.round(dir * a)}px ${Math.round((i % 3 === 0 ? -dir : dir) * a * 0.4)}px` };
+      });
+      duration = ARENA_SHAKE.rumbleMs;
+    } else {
+      // The hit overlay's shake, at this hit's tier.
+      const k = HIT_TIERS[hitTier(hitAmount ?? 0)].shake;
+      keyframes = [
+        { translate: "0 0" },
+        { translate: `${-k}px ${k / 2}px` },
+        { translate: `${k}px ${-k / 2}px` },
+        { translate: `${-k / 2}px ${k / 3}px` },
+        { translate: `${k / 3}px 0` },
+        { translate: "0 0" },
+      ];
+      duration = ARENA_SHAKE.hitMs;
+    }
+    running.current = { anim: el.animate(keyframes, { duration, easing: "ease-out" }), rumble };
+  });
+  useEffect(() => () => running.current?.anim.cancel(), []);
+  return ref;
 }
 
 /** Event captions as a parchment banner across the top of the arena. */
