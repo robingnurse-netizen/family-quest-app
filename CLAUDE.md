@@ -686,7 +686,7 @@ PROJECT STATUS:
     the missed day + 2 (family days). A miss at 0 changes nothing.
   * The child is offered up to 5 jobs drawn at random from the family's
     active rescue_jobs (snapshotted into `offered`), picks one
-    (pick_rescue_job; may change until done) and taps "Done it!"
+    (pick_rescue_job; may change until done) and taps "All done!"
     (complete_rescue): normal boss damage + XP (1 per minute) at once,
     through strike_active_boss() — the boss strike now shared with the
     quest-completion trigger (boss_log damage row with no
@@ -715,7 +715,11 @@ PROJECT STATUS:
     the battle scene while a rescue is open (loadOpenRescue; not live —
     the nightly reset resolves it, a reload shows the change); server
     actions pickRescueJob / completeRescue; kid-friendly errors and the
-    "today / tomorrow / Wednesday" deadline in lib/rpg/rescue.ts. The
+    "today / tomorrow / Wednesday" deadline in lib/rpg/rescue.ts. Card
+    copy (1.3 group 4): "Your 6‑day streak has a crack." / "Pick a rescue
+    quest by the end of tomorrow to patch it up." (fallback: "Finish any
+    quest … to patch it up.") → "All done!" → "Rescue complete!" / "Your
+    6‑day streak will be whole again by morning!". The
     streak nudge hides while a rescue is open; the evening warning drops
     its streak clause (rescue_open).
   * Parent HQ: /parent/rescue-jobs (linked from /parent): add a job (name,
@@ -800,8 +804,8 @@ PROJECT STATUS:
       clause while a rescue is open; none when nothing can be raided). The
       boss still "charges up" visually (.boss-charging) — revisit.
     - Streak nudge: "N quests to go — a perfect day makes it N+1 days!".
-      Rescue card / errors: "on hold … win it back" (not yet rewritten —
-      copy pass 1.3 group 4).
+      Rescue card / errors: "has a crack … patch it up" → "Rescue
+      complete!" (copy pass 1.3 group 4, a57f568).
     - ALL new player-facing copy is PLACEHOLDER COPY (marked in the code).
       tests/recap.test.mjs and tests/evening.test.mjs fail on loss words.
     - Dev console: __fqBattle.raid(3), hurt(10) (dormant attack preview).
@@ -853,7 +857,7 @@ PROJECT STATUS:
 
 - Copy rewrite 1.3, Pass 1 (groups 1–3, 5–8): DONE. British spelling,
   plurals always grammatical (never "day(s)"). Group 4 (rescue card +
-  errors) is a separate pass, NOT done yet.
+  errors, #18–#32): DONE as Pass 2 (a57f568).
   * Recap (lib/rpg/recap.ts): title "Night Raid!" (raid) / "While you
     slept…" (text); "${when}, Rogue snuck out on a Night Raid — ${boss}
     took N damage!" (N Night Raids when several); closing lines: raid →
