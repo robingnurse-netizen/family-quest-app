@@ -421,8 +421,7 @@ PROJECT STATUS:
   * Quest colours (lib/backlog/colors.ts) are stored hex values; nowhere
     puts text on them any more (Parent HQ only uses them for a dot, the
     progress bars and the picker), so the palette itself is unchanged.
-  * No automated tests exist in the repo (no recurrence tests, no PGlite);
-    Stage 3 was checked in headless Chromium against the live data.
+  * Stage 3 was checked in headless Chromium against the live data.
 - Visual overhaul Stage 4 — Item shop (player): COMPLETE (coin flight and
   live gold after a real victory confirmed in the browser). Reward rules
   unchanged (same redeem action + DB triggers).
@@ -574,11 +573,8 @@ PROJECT STATUS:
   editor). Verified in the browser: recap previews (including the
   Continue card), evening mode, the heal effect, a real Small Potion
   purchase (gold −30, party +20 HP) and Parent HQ's "Party healing" log.
-  * Tunables, one place each: miss_penalty_per_minute() (1) and
-    perfect_day_heal_hp() (10) SQL functions; the potions table (small:
-    20 HP / 30 gold, large: 50 HP / 70 gold — edit the rows);
-    EVENING_WARNING_FROM ("18:00") in lib/rpg/evening.ts; RECAP_TIMING in
-    lib/rpg/recap.ts.
+  * Tunables, one place each: EVENING_WARNING_FROM ("18:00") in
+    lib/rpg/evening.ts; RECAP_TIMING in lib/rpg/recap.ts.
   * "While you were away" recap: run_daily_reset writes a reset_recaps row
     per child per run that affected him (his misses / perfect days, or any
     party damage / knock-out): missed quests + minutes, party damage, the
@@ -608,47 +604,37 @@ PROJECT STATUS:
     devices won't replay) and marks only auth.uid()'s unseen rows up to
     the newest shown (a reset landing meanwhile isn't swallowed). No write
     policies on reset_recaps; the child reads his own, parents the family.
-  * Evening warning: from 18:00 family time (isEvening, re-checked every
-    minute), while HE has open quests today and a boss is active, the boss
-    charges up (.boss-charging glow + .boss-aura-charging, gentle; static
-    under reduced motion) and the stats row's nudge becomes "<Boss> is
-    powering up! N quests left before midnight, or the party takes D
-    damage[ and gets knocked out][ — and your N-day streak will crack]."
-    (the streak clause only while no rescue is open: tonight_stakes()
-    rescue_open — a frozen streak isn't at stake; see Streak recovery) — it
-    replaces the streak nudge (never both). D comes from tonight_stakes()
-    (lib/hooks/use-evening-warning.ts): every open quest up to today in
-    family time × miss_penalty_per_minute(), 0 with no boss — the reset's
-    own rule and constant, so it's what the reset would deal.
-  * Potions (/player/store, PotionShelf above the real-life rewards, which
-    are now headed "Real-life rewards"): buy_potion(p_potion_id) — child
-    only, auth.uid()'s gold, priced from the table, heal capped at max,
-    refused at full HP (potion_party_full) or short (potion_insufficient_
-    gold); locks party_health → player_stats; logged in party_log (gold
-    spent, potion). Bought and drunk in one tap, no inventory, no parent.
-    Server action buyPotion checks the price he saw first (like rewards).
-    Feedback: the shelf's party HP bar + green +N, "potion" moment →
-    item-purchased sound; the battle scene shows a green +N for every
-    party_log heal over Realtime ("heal" events). Parent HQ /parent/rewards:
-    "Party healing" log (potions: who, which, gold; perfect-day heals).
-    Potion icons are PLACEHOLDER pixel art (PotionIcon in
-    components/ui/icons.tsx) — replace in the PixelLab art pass.
-  * Perfect-day heal: evaluate_streaks() also returns each perfect day
-    (every scheduled quest done — the streak's +1 condition) plus the
-    streak before; run_daily_reset heals perfect_day_heal_hp() per day, in
-    order, after penalties and the knock-out refill, capped at max (party
-    row already locked; lock order unchanged). Idempotent and catches up
-    over missed nights via streak_through, like streaks. Logged per day in
-    party_log (only when it healed something).
-  * Dev console (next dev only): __fqBattle.recap("blow" | "ko" | "nights"
-    | "text" | "perfect") — the same RecapHost → Recap component and
-    RECAP_TIMING as the real recap, fed fake rows through the same
-    summarizeRecaps(); differences: never acknowledged (no database
+  * Evening nudge (Night Raid offer, no loss framing): from 18:00 family
+    time (EVENING_WARNING_FROM; isEvening, re-checked every minute), while
+    HE has quests left today, a boss is active and it can be raided
+    (tonight_stakes() raid_damage > 0 — not at 1 HP), the boss charges up
+    (.boss-charging glow + .boss-aura-charging, gentle; static under
+    reduced motion) and the stats row shows the RaidBanner:
+    eveningNudge() — "N quests left — finish them and Rogue goes on a
+    Night Raid tonight![ Your streak grows to S+1 days too!]" (S = his
+    current streak; the streak clause only while no rescue is open:
+    tonight_stakes() rescue_open — a streak on hold doesn't grow; see
+    Streak recovery). It replaces the streak nudge (never both). ONE
+    COUNT behind both nudges (…18): N is useQuestsLeftToday
+    (lib/hooks/use-quests-left-today.ts → countQuestsLeft in
+    lib/backlog/quests-left.ts: his slots scheduled for today in family
+    time, still 'scheduled'; live over Realtime, follows
+    the date rollover, independent of the week the board shows; loaded
+    server-side first). 20261002000018_tonight_stakes_today.sql made
+    tonight_stakes() count today's slots only (was <= today, overdue
+    included) and dropped open_quests / open_minutes; the hook
+    (lib/hooks/use-evening-warning.ts) reads only raid_damage / boss_active
+    / rescue_open from it. See "PROGRESS NEVER GOES BACKWARDS" (…16).
+  * Dev console (next dev only): __fqBattle.recap(kind) — the same
+    RecapHost → Recap component and RECAP_TIMING as the real recap, fed
+    fake rows through the same summarizeRecaps() (kinds: see "Progress
+    never goes backwards"); differences: never acknowledged (no database
     writes), fixed Slime → Alarm Clock Swarm bosses, it holds celebration
     cards back only once it starts (the real one from the first render,
-    via recapPending), and a new call replaces one already playing / evening(true | false | null, stakes?) (force evening;
-    pass `stakes` — e.g. {} or { damage: 60, party_hp: 30 } — to preview
-    without the database) / heal(20) (heal event + party HP, no gold).
+    via recapPending), and a new call replaces one already playing /
+    evening(true | false | null, stakes?, quests?) (force evening; pass
+    `stakes` — e.g. {} or { raid_damage: 0 } — to preview without the
+    database; quests left defaults to 2 with stakes).
 
 - Trophy Case (bestiary): /player/trophies, read-only. Every roster boss
   on one horizontally scrolling shelf (low → mid → epic) in a wooden cabinet
