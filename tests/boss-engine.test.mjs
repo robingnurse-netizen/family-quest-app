@@ -1,10 +1,15 @@
 // The boss engine: roster + activation (…06), instant damage and
-// finish_boss (…08, …11), and the nightly reset's misses / escape / refill.
+// finish_boss (…08, …11), the nightly reset's misses / escape / refill, and
+// retreat + return (…15).
 import { test, before } from "node:test";
 import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
+import { importTs } from "./helpers/load-ts.mjs";
 import {
   freshDb, as, tryAsUser, makeFamily, makePool, makeSlot, stats, slot, activeBoss, londonToday, addDays, mondayOf, setBossHp,
 } from "./helpers/db.mjs";
+
+const retreat = await importTs(fileURLToPath(new URL("../lib/rpg/retreat.ts", import.meta.url)));
 
 let db;
 before(async () => {
@@ -63,10 +68,12 @@ test("bosses activate low tier first, in queue order, then mid, then epic; then 
   const { familyId } = await makeFamily(db);
   const today = await londonToday(db);
   const order = [];
+  // All wins: an escape now sends the boss to the return line (…15), so the
+  // roster only runs out once every boss is beaten.
   for (let i = 0; i < 12; i++) {
     const boss = await activeBoss(db, familyId);
     order.push(boss.name);
-    await finish(boss.id, i % 2 ? "escaped" : "defeated", today);
+    await finish(boss.id, "defeated", today);
   }
   assert.deepEqual(order, [
     "Trash-Bag Slime", "Alarm Clock Swarm", "Laundry Goblin", "Cable Spider",
@@ -208,6 +215,176 @@ test("epic bosses pay 100 gold", async () => {
   assert.equal((await stats(db, kid)).gold, 100);
 });
 
+// --- Retreat & return (…15) ------------------------------------------------------
+
+/** Every boss in the family except `keep` (names) marked defeated. */
+async function onlyLeft(familyId, ...keep) {
+  await db.query("update public.bosses set status = 'defeated' where family_id = $1 and not (name = any($2))", [familyId, keep]);
+}
+const byName = async (familyId, name) =>
+  (await db.query("select * from public.bosses where family_id = $1 and name = $2", [familyId, name])).rows[0];
+
+test("every activation sets active_since (first-time too); new bosses get base_max_hp = max_hp", async () => {
+  const { familyId } = await makeFamily(db);
+  const today = await londonToday(db);
+  const { rows } = await db.query("select count(*)::int as n from public.bosses where family_id = $1 and base_max_hp = max_hp", [familyId]);
+  assert.equal(rows[0].n, 12);
+  const slime = await activeBoss(db, familyId);
+  assert.ok(slime.active_since, "the first boss, activated at family creation");
+  assert.equal(slime.retreats, 0);
+  await finish(slime.id, "defeated", today);
+  const swarm = await activeBoss(db, familyId);
+  assert.ok(swarm.active_since >= slime.active_since);
+});
+
+test("an escape brings on the next queued boss, never the one that fled; the retreat is counted, its HP untouched", async () => {
+  const { familyId } = await makeFamily(db);
+  const today = await londonToday(db);
+  const slime = await activeBoss(db, familyId);
+  await db.query("update public.bosses set current_hp = 42 where id = $1", [slime.id]);
+  const r = (await finish(slime.id, "escaped", today)).rows[0].r;
+  const fled = await bossById(slime.id);
+  assert.deepEqual([fled.status, fled.retreats, fled.max_hp, fled.current_hp], ["escaped", 1, 60, 42]);
+  assert.ok(fled.escaped_at);
+  const next = await activeBoss(db, familyId);
+  assert.equal(next.name, "Alarm Clock Swarm");
+  assert.equal(r.activated, next.id);
+  assert.deepEqual(r.comeback_bonus, { gold: 0, xp: 0 });
+});
+
+test("a retreated boss returns after the party's next win, before the queue: +10% max HP, at full HP", async () => {
+  const { familyId } = await makeFamily(db);
+  const today = await londonToday(db);
+  const slime = await activeBoss(db, familyId);
+  await finish(slime.id, "escaped", today);
+  const swarm = await activeBoss(db, familyId);
+  await finish(swarm.id, "defeated", today);
+  const back = await activeBoss(db, familyId);
+  assert.equal(back.id, slime.id, "the Slime is back, not the Laundry Goblin");
+  assert.deepEqual([back.max_hp, back.current_hp, back.base_max_hp, back.retreats], [66, 66, 60, 1]);
+  assert.ok(back.active_since > swarm.active_since);
+  assert.equal((await log(slime.id, "activated")).length, 2);
+  // Beaten again, the queue carries on.
+  await finish(back.id, "defeated", today);
+  assert.equal((await activeBoss(db, familyId)).name, "Laundry Goblin");
+});
+
+test("the oldest escape returns first, whatever its tier; one return per win", async () => {
+  const { familyId } = await makeFamily(db);
+  const today = await londonToday(db);
+  // All four low-tier bosses flee in turn: Slime, Swarm, Goblin, Spider.
+  for (let i = 0; i < 4; i++) await finish((await activeBoss(db, familyId)).id, "escaped", today);
+  const ooze = await activeBoss(db, familyId);
+  assert.equal(ooze.name, "Swamp-Bag Ooze", "escapes only draw from the queue");
+  const order = [];
+  for (let i = 0; i < 5; i++) {
+    const boss = await activeBoss(db, familyId);
+    await finish(boss.id, "defeated", today);
+    order.push((await activeBoss(db, familyId)).name);
+  }
+  assert.deepEqual(order, ["Trash-Bag Slime", "Alarm Clock Swarm", "Laundry Goblin", "Cable Spider", "Tupperware Troll"]);
+});
+
+test("an escape that leaves nothing queued: no boss until the next nightly reset brings it back", async () => {
+  const { familyId, childIds: [kid] } = await makeFamily(db);
+  await onlyLeft(familyId, "Trash-Bag Slime");
+  const slime = await activeBoss(db, familyId);
+  await quest(familyId, kid, D, 150); // knocks the party out
+
+  const first = await reset(familyId, addDays(D, 1));
+  assert.equal(first.escaped, slime.id);
+  assert.equal(first.activated, null, "never re-picked on its own escape");
+  assert.equal(await activeBoss(db, familyId), null);
+  const p = await party(familyId);
+  assert.equal(p.current_hp, p.max_hp, "the party still refills");
+
+  const second = await reset(familyId, addDays(D, 2));
+  const back = await activeBoss(db, familyId);
+  assert.equal(back.id, slime.id);
+  assert.equal(second.activated, slime.id);
+  assert.deepEqual([back.max_hp, back.current_hp], [66, 66]);
+  assert.equal(back.week_start_date.toISOString().slice(0, 10), mondayOf(addDays(D, 2)));
+});
+
+test("HP bump: +10% of the ORIGINAL max HP per retreat (not compounding), rounded up, capped at +30%", async () => {
+  const { familyId } = await makeFamily(db);
+  const today = await londonToday(db);
+  await onlyLeft(familyId, "Trash-Bag Slime");
+  const seen = [];
+  for (let i = 0; i < 4; i++) {
+    const boss = await activeBoss(db, familyId);
+    await finish(boss.id, "escaped", today);
+    await db.query("select public.activate_next_boss($1, $2)", [familyId, today]); // as the next reset would
+    seen.push((await activeBoss(db, familyId)).max_hp);
+  }
+  assert.deepEqual(seen, [66, 72, 78, 78]);
+  // lib/rpg/retreat.ts (the on-screen "+N%") mirrors the database's rule.
+  assert.deepEqual(seen, [1, 2, 3, 4].map((n) => Math.ceil(60 * (1 + retreat.retreatHpBonusPct(n) / 100))));
+  assert.equal((await byName(familyId, "Trash-Bag Slime")).retreats, 4, "retreats keep counting past the cap");
+
+  // Rounding up: an original 61 HP, one retreat → 67.1 → 68.
+  const boss = await activeBoss(db, familyId);
+  await db.query("update public.bosses set base_max_hp = 61, retreats = 0 where id = $1", [boss.id]);
+  await finish(boss.id, "escaped", today);
+  await db.query("select public.activate_next_boss($1, $2)", [familyId, today]);
+  assert.equal((await activeBoss(db, familyId)).max_hp, 68);
+});
+
+test("comeback bonus: +50% of the tier's gold and XP, flat, split by damage share; a first defeat has none", async () => {
+  const { familyId, childIds: [a, b] } = await makeFamily(db, { children: 2 });
+  const today = await londonToday(db);
+  const slime = await activeBoss(db, familyId);
+  // First defeat of a boss: the plain 25 gold, no bonus row.
+  await finish(slime.id, "defeated", today);
+  assert.equal((await log(slime.id, "comeback_bonus")).length, 0);
+  assert.deepEqual((await log(slime.id, "defeated")).map((r) => r.amount), [25]);
+
+  // The Swarm retreats twice, then is beaten: still +50%, not +100%.
+  const swarm = await activeBoss(db, familyId);
+  await onlyLeft(familyId, "Alarm Clock Swarm");
+  for (let i = 0; i < 2; i++) {
+    await finish((await activeBoss(db, familyId)).id, "escaped", today);
+    await db.query("select public.activate_next_boss($1, $2)", [familyId, today]);
+  }
+  assert.equal((await activeBoss(db, familyId)).retreats, 2);
+  await setBossHp(db, familyId, 60);
+  const xpBefore = [(await stats(db, a)).xp, (await stats(db, b)).xp];
+  // Damage 40 / 20: gold 38 × ⅔ = 25.3 / 12.7 → 25 / 12, +1 to a; XP 75 → 50 / 25.
+  await tick(a, await quest(familyId, a, today, 40));
+  await tick(b, await quest(familyId, b, today, 20));
+
+  assert.equal((await bossById(swarm.id)).status, "defeated");
+  assert.deepEqual((await log(swarm.id, "defeated")).map((r) => r.amount), [38], "25 + 13 in the pool");
+  assert.deepEqual((await log(swarm.id, "comeback_bonus")).map((r) => r.amount), [13]);
+  assert.equal(Math.ceil((25 * retreat.COMEBACK_BONUS_PCT) / 100), 13, "lib/rpg/retreat.ts mirrors the bonus");
+  // (The Slime's 25 went to no one: nobody hit it before finish_boss.)
+  assert.deepEqual([(await stats(db, a)).gold, (await stats(db, b)).gold], [26, 12]);
+  assert.deepEqual(
+    [(await stats(db, a)).xp - xpBefore[0], (await stats(db, b)).xp - xpBefore[1]],
+    [40 + 50, 20 + 25],
+    "1 XP per quest minute, plus the defeat XP (50 + 25 bonus) by share",
+  );
+});
+
+test("the reward counts only the current fight: damage from before a retreat earns nothing", async () => {
+  const { familyId, childIds: [a, b] } = await makeFamily(db, { children: 2 });
+  const today = await londonToday(db);
+  const slime = await activeBoss(db, familyId);
+  await tick(a, await quest(familyId, a, today, 30)); // the first fight
+  await finish(slime.id, "escaped", today);
+  await finish((await activeBoss(db, familyId)).id, "defeated", today); // no one hit the Swarm: no awards
+  const back = await activeBoss(db, familyId);
+  assert.equal(back.id, slime.id);
+  await tick(b, await quest(familyId, b, today, 66)); // the rematch, all b
+
+  assert.equal((await bossById(slime.id)).status, "defeated");
+  assert.equal((await stats(db, a)).gold, 0, "a's damage was in the lost fight");
+  assert.equal((await stats(db, b)).gold, 38);
+  assert.deepEqual((await log(slime.id, "gold_awarded")).map((r) => [r.child_id, r.amount]), [[b, 38]]);
+  // Every fight's damage stays in the log (the Trophy Case sums it all).
+  assert.equal((await log(slime.id, "damage")).reduce((n, r) => n + r.amount, 0), 96);
+});
+
 // --- Nightly reset ------------------------------------------------------------
 // Days far in the future, driven through run_daily_reset(family, today).
 
@@ -315,6 +492,7 @@ test("engine functions can't be called through the API, except the reset by the 
       ["select public.run_daily_reset_all()", []],
       ["select public.finish_boss($1, 'defeated', current_date)", [boss.id]],
       ["select public.activate_next_boss($1, current_date)", [familyId]],
+      ["select public.activate_boss($1, current_date, 'any')", [familyId]],
       ["select public.seed_family_bosses($1)", [familyId]],
       ["select public.award_xp($1, 1000)", [kid]],
     ]) {
