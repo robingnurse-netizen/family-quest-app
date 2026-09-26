@@ -15,14 +15,14 @@ export function rescueDeadline(dueOn: string, today: string): string {
   return new Date(`${dueOn}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", timeZone: "UTC" });
 }
 
-/** A pick_rescue_job / complete_rescue error, in words for him. PLACEHOLDER COPY. */
+/** A pick_rescue_job / complete_rescue error, in words for him. */
 export function friendlyRescueError(message: string | undefined, fallback: string): string {
   if (!message) return fallback;
-  if (message.includes("rescue_overdue")) return "This rescue's time is up — every perfect day grows your streak again!";
-  if (message.includes("rescue_closed")) return "This rescue is already done.";
-  if (message.includes("rescue_not_picked")) return "Pick a rescue quest first.";
-  if (message.includes("rescue_not_offered")) return "That quest isn't one of your choices.";
-  if (message.includes("rescue_fallback")) return "Finish any of today's quests to win your streak back.";
-  if (message.includes("rescue_not_found")) return "That rescue quest doesn't exist any more.";
+  if (message.includes("rescue_overdue")) return "This rescue has closed. Tomorrow's quests will grow your streak again.";
+  if (message.includes("rescue_closed")) return "This one's wrapped up — your streak's already been updated.";
+  if (message.includes("rescue_not_picked")) return "Pick a rescue quest first, then tap All done.";
+  if (message.includes("rescue_not_offered")) return "That one's not on your list — pick from the rescue quests shown.";
+  if (message.includes("rescue_fallback")) return "Finish any of today's quests to rescue your streak.";
+  if (message.includes("rescue_not_found")) return "Can't find that one — try picking again.";
   return fallback;
 }

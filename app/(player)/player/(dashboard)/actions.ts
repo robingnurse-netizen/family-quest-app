@@ -126,7 +126,7 @@ export async function pickRescueJob(rescueId: string, jobId: string): Promise<Ac
   await requireRole("child");
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("pick_rescue_job", { p_rescue_id: rescueId, p_job_id: jobId });
-  if (error || !data) return { ok: false, error: friendlyRescueError(error?.message, "Couldn't pick that quest.") };
+  if (error || !data) return { ok: false, error: friendlyRescueError(error?.message, "Hmm, that didn't work — try picking again.") };
   return { ok: true, data };
 }
 
@@ -135,6 +135,6 @@ export async function completeRescue(rescueId: string): Promise<ActionResult<Str
   await requireRole("child");
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("complete_rescue", { p_rescue_id: rescueId });
-  if (error || !data) return { ok: false, error: friendlyRescueError(error?.message, "Couldn't finish that quest.") };
+  if (error || !data) return { ok: false, error: friendlyRescueError(error?.message, "Hmm, that didn't save — give it another tap.") };
   return { ok: true, data: data.rescue };
 }

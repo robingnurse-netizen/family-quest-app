@@ -14,7 +14,7 @@ test("the deadline reads as today / tomorrow / a weekday", () => {
 });
 
 test("database errors become kid-friendly words; anything else gets the fallback", () => {
-  assert.match(friendlyRescueError('ERROR: rescue_overdue', "x"), /time is up/);
+  assert.match(friendlyRescueError('ERROR: rescue_overdue', "x"), /has closed/);
   assert.match(friendlyRescueError("rescue_not_picked", "x"), /Pick a rescue quest/);
   assert.equal(friendlyRescueError("something else", "Couldn't do that."), "Couldn't do that.");
   assert.equal(friendlyRescueError(undefined, "Couldn't do that."), "Couldn't do that.");

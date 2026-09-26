@@ -9,14 +9,13 @@ import { PixelButton } from "@/components/ui/pixel-button";
 
 // Streak recovery on the dashboard: his streak is on hold, and this
 // parchment note is the way to win it back. He picks one of the offered rescue quests (up
-// to 5, from the parents' pool) and taps "Done it!" when it's done — that
+// to 5, from the parents' pool) and taps "All done!" when it's done — that
 // strikes the boss like any quest (the hit overlay and sounds play from the
 // battle event stream), and tonight's reset repairs the streak. With an empty
 // pool it's the fallback: finish any quest by the deadline. Rules and
 // deadlines live in the database (20260928000014_streak_recovery.sql).
 //
-// PLACEHOLDER COPY: the card's wording is temporary (no loss framing — it's
-// about what can be won back).
+// Wording: no loss framing — it's about what can be won back.
 
 type Props = {
   initial: StreakRescue;
@@ -46,8 +45,8 @@ export function RescueQuest({ initial, today, pick, complete }: Props) {
       <section aria-live="polite" className="panel panel-parchment flex items-center gap-3 p-4">
         <FlameIcon className="h-9 w-9 shrink-0" />
         <div>
-          <p className="font-display text-lg font-semibold">Rescue done!</p>
-          <p className="text-sm font-bold text-ink-soft">Your {days} streak comes back tonight. Keep going!</p>
+          <p className="font-display text-lg font-semibold">Rescue complete!</p>
+          <p className="text-sm font-bold text-ink-soft">Your {days} streak will be whole again by morning!</p>
         </div>
       </section>
     );
@@ -60,12 +59,12 @@ export function RescueQuest({ initial, today, pick, complete }: Props) {
         <FlameIcon className="h-9 w-9 shrink-0 opacity-60 grayscale-[60%]" />
         <div className="min-w-0">
           <h2 id="rescue-title" className="font-display text-lg font-semibold">
-            Your {days} streak is on hold!
+            Your {days} streak has a crack.
           </h2>
           <p className="text-sm font-bold text-ink-soft">
             {rescue.fallback
-              ? `Finish any quest ${byWhen} to win it back.`
-              : `Do a rescue quest ${byWhen} to win it back.`}
+              ? `Finish any quest ${byWhen} to patch it up.`
+              : `Pick a rescue quest ${byWhen} to patch it up.`}
           </p>
         </div>
       </div>
@@ -106,7 +105,7 @@ export function RescueQuest({ initial, today, pick, complete }: Props) {
               disabled={pending || !rescue.job_id}
               onClick={() => run(() => complete(rescue.id))}
             >
-              Done it!
+              All done!
             </PixelButton>
           </div>
         </>
