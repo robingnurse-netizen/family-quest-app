@@ -1,5 +1,5 @@
-// The evening warning (lib/rpg/evening.ts): the threshold in the family's
-// timezone, and the stakes line.
+// The evening nudge (lib/rpg/evening.ts): the threshold in the family's
+// timezone, and the Night Raid opportunity line.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
@@ -44,35 +44,45 @@ const stakes = (over = {}) => ({
   timezone: "Europe/London",
   boss_active: true,
   boss_name: "Shogun-Bot",
+  boss_hp: 300,
+  boss_max_hp: 400,
   my_open_quests: 2,
   open_quests: 2,
   open_minutes: 45,
-  damage: 45,
-  party_hp: 100,
+  raid_damage: 20,
+  rescue_open: false,
   ...over,
 });
 
-test("the stakes line: the boss, his quests left and the reset's real damage", () => {
+test("the nudge: his quests left and the Night Raid on offer, with the streak it grows", () => {
   assert.equal(
-    evening.eveningWarning(true, stakes(), 0),
-    "Shogun-Bot is powering up! 2 quests left before midnight, or the party takes 45 damage.",
+    evening.eveningNudge(true, stakes(), 3),
+    "2 quests left — finish them and Rogue goes on a Night Raid tonight! Your streak grows to 4\u00a0days too!",
   );
   assert.equal(
-    evening.eveningWarning(true, stakes({ my_open_quests: 1, damage: 30 }), 0),
-    "Shogun-Bot is powering up! 1 quest left before midnight, or the party takes 30 damage.",
-  );
-});
-
-test("the line folds in a streak at stake and a knock-out", () => {
-  assert.equal(
-    evening.eveningWarning(true, stakes({ party_hp: 40 }), 3),
-    "Shogun-Bot is powering up! 2 quests left before midnight, or the party takes 45 damage and gets knocked out — and your 3\u2011day streak ends.",
+    evening.eveningNudge(true, stakes({ my_open_quests: 1 }), 0),
+    "1 quest left — finish it and Rogue goes on a Night Raid tonight! Your streak grows to 1\u00a0day too!",
   );
 });
 
-test("no warning before evening, without a boss, or with nothing left to do", () => {
-  assert.equal(evening.eveningWarning(false, stakes(), 0), null);
-  assert.equal(evening.eveningWarning(true, null, 0), null);
-  assert.equal(evening.eveningWarning(true, stakes({ boss_active: false, damage: 0 }), 0), null);
-  assert.equal(evening.eveningWarning(true, stakes({ my_open_quests: 0 }), 0), null);
+test("a streak on hold (open rescue) doesn't grow: no streak clause", () => {
+  assert.equal(
+    evening.eveningNudge(true, stakes({ rescue_open: true }), 5),
+    "2 quests left — finish them and Rogue goes on a Night Raid tonight!",
+  );
+});
+
+test("no nudge before evening, without a boss, with nothing left to do, or with nothing to raid", () => {
+  assert.equal(evening.eveningNudge(false, stakes(), 0), null);
+  assert.equal(evening.eveningNudge(true, null, 0), null);
+  assert.equal(evening.eveningNudge(true, stakes({ boss_active: false, raid_damage: 0 }), 0), null);
+  assert.equal(evening.eveningNudge(true, stakes({ my_open_quests: 0 }), 0), null);
+  assert.equal(evening.eveningNudge(true, stakes({ boss_hp: 1, raid_damage: 0 }), 0), null, "a boss at 1 HP");
+});
+
+test("no loss framing in the nudge", () => {
+  for (const [s, streak] of [[stakes(), 0], [stakes(), 9], [stakes({ rescue_open: true }), 4], [stakes({ my_open_quests: 1 }), 1]]) {
+    const line = evening.eveningNudge(true, s, streak);
+    assert.doesNotMatch(line, /damage|lose|lost|crack|knock|escape|or the|miss/i, line);
+  }
 });

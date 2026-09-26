@@ -44,7 +44,8 @@ PROJECT STATUS:
     escape → next boss. The nightly job (/api/cron/daily-reset, 00:05 UTC)
     now only marks past open slots 'missed', damages party_health, handles
     escape at party 0 (and any boss left at 0 HP), and refills the party.
-    player_stats.pending_damage is unused.
+    player_stats.pending_damage is unused. (SUPERSEDED by the rewind, …14 /
+    …16: no party damage, no escape — see "Progress never goes backwards".)
   * BEFORE triggers fire in name order: task_slots_strike_boss must sort
     after task_slots_guard_child_writes — don't rename it. Lock order is
     slot row → boss row in both the trigger and the nightly job.
@@ -204,7 +205,9 @@ PROJECT STATUS:
   damage → hurt once;
   miss → the boss's attack once (it hits the party; it used to flinch);
   defeated → death once + hold; escaped → move loop sliding off; then the
-  next boss enters. State machine in lib/rpg/boss-stage.ts (pure reducer);
+  next boss enters. (Since …16: nothing sends "miss" — the attack is a
+  DORMANT code path, dev hurt() only; the escape is REMOVED; a Night Raid
+  plays hurt. See "Progress never goes backwards".) State machine in lib/rpg/boss-stage.ts (pure reducer);
   the on-stage boss (sprite, name, HP) briefly lags the DB while a finished
   boss plays out. Animation mapping in components/rpg/sprites/
   boss-animations.ts. Data-driven only — no manual battle controls.
@@ -282,7 +285,9 @@ PROJECT STATUS:
     capped by its own aspect ratio. Level/XP/Streak aren't wired to game
     logic yet — displayed as stored.
   * ONE EVENT SOURCE: lib/rpg/battle-events.ts (typed BattleEvent: damage,
-    miss, defeated, escaped, activated, party + a tiny emitter). "party"
+    miss, defeated, escaped, activated, party + a tiny emitter). (Since
+    …16: + raid; escaped / heal removed; miss / party DORMANT — nothing
+    emits them, and useBattle no longer reads party_health / party_log.) "party"
     (hp, max) comes from party_health Realtime rows (and dev setParty) —
     an event, because the nightly reset's 0 and refill arrive back to back
     and React would batch the state away. useBattle
@@ -371,6 +376,9 @@ PROJECT STATUS:
       (.hero-hit) now also shoves them back (left, 3.5% of the arena), its
       peak delayed to --impact. Restarted by re-adding the class, NOT by
       re-keying the party (that would restart a K.O. mid-fall).
+    - (Since …16 the flinch, red flash and K.O. / rise below are DORMANT:
+      no "miss" / "party" events. Dev: hurt() previews the attack only;
+      heal / knockOut / standUp / setParty are gone; raid(3) plays a raid.)
     - K.O.: party hp → 0 (a "party" event) plays ko (queued after a flinch
       that's still playing), then "down" holds the last frame. When the
       party refills he stays down DOWN_HOLD_MS (1.5s), then "rise" plays
@@ -499,7 +507,9 @@ PROJECT STATUS:
   * Streaks: evaluate_streaks(), run at the end of run_daily_reset — per
     child, day by day from streak_through+1 to yesterday (first run:
     yesterday only): all done +1 (best_streak kept), any missed → 0, rest
-    day no change. Idempotent; catches up over missed nights.
+    day no change. Idempotent; catches up over missed nights. (SUPERSEDED
+    by Streak recovery, …14: a miss now cracks the streak instead of
+    resetting it — see "Streak recovery" below.)
   * FIXES A REGRESSION from …10 (which rebuilt the guard from …05 and lost
     …08's slot_locked rule — a child's API could un-tick a locked quest).
     Restored and extended to xp_awarded. No live slots were affected.
@@ -507,7 +517,8 @@ PROJECT STATUS:
   * UI: XP cell shows total/next-level XP with a 5-segment bar of progress
     through the current level (lib/rpg/levels.ts levelProgress); streak
     cell glows + "Keep your N-day streak: X quests left today" when today
-    has quests to do (the quest board reports the count via
+    has quests to do and no rescue is open (a frozen streak: BattleScene
+    rescueOpen hides it) (the quest board reports the count via
     BattleProvider.questsLeftToday). Moments "level_up" (live level rise)
     and "streak_milestone" (3/7/14/30; celebrated once per run, remembered
     in localStorage) → components/rpg/battle/celebrations.tsx shows the
@@ -517,7 +528,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-healing, recap, evening, sun-times, meadow-key, trophies (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-stakes, recap, evening, sun-times, meadow-key, trophies, streak-rescue, rescue, night-raid, migration-order (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
@@ -537,7 +548,9 @@ PROJECT STATUS:
     BattleProvider on /player and /player/store) is the one event → sound
     map. Own hits sound on the overlay's beats: attack on "impact" (every
     combo hit), fanfare on "ko"; others' damage and defeats the overlay
-    doesn't show sound on the event. miss → party damage, delayed
+    doesn't show sound on the event. (Since …16: raid and the recap's
+    "night_raid" moment → attack; "potion" / "party_hit" moments gone; the
+    miss case is dormant.) miss → party damage, delayed
     BOSS_ATTACK_IMPACT_MS (210ms) to land on the boss's blow; "purchase" →
     item bought; "celebration" (emitted by Celebrations when a level-up /
     streak card appears, so the sound matches the card, not the XP row) →
@@ -551,7 +564,11 @@ PROJECT STATUS:
     arena's top-left corner; the event banner is narrowed to clear it.
     No toggle on /player/store (the setting carries over).
   * proxy.ts matcher skips sounds/ and .wav/.mp3 (as for sprites).
-- Recap, evening warning & healing: COMPLETE. Migration
+- Recap, evening warning & healing: COMPLETE, then LARGELY SUPERSEDED by
+  the 26 Sep 2026 rewind (…14 rewritten + …16): party damage, knock-outs,
+  escapes, potions and perfect-day heals are gone; the recap is now a Night
+  Raid / streak story and the evening warning an opportunity nudge — see
+  "Progress never goes backwards" below. Kept as history. Migration
   20260926000012_recap_evening_healing.sql APPLIED to Supabase (SQL
   editor). Verified in the browser: recap previews (including the
   Continue card), evening mode, the heal effect, a real Small Potion
@@ -595,7 +612,9 @@ PROJECT STATUS:
     charges up (.boss-charging glow + .boss-aura-charging, gentle; static
     under reduced motion) and the stats row's nudge becomes "<Boss> is
     powering up! N quests left before midnight, or the party takes D
-    damage[ and gets knocked out][ — and your N-day streak ends]." — it
+    damage[ and gets knocked out][ — and your N-day streak will crack]."
+    (the streak clause only while no rescue is open: tonight_stakes()
+    rescue_open — a frozen streak isn't at stake; see Streak recovery) — it
     replaces the streak nudge (never both). D comes from tonight_stakes()
     (lib/hooks/use-evening-warning.ts): every open quest up to today in
     family time × miss_penalty_per_minute(), 0 with no boss — the reset's
@@ -635,10 +654,11 @@ PROJECT STATUS:
   (the shop's .shop-wall / .shelf-plank + glass); statues are each boss's
   first idle frame. Defeated: full colour, gold glow (.trophy-lit), defeat
   date (boss_log "defeated" row) and the family's total damage (sum of its
-  "damage" rows). Every unbeaten boss (not reached, active, escaped) is the
+  "damage" + "night_raid" rows). Every unbeaten boss (not reached, active) is the
   same silhouette with a faint glow (.trophy-silhouette) and a scratched-out
   name bar (.trophy-redacted; the name isn't sent until defeated), with only
-  the status line differing ("Not yet faced" / "Now fighting" / "Escaped").
+  the status line differing ("Not yet faced" / "Now fighting"; a legacy
+  escaped boss shows as not yet faced — the escaped state is gone, …16).
   Plus his best_streak (a child reads only his own player_stats). Pure
   logic in lib/rpg/trophies.ts (tests/trophies.test.mjs); loadTrophyCase in
   lib/rpg/queries.ts pages boss_log (1000-row API limit). Statues are each
@@ -667,6 +687,135 @@ PROJECT STATUS:
   a dim cool halo;
   plaques are light brass (dark text ≥7.4:1); the frame has an inner
   shadow (.trophy-recess).
+
+- Streak recovery (carrot-style): BUILT, NOT YET APPLIED to Supabase or
+  committed. Migration 20260928000014_streak_recovery.sql (design signed
+  off 25 Sep 2026; REWRITTEN 26 Sep 2026 for the rewind: its nightly reset
+  no longer touches party HP — see "Progress never goes backwards"; the
+  rules are in its header). A missed day no longer resets the streak:
+  * CRACK: a miss while the streak is ≥ 1 freezes it at that value and
+    opens a rescue (streak_rescues, one open per child), due by the end of
+    the missed day + 2 (family days). A miss at 0 changes nothing.
+  * The child is offered up to 5 jobs drawn at random from the family's
+    active rescue_jobs (snapshotted into `offered`), picks one
+    (pick_rescue_job; may change until done) and taps "Done it!"
+    (complete_rescue): normal boss damage + XP (1 per minute) at once,
+    through strike_active_boss() — the boss strike now shared with the
+    quest-completion trigger (boss_log damage row with no
+    source_task_slot_id, so the hit overlay plays as usual). Honour
+    system: no parent approval. Empty pool: the FALLBACK rescue is
+    "finish any quest on the missed day + 1" (due that day).
+  * FROZEN window: further misses are absorbed (window not reset or
+    extended), perfect days don't add to the streak — but a perfect day
+    still earns its Night Raid (…16).
+  * Resolved nightly in evaluate_streaks (run_daily_reset): done →
+    RESCUED, back to exactly the frozen value (no credit for frozen days);
+    not done by due_on → LAPSED, halved rounded up (never 0: 1 → 1,
+    7 → 4). best_streak never lowered. Idempotent; catches up over missed
+    nights. TODO in the SQL: once rest days exist, due_on should skip them.
+  * Recap: each night's cracked / rescued / halved events go in
+    reset_recaps.rescue_events; lib/rpg/recap.ts rescueLine() tells him,
+    framed around what can be won back (PLACEHOLDER COPY: "Your 6-day
+    streak is on hold! Do a rescue quest by the end of Wednesday to win it
+    back." / "Streak won back! You're on 6 days." / "Your streak is on 4
+    days — every perfect day adds one!"). No "cracked" / "lost" in any
+    copy the player sees (the data keeps the event names). Dev previews:
+    __fqBattle.recap("cracked" | "rescued" | "halved").
+  * Player: RescueQuest (components/rpg/rescue-quest.tsx) on /player under
+    the battle scene while a rescue is open (loadOpenRescue; not live —
+    the nightly reset resolves it, a reload shows the change); server
+    actions pickRescueJob / completeRescue; kid-friendly errors and the
+    "today / tomorrow / Wednesday" deadline in lib/rpg/rescue.ts. The
+    streak nudge hides while a rescue is open; the evening warning drops
+    its streak clause (rescue_open).
+  * Parent HQ: /parent/rescue-jobs (linked from /parent): add a job (name,
+    5–60 min, default 10), hide / show (never deleted — open rescues keep
+    a snapshot), and any rescue open right now.
+  * Lock order: family row (the nightly reset only) → task slot → boss →
+    streak rescue → player_stats (complete_rescue takes the boss before the
+    rescue row). party_health is no longer locked.
+  * supabase/scripts/reset-family-progress.sql deletes the family's
+    streak_rescues (step 4c, skipped until …14 exists); rescue_jobs kept.
+
+- PROGRESS NEVER GOES BACKWARDS — Rogue's Night Raid (the 26 Sep 2026
+  rewind): BUILT, NOT YET APPLIED (…14 rewritten, …16 new) or committed.
+  Boss HP only ever goes down; streak recovery is the ONLY thing a missed
+  quest sets off; a perfect day earns Rogue's Night Raid.
+  * MIGRATION HISTORY (live ≠ file order): 20260929000015_boss_retreat.sql
+    (boss retreat / return / comeback bonus) was APPLIED live on 25 Sep
+    2026 BEFORE …14, and is kept as history (never edit it). Live order:
+    …13 → …15 → …14 → …16; a fresh database runs …14 → …15 → …16. …14
+    redefines none of …15's functions and checks that when …15 is already
+    in (to_regprocedure guard at its end). tests/migration-order.test.mjs
+    replays the live order and checks it matches the fresh one exactly
+    (functions, columns, constraints, grants).
+  * Kept from …15: bosses.base_max_hp (original HP, set on insert by
+    trigger) and bosses.active_since (every activation; finish_boss splits
+    gold / XP by damage since then — the current fight).
+  * …14 (rewritten): the nightly reset marks misses and nothing else — no
+    'miss_penalty' rows, no party damage / knock-out / escape / refill /
+    perfect-day heal. Serializes on the families row. tonight_stakes
+    `damage` = 0 in …14 (…16 replaces it).
+  * …16 (20260930000016_night_raid.sql):
+    - NIGHT RAID in run_daily_reset, after evaluate_streaks: one per newly
+      evaluated perfect day (frozen streaks included), in (day, child id)
+      order, each ceil(5% of max_hp) (so ≥ 1), clamped to current_hp − 1
+      (never finishes a boss; a boss at 1 HP isn't raided, no row).
+      boss_log 'night_raid' row per raid (that child), counted in
+      finish_boss's reward split (with 'damage', since active_since) and in
+      the Trophy Case's damage. Idempotent; catch-up raids once per perfect
+      day. No active boss: no raid. The safety net (boss at 0 HP → defeat)
+      runs first, so raids hit the next boss. Tunable c_raid_pct (in both
+      run_daily_reset and tonight_stakes); lib/rpg/night-raid.ts mirrors it
+      for wording (RAID_PCT, raidDamage), tested against the DB.
+    - reset_recaps.raid_damage / raids (his raids that night). The reset
+      result: raids [{child_id, day, amount, hp_after}], raid_damage.
+    - NO ESCAPE: finish_boss refuses 'escaped'; activate_boss only draws
+      from the queue, current_hp = max_hp (a parent's HP edit holds).
+    - tonight_stakes: raid_damage (what tonight's raid would deal), boss_hp,
+      boss_max_hp; damage / party_hp keys gone.
+    - buy_potion revoked from authenticated (potions retired).
+    - DORMANT, to drop in a later cleanup migration: bosses.retreats /
+      escaped_at / bosses_returning_idx; status 'escaped' and log types
+      'escaped' / 'miss_penalty' / 'comeback_bonus' (still allowed, never
+      written); party_health, party_log, potions, buy_potion; reset_recaps
+      party_damage / healed / knocked_out / escaped_boss_id / next_boss_id /
+      hp_before / hp_after / max_hp (defaults, never written). The app's
+      types no longer include the dormant tables.
+    - Pre-flight raises (rolls back) if …14 / …15 are missing or any boss
+      escaped / retreated or any escaped / comeback_bonus row exists.
+  * UI:
+    - No party HP anywhere (scene HUD, recap, Parent HQ panel); useBattle /
+      BattleProvider carry no party. The hero's flinch / K.O. / rise and the
+      boss's attack are DORMANT code paths (art kept for later seasons).
+    - Escape removed: stage mode, BossSprite mode, boss-animations `escape`
+      pose, .boss-fx-escaped CSS, the recap's escape beat, the Trophy Case
+      "Escaped" state. `move` art is still sliced (unused).
+    - Potions retired: potion shelf, buyPotion action, lib/potions and
+      Parent HQ's "Party healing" log deleted (PotionIcon kept, unused).
+    - Live raid: boss_log 'night_raid' → "raid" event → boss hurt + caption
+      "Rogue's Night Raid! …", attack sound (no hit overlay: not his tap).
+    - Recap (lib/rpg/recap.ts): kind "raid" (arena: the boss flinches,
+      "−N", "night_raid" moment → sound, then the hero cheers and Rogue
+      barks), "text" (streak events / a perfect day with nothing to raid),
+      "quiet" (misses only: nothing shown, acknowledged silently; the
+      dashboard doesn't hold celebrations back for it). Dev:
+      __fqBattle.recap("raid" | "nights" | "text" | "quiet" | "cracked" |
+      "rescued" | "halved").
+    - Evening: eveningNudge() — "N quests left — finish them and Rogue goes
+      on a Night Raid tonight! Your streak grows to N days too!" (no streak
+      clause while a rescue is open; none when nothing can be raided). The
+      boss still "charges up" visually (.boss-charging) — revisit.
+    - Streak nudge: "N quests left today — a perfect day makes your streak
+      N+1!". Rescue card / errors: "on hold … win it back".
+    - ALL new player-facing copy is PLACEHOLDER COPY (marked in the code).
+      tests/recap.test.mjs and tests/evening.test.mjs fail on loss words.
+    - Dev console: __fqBattle.raid(3), hurt(10) (dormant attack preview).
+  * Tests: night-raid (raid rules, gold share, idempotence, catch-up,
+    frozen streak, stakes, potions refused, and the REGRESSION: across
+    mixed nights no boss HP ever rises, no escape, no party writes),
+    migration-order, recap-stakes (was recap-healing), boss-engine /
+    streak-rescue / trophies / recap / evening updated; retreat deleted.
 
 TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
 - Connected as the `pixellab` MCP server (~94 tools: characters, objects,
@@ -732,6 +881,9 @@ TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
   serpent-head.cjs) and every animation starts from it; the death animates
   into a hand-drawn end frame (serpent-heap.cjs: head down, eye shut). Mid bosses are seeded for new
   families only (migration …13).
+  20260927000013_mid_tier_bosses.sql APPLIED to Supabase (SQL editor) on
+  2026-09-25; confirmed by the reset-family-progress.sql dry run afterwards
+  seeding all 12 bosses correctly.
 - Boss attack timing: a boss's attack with a `contact` frame (manifest
   field, set in the slicer config, e.g. attack: { contact: 5 }) is
   trimmed by bossAttackAnimation() (lib/rpg/strike.ts, via
@@ -803,9 +955,11 @@ PARKED — future items, NOT to be built until asked:
 - FUTURE — Test suite: STARTED (npm test; tests/, see "XP, Level &
   Streak"). Covered so far: slot guard, XP, levels, streaks, the boss
   engine + instant damage (roster, activation order, strike, defeat, gold
-  split, escape, nightly reset, API access) and the rewards store (ledger
+  split, no escape, nightly reset, API access) and the rewards store (ledger
   triggers + RLS), recaps (scope, show-once, acknowledgement security),
-  evening stakes, potions and perfect-day heals. Still to add before
+  evening stakes, Night Raids (+ the never-backwards regression), streak
+  recovery (crack, frozen window, rescue / halving, fallback, access), and
+  the live-vs-fresh migration order. Still to add before
   production use: pool integrity
   (allocation / week bounds). Not testable in PGlite: true concurrency
   (row-lock serialization of redemptions / strikes / potion buys).
@@ -823,10 +977,14 @@ DATABASE SCHEMA (Supabase/Postgres):
   completed_at
 - bosses: id, family_id, name, tier ('low'|'mid'|'epic'), sprite_key,
   max_hp, current_hp, week_start_date, status
-  ('inactive'|'active'|'defeated'|'escaped')
-- boss_log: id, boss_id, event_type ('damage'|'miss_penalty'|'defeated'|
-  'escaped'), amount, source_task_slot_id→task_slots (nullable), created_at
+  ('inactive'|'active'|'defeated'; 'escaped' dormant), queue_position,
+  base_max_hp, active_since (+ dormant retreats, escaped_at)
+- boss_log: id, boss_id, event_type ('damage'|'night_raid'|'defeated'|
+  'activated'|'gold_awarded'; dormant 'miss_penalty'|'escaped'|
+  'comeback_bonus'), amount, child_id, source_task_slot_id→task_slots
+  (nullable), created_at
 - party_health: id, family_id (unique), current_hp, max_hp, updated_at
+  (DORMANT since …16)
 - player_stats: id, child_id→profiles (unique), gold, xp, level,
   current_streak, pending_damage, updated_at
 - companions: id, child_id→profiles, name, sprite_key, unlocked, level
@@ -836,17 +994,27 @@ DATABASE SCHEMA (Supabase/Postgres):
   status ('pending'|'approved'|'fulfilled'|'denied'), redeemed_at,
   resolved_by
 
-- potions: id (text: small/large), name, heal_hp, gold_cost, sort_order,
+- potions (DORMANT since …16): id (text: small/large), name, heal_hp, gold_cost, sort_order,
   active (global catalogue; read-only via the API)
-- party_log: id, family_id, child_id, event_type ('potion'|'perfect_day'),
+- party_log (DORMANT since …16): id, family_id, child_id, event_type ('potion'|'perfect_day'),
   amount (HP healed), hp_after, potion_id, gold_spent, day, created_at
 - reset_recaps: id, family_id, child_id, created_at, day_from, day_to,
   missed_quests, missed_minutes, party_damage, boss_id, perfect_days,
   healed, streak_before, streak_after, knocked_out, escaped_boss_id,
-  next_boss_id, hp_before, hp_after, max_hp, seen_at
+  next_boss_id, hp_before, hp_after, max_hp, seen_at, rescue_events (jsonb),
+  raid_damage, raids (party_damage / healed / knocked_out / escaped_boss_id
+  / next_boss_id / hp_* dormant since …16)
+- rescue_jobs: id, family_id, title, minutes (5–60, default 10), active,
+  created_by, created_at (parents write; family reads)
+- streak_rescues: id, family_id, child_id, missed_day, streak_at_crack,
+  due_on, offered (jsonb snapshot), fallback, job_id, job_title, minutes,
+  picked_at, completed_at, completed_on, status ('open'|'rescued'|
+  'lapsed'), resolved_on, streak_after, created_at (read-only via the API:
+  child reads his own, parents the family; written only by the reset,
+  pick_rescue_job() and complete_rescue())
 
 RLS: every table scopes on family_id matching the caller's profile.
-Parents can write to bosses/calendar_events/weekly_pools/rewards.
+Parents can write to bosses/calendar_events/weekly_pools/rewards/rescue_jobs.
 Reuben can only write task_slots (his own pools) and reward_redemptions.
 
 FOLDER STRUCTURE:

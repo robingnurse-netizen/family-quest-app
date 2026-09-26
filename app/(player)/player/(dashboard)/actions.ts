@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { isDayKey } from "@/lib/calendar/dates";
 import { friendlyBacklogError } from "@/lib/backlog/errors";
 import type { ActionResult } from "@/lib/backlog/types";
-import type { TaskSlot, TaskSlotStatus } from "@/lib/supabase/types";
+import type { StreakRescue, TaskSlot, TaskSlotStatus } from "@/lib/supabase/types";
+import { friendlyRescueError } from "@/lib/rpg/rescue";
 
 // RLS limits all of these to slots in pools assigned to the signed-in child;
 // the pool integrity triggers enforce the minutes cap and the pool's week.
@@ -112,4 +113,28 @@ export async function acknowledgeRecaps(through: string): Promise<void> {
   await requireRole("child");
   const supabase = await createClient();
   await supabase.rpc("acknowledge_recaps", { p_through: through });
+}
+
+// --- Streak recovery: his rescue quest ------------------------------------------
+// The rules live in the database (pick_rescue_job / complete_rescue,
+// 20260928000014_streak_recovery.sql): his own open rescue, one of the
+// offered jobs, not past due. Completing deals boss damage and XP now; the
+// streak repairs in tonight's reset.
+
+/** Pick (or change) which offered job he'll do. */
+export async function pickRescueJob(rescueId: string, jobId: string): Promise<ActionResult<StreakRescue>> {
+  await requireRole("child");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("pick_rescue_job", { p_rescue_id: rescueId, p_job_id: jobId });
+  if (error || !data) return { ok: false, error: friendlyRescueError(error?.message, "Couldn't pick that quest.") };
+  return { ok: true, data };
+}
+
+/** He's done his picked rescue job. */
+export async function completeRescue(rescueId: string): Promise<ActionResult<StreakRescue>> {
+  await requireRole("child");
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("complete_rescue", { p_rescue_id: rescueId });
+  if (error || !data) return { ok: false, error: friendlyRescueError(error?.message, "Couldn't finish that quest.") };
+  return { ok: true, data: data.rescue };
 }

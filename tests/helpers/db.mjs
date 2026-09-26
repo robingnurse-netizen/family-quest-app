@@ -34,10 +34,19 @@ const SHIM = `
   alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
 `;
 
-export async function freshDb() {
+/** Every migration file name, in the order a fresh database applies them. */
+export function migrationFiles() {
+  return readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort();
+}
+
+/**
+ * A new database with every migration applied — in file-name order, or in
+ * `order` (file names) to replay the order a live database got them in.
+ */
+export async function freshDb({ order = migrationFiles() } = {}) {
   const db = new PGlite();
   await db.exec(SHIM);
-  for (const file of readdirSync(migrationsDir).filter((f) => f.endsWith(".sql")).sort()) {
+  for (const file of order) {
     await db.exec(readFileSync(join(migrationsDir, file), "utf8"));
   }
   // Test users are created directly (the signup trigger expects app metadata).

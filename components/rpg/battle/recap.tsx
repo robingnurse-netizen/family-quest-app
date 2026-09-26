@@ -3,9 +3,9 @@
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { AnchoredSprite, needsMirror } from "@/components/rpg/sprites/anchored-sprite";
 import { bossAnimations } from "@/components/rpg/sprites/boss-animations";
-import { HeartIcon } from "@/components/ui/icons";
+import type { RescueEvent } from "@/lib/supabase/types";
 import { PixelButton } from "@/components/ui/pixel-button";
-import { BOSS_ATTACK_IMPACT_MS } from "@/lib/rpg/hero-stage";
+import { roguePoseFor } from "@/lib/rpg/hero-stage";
 import {
   recapFinalState,
   recapSchedule,
@@ -17,7 +17,6 @@ import {
 import { registerDevTools, useBattleContext } from "./battle-provider";
 import { ArenaBackdrop, HERO_POSES, RogueSprite } from "./arena-parts";
 import { useArenaSky } from "./arena-backdrop";
-import { HudBar } from "./hud-bar";
 import {
   ARENA_CLASS,
   ARENA_STYLE,
@@ -29,13 +28,14 @@ import {
 } from "./stage-layout";
 
 // "While you were away": on his first /player visit after a nightly reset
-// that affected him, a short replay before anything else — the boss's blow
-// (lunge, flinch, the party-damage sound, ONE damage number), a knock-out
-// (the boss leaving, the next arriving, him getting back up) and
-// perfect-day heals, with a few kid-friendly lines. The animated part
-// plays by itself (a tap skips it); it always ends on the summary card —
-// every line plus the closing line — which stays up until he taps
-// Continue, so the explanation can't be missed.
+// with good news for him, a short replay before anything else — Rogue's
+// Night Raid landing on the boss (it flinches, ONE damage number, a sound;
+// the hero cheers, Rogue barks), with a few kid-friendly lines; or, with no
+// raid, a text card (a streak on hold / won back). Nights with nothing to
+// say ("quiet": misses only) show nothing and are acknowledged silently.
+// The animated part plays by itself (a tap skips it); it always ends on the
+// summary card — every line plus the closing line — which stays up until he
+// taps Continue, so the explanation can't be missed.
 //
 // "Seen" lives in the database (reset_recaps.seen_at via
 // acknowledge_recaps): acknowledged as soon as it starts, so a skip counts
@@ -56,18 +56,20 @@ export function RecapHost({
 }) {
   const { setRecapActive } = useBattleContext();
   const [playing, setPlaying] = useState<{ summary: RecapSummary; preview: boolean; key: number } | null>(
-    initial ? { summary: initial, preview: false, key: 0 } : null,
+    initial && initial.kind !== "quiet" ? { summary: initial, preview: false, key: 0 } : null,
   );
 
   // Seen as soon as it starts (a skip counts; other devices won't replay it).
+  // A quiet recap (nothing to say) is acknowledged without showing.
   const acknowledged = useRef(false);
   useEffect(() => {
-    if (!playing || playing.preview || acknowledged.current) return;
+    const summary = playing && !playing.preview ? playing.summary : initial?.kind === "quiet" ? initial : null;
+    if (!summary || acknowledged.current) return;
     acknowledged.current = true;
-    void acknowledge(playing.summary.through).catch(() => {
+    void acknowledge(summary.through).catch(() => {
       // Offline: it plays again next visit, which is fine.
     });
-  }, [playing, acknowledge]);
+  }, [playing, initial, acknowledge]);
 
   useEffect(() => {
     setRecapActive(playing !== null);
@@ -77,8 +79,9 @@ export function RecapHost({
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
     return registerDevTools({
-      recap: (kind: keyof typeof DEV_RECAPS = "blow") => {
+      recap: (kind: keyof typeof DEV_RECAPS = "raid") => {
         const summary = devRecap(kind);
+        if (summary?.kind === "quiet") return "A quiet night: nothing to show (acknowledged silently).";
         if (summary) setPlaying((p) => ({ summary, preview: true, key: (p?.key ?? 0) + 1 }));
       },
     });
@@ -89,8 +92,7 @@ export function RecapHost({
   return <Recap key={playing.key} summary={playing.summary} onClose={close} timeZone={timeZone} />;
 }
 
-type Pose = "idle" | "hurt" | "ko" | "down" | "rise";
-type BossOnStage = { boss: RecapBoss; mode: "idle" | "attack" | "escape" | "enter" } | null;
+type Pose = "idle" | "victory";
 
 function Recap({
   summary: s,
@@ -107,13 +109,8 @@ function Recap({
   useDevicePixelStep();
 
   const [hero, setHero] = useState<{ pose: Pose; key: number }>({ pose: "idle", key: 0 });
-  const [boss, setBoss] = useState<BossOnStage>(() =>
-    s.kind === "blow" && s.attacker ? { boss: s.attacker, mode: "idle" } : null,
-  );
-  const [hp, setHp] = useState(s.hpBefore);
-  const [hit, setHit] = useState(false);
-  const [blown, setBlown] = useState(false);
-  const [healed, setHealed] = useState(false);
+  const [bossHurt, setBossHurt] = useState<number | null>(null);
+  const [raided, setRaided] = useState(false);
   const [lines, setLines] = useState(0);
   const [closing, setClosing] = useState(false);
   // Tapped during the animated part: jump to the summary card.
@@ -132,50 +129,19 @@ function Recap({
     if (skipped) return;
     if (reduced) {
       // Everything shows at once (see `shown` below); just the sound.
-      if (s.damage > 0) emit({ type: "moment", name: "party_hit" });
+      if (s.kind === "raid") emit({ type: "moment", name: "night_raid" });
       return;
     }
-    const pose = (p: Pose) => setHero((h) => ({ pose: p, key: h.key + 1 }));
     const timers = recapSchedule(s).map((beat) =>
       setTimeout(() => {
         switch (beat.kind) {
-          case "attack":
-            setBoss((b) => b && { ...b, mode: "attack" });
-            pose("hurt");
-            setHit(true);
+          case "raid":
+            emit({ type: "moment", name: "night_raid" });
+            setBossHurt((k) => (k ?? 0) + 1);
+            setRaided(true);
             break;
-          case "blow":
-            emit({ type: "moment", name: "party_hit" });
-            setBlown(true);
-            setHp(Math.max(0, s.hpBefore - s.damage));
-            break;
-          case "boss_idle":
-            setBoss((b) => (b && b.mode === "attack" ? { ...b, mode: "idle" } : b));
-            break;
-          case "ko":
-            pose("ko");
-            break;
-          case "down":
-            setHero((h) => ({ ...h, pose: "down" }));
-            break;
-          case "escape":
-            setBoss((b) => (s.escaped ? { boss: s.escaped, mode: "escape" } : b));
-            break;
-          case "enter":
-            setBoss(s.next ? { boss: s.next, mode: "enter" } : null);
-            break;
-          case "refill":
-            setHp(s.maxHp);
-            break;
-          case "rise":
-            pose("rise");
-            break;
-          case "stand":
-            pose("idle");
-            break;
-          case "heal":
-            setHealed(true);
-            setHp(s.hpAfter);
+          case "cheer":
+            setHero((h) => ({ pose: "victory", key: h.key + 1 }));
             break;
           case "line":
             setLines(beat.index + 1);
@@ -208,15 +174,14 @@ function Recap({
   const jumped = reduced || skipped;
   const final = recapFinalState(s);
   const shown = {
-    hp: jumped ? final.hp : hp,
     lines: jumped ? final.lines : lines,
     closing: atSummary,
     hero: skipped ? ({ pose: "idle", key: -1 } as const) : hero,
-    boss: skipped ? (final.boss ? { boss: final.boss, mode: "idle" as const } : null) : boss,
   };
 
-  const title = s.kind === "perfect" ? "While you were away…" : s.nights > 1 ? "Since you were last here…" : "While you were away…";
-  const showArena = s.kind === "blow" && !reduced;
+  // PLACEHOLDER COPY (the title).
+  const title = s.kind === "raid" ? "Night Raid!" : "While you were away…";
+  const showArena = s.kind === "raid" && !reduced && final.boss !== null;
 
   return (
     <div
@@ -234,19 +199,16 @@ function Recap({
           {title}
         </h2>
 
-        {showArena && (
+        {showArena && final.boss && (
           <div
             className={`relative overflow-hidden rounded-[2px] border-2 border-stone-edge ${ARENA_CLASS}`}
             style={{ ...ARENA_STYLE, ...sky }}
             suppressHydrationWarning
           >
             <ArenaBackdrop />
-            <div
-              className={`arena-party absolute inset-x-0 bottom-(--ground) top-0 z-10 ${hit ? "hero-hit" : ""}`}
-              style={{ "--impact": `${BOSS_ATTACK_IMPACT_MS}ms` } as React.CSSProperties}
-            >
-              {/* Rogue flinches, falls and gets up with the hero. */}
-              <RogueSprite pose={shown.hero.pose} playKey={shown.hero.key} />
+            <div className="arena-party absolute inset-x-0 bottom-(--ground) top-0 z-10">
+              {/* Rogue barks as the hero cheers. */}
+              <RogueSprite pose={roguePoseFor(shown.hero.pose)} playKey={shown.hero.key} />
               <FeetSpot x={FEET_X.hero}>
                 <AnchoredSprite
                   key={shown.hero.key}
@@ -255,42 +217,20 @@ function Recap({
                   mirror={needsMirror(HERO_POSES[shown.hero.pose].facing, "right")}
                   alt=""
                 />
-                {blown && !skipped && (
-                  <p className="damage-pop absolute bottom-[calc(var(--arena)*0.62)] left-0 w-max -translate-x-1/2 font-body text-5xl font-black leading-none text-[#ff8787] [text-shadow:3px_3px_0_#12141f,-1px_-1px_0_#12141f]">
-                    -{s.damage}
-                  </p>
-                )}
-                {healed && !skipped && s.healed > 0 && (
-                  <p className="heal-pop absolute bottom-[calc(var(--arena)*0.72)] left-0 w-max -translate-x-1/2 font-body text-4xl font-black leading-none">
-                    +{s.healed}
-                  </p>
-                )}
               </FeetSpot>
             </div>
             <div className="absolute inset-x-0 bottom-(--ground) top-0 z-10">
-              {shown.boss && (
-                <RecapBossSprite
-                  key={`${shown.boss.boss.id}-${shown.boss.mode === "enter" ? "enter" : "stay"}`}
-                  stage={shown.boss}
-                />
+              <RecapBossSprite boss={final.boss} hurtKey={skipped ? null : bossHurt} />
+              {raided && !skipped && (
+                <FeetSpot x={FEET_X.boss}>
+                  <p className="damage-pop absolute bottom-[calc(var(--arena)*0.62)] left-0 w-max -translate-x-1/2 font-body text-5xl font-black leading-none text-[#ff8787] [text-shadow:3px_3px_0_#12141f,-1px_-1px_0_#12141f]">
+                    -{s.raidDamage}
+                  </p>
+                </FeetSpot>
               )}
             </div>
           </div>
         )}
-
-        <div className="mt-3">
-          <HudBar
-            label="Party HP"
-            icon={<HeartIcon className="h-4 w-4 shrink-0" />}
-            current={shown.hp}
-            max={s.maxHp}
-            segments={10}
-            tone="party"
-          />
-          {!showArena && healed && !skipped && s.healed > 0 && (
-            <p className="heal-pop mt-1 text-center font-body text-3xl font-black">+{s.healed}</p>
-          )}
-        </div>
 
         <div aria-live="polite" className="mt-3 min-h-16 space-y-1 text-center">
           {s.lines.slice(0, shown.lines).map((line) => (
@@ -322,24 +262,23 @@ function Recap({
   );
 }
 
-/** The boss in the recap: idle, attacking (lunging), sliding off, or arriving. */
-function RecapBossSprite({ stage }: { stage: NonNullable<BossOnStage> }) {
-  const anims = bossAnimations(stage.boss.sprite_key);
+/** The raided boss in the recap: idle, flinching once as the raid lands. */
+function RecapBossSprite({ boss, hurtKey }: { boss: RecapBoss; hurtKey: number | null }) {
+  const [doneKey, setDoneKey] = useState<number | null>(null);
+  const anims = bossAnimations(boss.sprite_key);
   if (!anims) return null;
-  const anim = stage.mode === "attack" ? anims.attack : stage.mode === "escape" ? anims.escape : anims.idle;
-  // Facing the party (left); escaping, it faces the way it runs (right).
-  const want = stage.mode === "escape" ? "right" : "left";
-  const fx =
-    stage.mode === "attack" ? "boss-fx-attack" : stage.mode === "escape" ? "boss-fx-escaped" : "";
+  const hurt = hurtKey !== null && doneKey !== hurtKey;
+  const anim = hurt ? anims.hurt : anims.idle;
   return (
-    <FeetSpot x={FEET_X.boss} className={stage.mode === "enter" ? "boss-enter" : ""}>
+    <FeetSpot x={FEET_X.boss}>
       <AnchoredSprite
-        key={stage.mode}
+        key={hurt ? `hurt-${hurtKey}` : "idle"}
         animation={anim}
-        height={`calc(${bossHeight(stage.boss)} * ${anim.height / anims.idle.height})`}
-        mirror={needsMirror(anim.facing, want)}
+        height={`calc(${bossHeight(boss)} * ${anim.height / anims.idle.height})`}
+        mirror={needsMirror(anim.facing, "left")}
         alt=""
-        className={fx}
+        className={hurt ? "boss-fx-hurt" : ""}
+        onComplete={hurt ? () => setDoneKey(hurtKey) : undefined}
       />
     </FeetSpot>
   );
@@ -367,38 +306,40 @@ const devRow = (over: Partial<RecapRow>): RecapRow => ({
   created_at: new Date().toISOString(),
   day_from: "2000-01-01",
   day_to: "2000-01-01",
-  missed_quests: 0,
-  missed_minutes: 0,
-  party_damage: 0,
   boss_id: "dev-slime",
   perfect_days: 0,
-  healed: 0,
   streak_before: 0,
   streak_after: 0,
-  knocked_out: false,
-  escaped_boss_id: null,
-  next_boss_id: null,
-  hp_before: 100,
-  hp_after: 100,
-  max_hp: 100,
+  rescue_events: [],
+  raid_damage: 0,
+  raids: 0,
   ...over,
 });
 const DEV_RECAPS = {
-  blow: [devRow({ missed_quests: 2, missed_minutes: 45, party_damage: 45, hp_after: 55, streak_before: 3 })],
-  ko: [
-    devRow({
-      missed_quests: 3, missed_minutes: 60, party_damage: 60, hp_before: 40, knocked_out: true,
-      escaped_boss_id: "dev-slime", next_boss_id: "dev-swarm",
-    }),
-  ],
+  raid: [devRow({ perfect_days: 1, raid_damage: 3, raids: 1, streak_before: 2, streak_after: 3 })],
   nights: [
-    devRow({ day_from: "1999-12-30", day_to: "1999-12-30", missed_quests: 1, missed_minutes: 15, party_damage: 15, hp_after: 85 }),
-    devRow({ missed_quests: 1, missed_minutes: 30, party_damage: 30, hp_before: 85, hp_after: 55 }),
-    devRow({ perfect_days: 1, healed: 10, hp_before: 55, hp_after: 65 }),
+    devRow({ day_from: "1999-12-30", day_to: "1999-12-30", perfect_days: 1, raid_damage: 3, raids: 1 }),
+    devRow({ perfect_days: 1, raid_damage: 3, raids: 1, boss_id: "dev-swarm" }),
   ],
-  text: [devRow({ missed_quests: 1, missed_minutes: 20, boss_id: null })],
-  perfect: [devRow({ perfect_days: 1, healed: 10, hp_before: 80, hp_after: 90 })],
+  // A perfect day with nothing to raid (the boss already at 1 HP).
+  text: [devRow({ perfect_days: 1 })],
+  // Misses only: nothing to say.
+  quiet: [devRow({})],
+  // Streak recovery (…14): the night it goes on hold, then won back or halved.
+  cracked: [
+    devRow({ streak_before: 6, streak_after: 6, rescue_events: [devRescue("cracked", { offered_count: 5 })] }),
+  ],
+  rescued: [
+    devRow({ streak_before: 6, streak_after: 6, rescue_events: [devRescue("rescued", { job_title: "Tidy the shoe rack" })] }),
+  ],
+  halved: [devRow({ streak_before: 7, streak_after: 4, rescue_events: [devRescue("halved", { streak_at_crack: 7, streak_after: 4 })] })],
 };
+function devRescue(event: RescueEvent["event"], over: Partial<RescueEvent> = {}): RescueEvent {
+  return {
+    event, rescue_id: "dev-rescue", missed_day: "1999-12-31", due_on: "2000-01-02",
+    streak_at_crack: 6, streak_after: 6, fallback: false, ...over,
+  };
+}
 function devRecap(kind: keyof typeof DEV_RECAPS) {
   const rows = DEV_RECAPS[kind];
   if (!rows) return null;

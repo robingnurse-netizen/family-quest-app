@@ -5,8 +5,9 @@ import { loadCalendar } from "@/lib/calendar/queries";
 import { monthKeyOf } from "@/lib/calendar/dates";
 import { loadWeekBoard } from "@/lib/backlog/queries";
 import { WeekBoard } from "@/components/kanban/week-board";
-import { acknowledgeRecaps, createSlot, moveSlot, removeSlot, setSlotStatus } from "./actions";
-import { loadBattle, loadRecap } from "@/lib/rpg/queries";
+import { acknowledgeRecaps, completeRescue, createSlot, moveSlot, pickRescueJob, removeSlot, setSlotStatus } from "./actions";
+import { loadBattle, loadOpenRescue, loadRecap } from "@/lib/rpg/queries";
+import { RescueQuest } from "@/components/rpg/rescue-quest";
 import { BattleProvider } from "@/components/rpg/battle/battle-provider";
 import { BattleScene } from "@/components/rpg/battle/battle-scene";
 import { HitOverlay } from "@/components/rpg/battle/hit-overlay";
@@ -22,7 +23,7 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
   const supabase = await createClient();
   const { week } = await props.searchParams;
 
-  const [{ data: stats }, [board, calendar], battle, store] = await Promise.all([
+  const [{ data: stats }, [board, calendar], battle, store, rescue] = await Promise.all([
     supabase
       .from("player_stats")
       .select("gold, xp, level, current_streak, best_streak, streak_through")
@@ -35,6 +36,8 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
     ),
     loadBattle(profile.family_id),
     loadRewardStore(profile),
+    // A cracked streak's rescue quest, if one is open.
+    loadOpenRescue(profile.id),
   ]);
   // "While you were away": resets since he last saw a recap.
   const recap = await loadRecap(profile.id, board.today);
@@ -57,8 +60,8 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
       <BattleProvider
         familyId={battle.familyId}
         initialBoss={battle.boss}
-        initialParty={battle.party}
-        recapPending={recap !== null}
+        // A quiet recap (nothing to say) shows nothing, so holds nothing back.
+        recapPending={recap !== null && recap.kind !== "quiet"}
       >
         <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
           <header className="flex items-center justify-between gap-4">
@@ -77,7 +80,12 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
             stats={playerStats}
             rewards={store.rewards}
             timeZone={calendar.timeZone}
+            rescueOpen={rescue !== null}
           />
+          {/* A cracked streak: pick a rescue quest and do it to fix it. */}
+          {rescue && (
+            <RescueQuest initial={rescue} today={board.today} pick={pickRescueJob} complete={completeRescue} />
+          )}
           {/* "While you were away": the nights since his last visit, before
               anything else (the celebration cards wait for it). */}
           <RecapHost initial={recap} acknowledge={acknowledgeRecaps} timeZone={calendar.timeZone} />

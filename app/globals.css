@@ -103,10 +103,6 @@ body {
   from { opacity: 0; scale: 0.85; }
   to { opacity: 1; scale: 1; }
 }
-@keyframes boss-escape {
-  0% { opacity: 1; translate: 0 0; }
-  100% { opacity: 0; translate: 140% 0; }
-}
 @keyframes boss-fall {
   0% { filter: none; }
   100% { filter: grayscale(0.7) brightness(0.8); }
@@ -115,13 +111,13 @@ body {
 .boss-enter { animation: boss-enter 500ms ease-out both; }
 .boss-fx-hurt { animation: boss-hit 450ms ease-out; }
 .boss-fx-defeated { animation: boss-fall 1400ms ease-in forwards; }
-.boss-fx-escaped { animation: boss-escape 1400ms ease-in forwards; }
 
 @keyframes boss-flash {
   0%, 60% { filter: drop-shadow(0 0 10px rgb(255 40 40)) brightness(1.5); }
   100% { filter: none; }
 }
-/* A missed quest: the boss lunges at the party while it attacks. */
+/* The boss lunges at the party while it attacks (DORMANT since …16: only the
+   dev hurt() preview). */
 @keyframes boss-lunge {
   0%, 100% { translate: 0 0; }
   35% { translate: -8% 0; }
@@ -130,7 +126,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   /* No movement; keep the colour cues so reactions stay visible. */
-  .boss-enter, .boss-fx-escaped, .boss-fx-attack { animation: none; }
+  .boss-enter, .boss-fx-attack { animation: none; }
   .boss-fx-hurt { animation: boss-flash 450ms ease-out; }
 }
 
@@ -250,26 +246,90 @@ body {
   animation-duration: 1.6s;
 }
 
-/* A heal: a green "+N" that pops and floats up, fading (battle scene, recap,
-   potion shelf). Numbers in the body font (Stage 1's digit rule). */
-@keyframes heal-float {
-  0% { opacity: 0; translate: 0 6px; scale: 0.6; }
-  15% { opacity: 1; translate: 0 0; scale: 1.15; }
-  70% { opacity: 1; translate: 0 -14px; scale: 1; }
-  100% { opacity: 0; translate: 0 -26px; scale: 1; }
-}
-.heal-pop {
-  color: #8ce99a;
-  text-shadow: 2px 2px 0 #12141f, -1px -1px 0 #12141f;
-  animation: heal-float 1600ms ease-out forwards;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .boss-charging { animation: none; filter: drop-shadow(0 0 6px rgb(252 196 25 / 0.6)); }
-  .heal-pop { animation: overlay-fade-out 1600ms ease-in forwards; }
   .boss-aura { animation: none; opacity: 0.8; }
   .hero-hit { animation: hero-hit-flash 700ms ease-out var(--impact, 0ms) backwards; }
   .event-banner { animation: event-banner-fade 3.5s linear forwards; }
+}
+
+/* The evening nudge's ribbon banner (components/rpg/battle/raid-banner.tsx):
+   a pixel-art band with a thick notched outline and a swallowtail tail
+   behind each end. --rb-px is one art pixel. The wrapper reserves room for
+   the tails (sides) and their hang below the band (bottom), so the whole
+   banner stays inside its container; the band itself shrinks and its text
+   wraps. */
+.raid-banner {
+  --rb-px: 4px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.5rem auto 0;
+  padding: 0 calc(var(--rb-px) * 9) calc(var(--rb-px) * 3);
+}
+.raid-banner-band {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  padding: var(--rb-px);
+  /* The outline: the world's dark purple. */
+  background: var(--color-world-deep);
+  /* Notched corners: the outline steps in one pixel at each corner. */
+  clip-path: polygon(
+    var(--rb-px) 0, calc(100% - var(--rb-px)) 0,
+    calc(100% - var(--rb-px)) var(--rb-px), 100% var(--rb-px),
+    100% calc(100% - var(--rb-px)), calc(100% - var(--rb-px)) calc(100% - var(--rb-px)),
+    calc(100% - var(--rb-px)) 100%, var(--rb-px) 100%,
+    var(--rb-px) calc(100% - var(--rb-px)), 0 calc(100% - var(--rb-px)),
+    0 var(--rb-px), var(--rb-px) var(--rb-px)
+  );
+}
+.raid-banner-fill {
+  position: absolute;
+  inset: var(--rb-px);
+  width: calc(100% - 2 * var(--rb-px));
+  height: calc(100% - 2 * var(--rb-px));
+}
+.raid-banner-text {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: calc(var(--rb-px) * 8);
+  padding: 0.35rem 1.6rem;
+  text-align: center;
+  font-family: var(--font-pixelify), ui-monospace, monospace;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.25;
+  color: #ffffff;
+  /* A hard pixel shadow plus a 1px dark rim: readable on every band. */
+  text-shadow:
+    2px 2px 0 var(--color-stone-edge),
+    -1px -1px 0 var(--color-stone-edge),
+    1px -1px 0 var(--color-stone-edge),
+    -1px 1px 0 var(--color-stone-edge);
+}
+.raid-banner-tail {
+  position: absolute;
+  bottom: 0;
+  z-index: 0;
+  width: calc(var(--rb-px) * 10);
+  height: calc(var(--rb-px) * 9);
+}
+.raid-banner-tail-left { left: 0; }
+.raid-banner-tail-right { right: 0; transform: scaleX(-1); }
+/* Sparkles twinkle in hard steps (off under reduced motion). */
+@keyframes raid-banner-twinkle {
+  0%, 60%, 100% { opacity: 1; }
+  70%, 90% { opacity: 0.25; }
+}
+.raid-banner-sparkle { animation: raid-banner-twinkle 2.4s steps(1, end) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .raid-banner-sparkle { animation: none; }
 }
 
 

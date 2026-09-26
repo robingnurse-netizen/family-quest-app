@@ -11,4 +11,4 @@ before running one against any other project or family.
 
 | Script | What it does |
 |---|---|
-| `reset-family-progress.sql` | Resets one family's game progress and boss roster for testing: deletes its bosses (boss_log cascades), recaps, quest slots, reward requests and party log; zeroes the children's stats; refills party HP; reseeds all 12 bosses and activates the first. One transaction, with a guard that aborts unless the family matches. **Wipes every child in that family** (Reuben included), not just a test child. Needs migration `20260927000013` applied first. |
+| `reset-family-progress.sql` | Resets one family's game progress and boss roster for testing: deletes its bosses (boss_log cascades), recaps, quest slots, reward requests, the (dormant) party log and streak rescues (the rescue job pool is kept, like the reward catalogue); zeroes the children's stats; refills the (dormant) party HP; reseeds all 12 bosses and activates the first. One transaction, with a guard that aborts unless the family matches. **Wipes every child in that family** (Reuben included), not just a test child. Needs migration `20260927000013` applied first. |

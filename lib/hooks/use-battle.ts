@@ -2,35 +2,31 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { Boss, BossLog, PartyHealth, PartyLog } from "@/lib/supabase/types";
+import type { Boss, BossLog } from "@/lib/supabase/types";
 import { eventFromLog, type BattleEvent } from "@/lib/rpg/battle-events";
 
 /**
- * The family's active boss + party health, kept live with Supabase Realtime.
- * When a boss is defeated and the next one activated, both updates arrive;
- * whichever order they come in, the active one wins.
+ * The family's active boss, kept live with Supabase Realtime. When a boss is
+ * defeated and the next one activated, both updates arrive; whichever order
+ * they come in, the active one wins.
  *
  * `onEvent` receives the typed battle events (lib/rpg/battle-events.ts):
- * damage / miss from boss_log inserts, defeated / escaped from boss rows,
- * party from party_health rows and heal from party_log rows (Realtime
- * only), and activated whenever a
- * different boss becomes the active one — whether that arrives over
- * Realtime or via a refetch.
+ * damage / raid / gold from boss_log inserts, defeated from boss rows
+ * (Realtime only), and activated whenever a different boss becomes the
+ * active one — whether that arrives over Realtime or via a refetch. (Party
+ * HP is gone since …16: party_health / party_log are dormant.)
  */
 export function useBattle({
   familyId,
   initialBoss,
-  initialParty,
   onEvent,
 }: {
   familyId: string;
   initialBoss: Boss | null;
-  initialParty: PartyHealth | null;
   onEvent?: (event: BattleEvent) => void;
 }) {
   const [supabase] = useState(createClient);
   const [boss, setBoss] = useState(initialBoss);
-  const [party, setParty] = useState(initialParty);
   const onEventRef = useRef(onEvent);
   useEffect(() => {
     onEventRef.current = onEvent;
@@ -46,33 +42,29 @@ export function useBattle({
   }, []);
 
   const refetch = useCallback(async () => {
-    const [b, p] = await Promise.all([
-      supabase
-        .from("bosses")
-        .select("*")
-        .eq("family_id", familyId)
-        .eq("status", "active")
-        .maybeSingle(),
-      supabase.from("party_health").select("*").eq("family_id", familyId).maybeSingle(),
-    ]);
+    const b = await supabase
+      .from("bosses")
+      .select("*")
+      .eq("family_id", familyId)
+      .eq("status", "active")
+      .maybeSingle();
     if (!b.error) {
       setBoss(b.data);
       adoptActive(b.data);
     }
-    if (!p.error && p.data) setParty(p.data);
   }, [supabase, familyId, adoptActive]);
 
   useEffect(() => {
     const onBoss = (row: Boss) => {
-      if (row.status === "defeated" || row.status === "escaped") {
-        onEventRef.current?.({ type: row.status, boss: row });
+      if (row.status === "defeated") {
+        onEventRef.current?.({ type: "defeated", boss: row });
         if (activeIdRef.current === row.id) activeIdRef.current = null;
       }
       if (row.status === "active") adoptActive(row);
       setBoss((current) => {
         if (row.status === "active") return row;
-        // The current boss was defeated/escaped; the next one (if any) arrives
-        // in its own event.
+        // The current boss is no longer active (defeated); the next one (if
+        // any) arrives in its own event.
         return current?.id === row.id ? null : current;
       });
     };
@@ -88,26 +80,6 @@ export function useBattle({
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "bosses", filter: `family_id=eq.${familyId}` },
         (p) => onBoss(p.new as Boss),
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "party_health", filter: `family_id=eq.${familyId}` },
-        (p) => {
-          if (p.eventType === "DELETE") return;
-          const row = p.new as PartyHealth;
-          setParty(row);
-          onEventRef.current?.({ type: "party", hp: row.current_hp, max: row.max_hp });
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "party_log", filter: `family_id=eq.${familyId}` },
-        (p) => {
-          const row = p.new as PartyLog;
-          if (row.amount > 0) {
-            onEventRef.current?.({ type: "heal", amount: row.amount, source: row.event_type, childId: row.child_id });
-          }
-        },
       )
       // boss_log has no family_id; RLS scopes Realtime to this family's bosses.
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "boss_log" }, (p) => {
@@ -136,5 +108,5 @@ export function useBattle({
     };
   }, [supabase, familyId, refetch, adoptActive]);
 
-  return { boss, party, refetch };
+  return { boss, refetch };
 }

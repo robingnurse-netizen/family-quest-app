@@ -6,23 +6,22 @@ import { bossAnimations } from "@/components/rpg/sprites/boss-animations";
 import type { StageMode } from "@/lib/rpg/boss-stage";
 
 const DEFEAT_HOLD_MS = 1200; // last death frame stays up this long
-const ESCAPE_MS = 1400; // matches the .boss-escape CSS animation
 
 /**
  * One boss on stage, reacting to the stage mode:
  *   idle     → idle loop
  *   hurt     → hurt animation once (+ shake/red flash), then onReactionDone
- *   attack   → attack animation once (a missed quest), then onReactionDone
+ *              (a quest hit or a Night Raid)
+ *   attack   → attack animation once, then onReactionDone (DORMANT since
+ *              …16: nothing sends it but the dev hurt() preview)
  *   defeated → death animation once, hold, then onFinishDone
- *   escaped  → move loop while sliding off, then onFinishDone
  * Single-frame strips just show their still frame; the CSS effect makes the
  * reaction visible either way. `playKey` restarts the animation (and the CSS
  * effect) on every event.
  *
  * `height` is the idle pose's display height as any CSS length; other poses
  * scale with it so the boss doesn't resize between animations. `face` turns
- * side-facing poses that way (escaping, it faces the way it runs: off to the
- * right, away from the hero); omit it to show poses as drawn.
+ * side-facing poses that way; omit it to show poses as drawn.
  */
 export function BossSprite({
   spriteKey,
@@ -48,13 +47,6 @@ export function BossSprite({
   useEffect(() => () => clearTimeout(holdTimer.current), [playKey]);
   const idleHeight = typeof height === "number" ? `${height}px` : height;
 
-  // Escape has no natural end (it loops while sliding away): time it.
-  useEffect(() => {
-    if (mode !== "escaped") return;
-    const t = setTimeout(onFinishDone, ESCAPE_MS);
-    return () => clearTimeout(t);
-  }, [mode, playKey, onFinishDone]);
-
   if (!anims) {
     // Unknown sprite_key: still show *something* reacting.
     return (
@@ -76,10 +68,7 @@ export function BossSprite({
         ? anims.attack
         : mode === "defeated"
           ? anims.death
-          : mode === "escaped"
-            ? anims.escape
-            : anims.idle;
-  const want = mode === "escaped" && face ? (face === "left" ? "right" : "left") : face;
+          : anims.idle;
 
   const onComplete =
     mode === "hurt" || mode === "attack"
@@ -96,7 +85,7 @@ export function BossSprite({
       animation={anim}
       // One scale per boss (from idle) so it doesn't resize between poses.
       height={`calc(${idleHeight} * ${anim.height / anims.idle.height})`}
-      mirror={needsMirror(anim.facing, want)}
+      mirror={needsMirror(anim.facing, face)}
       alt={name}
       className={`boss-fx-${mode}`}
       onComplete={onComplete}

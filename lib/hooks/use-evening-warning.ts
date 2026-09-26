@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { TonightStakes } from "@/lib/supabase/types";
-import { eveningWarning, isEvening } from "@/lib/rpg/evening";
+import { eveningNudge, isEvening } from "@/lib/rpg/evening";
 
 /**
- * The evening warning for the battle scene: is it evening in the family's
- * timezone (re-checked every minute), and what tonight's reset would deal
- * (tonight_stakes(), refetched whenever his quests left or the boss change).
- * Returns the warning line, or null. Development overrides: `force` sets
+ * The evening nudge for the battle scene: is it evening in the family's
+ * timezone (re-checked every minute), and what tonight's Night Raid would
+ * deal if he finishes his quests (tonight_stakes(), refetched whenever his
+ * quests left or the boss change). Returns the nudge line, or null. Development overrides: `force` sets
  * evening on / off (null follows the clock) and `devStakes` stands in for
  * the database's stakes.
  */
@@ -50,5 +50,5 @@ export function useEveningWarning({
     };
   }, [supabase, evening, bossId, questsLeftToday]);
 
-  return { evening, line: eveningWarning(evening, devStakes ?? stakes, streak) };
+  return { evening, line: eveningNudge(evening, devStakes ?? stakes, streak) };
 }

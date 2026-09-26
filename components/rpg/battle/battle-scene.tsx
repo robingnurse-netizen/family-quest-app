@@ -6,10 +6,11 @@ import type { Boss } from "@/lib/supabase/types";
 import { SPRITES } from "@/components/rpg/sprites/manifests";
 import { AnchoredSprite, needsMirror } from "@/components/rpg/sprites/anchored-sprite";
 import { BossSprite } from "@/components/rpg/boss/boss-sprite";
-import { CoinIcon, FlameIcon, HeartIcon, ShieldIcon, SkullIcon, StarIcon } from "@/components/ui/icons";
+import { CoinIcon, FlameIcon, ShieldIcon, SkullIcon, StarIcon } from "@/components/ui/icons";
 import { registerDevTools, useBattleContext, useBattleEvents } from "./battle-provider";
 import { SoundToggle } from "@/components/ui/sound-toggle";
 import { HudBar } from "./hud-bar";
+import { RaidBanner } from "./raid-banner";
 import { usePlayerStats, type LiveStats } from "@/lib/hooks/use-player-stats";
 import { levelProgress } from "@/lib/rpg/levels";
 import { useEveningWarning } from "@/lib/hooks/use-evening-warning";
@@ -41,7 +42,6 @@ import {
 
 /** HP bar chunks: more for tougher bosses. */
 const BOSS_SEGMENTS: Record<Boss["tier"], number> = { low: 10, mid: 15, epic: 20 };
-const PARTY_SEGMENTS = 10;
 
 export type PlayerStats = LiveStats;
 
@@ -69,6 +69,7 @@ export function BattleScene({
   stats: initialStats,
   rewards,
   timeZone,
+  rescueOpen = false,
 }: {
   heroName: string;
   childId: string;
@@ -78,13 +79,19 @@ export function BattleScene({
   rewards: Reward[];
   /** The family's timezone: the evening warning starts at 18:00 there. */
   timeZone: string;
+  /**
+   * His streak is cracked with a rescue open (streak recovery): it's frozen,
+   * so today's quests can't keep or lose it — the streak nudge steps aside
+   * (the rescue card under the scene is the thing to do).
+   */
+  rescueOpen?: boolean;
 }) {
-  const { party, boss, stage, onBossAnimationEnd, onBossFinished, emit, questsLeftToday } = useBattleContext();
+  const { boss, stage, onBossAnimationEnd, onBossFinished, emit, questsLeftToday } = useBattleContext();
   const stats = usePlayerStats(childId, initialStats);
 
-  // Evening warning (lib/rpg/evening.ts): from 18:00 family time, while he
-  // still has quests today and a boss is active, the boss charges up and a
-  // line states tonight's stakes.
+  // Evening nudge (lib/rpg/evening.ts): from 18:00 family time, while he
+  // still has quests today and a boss can be raided, the boss charges up and
+  // a line offers tonight's Night Raid.
   const [eveningDev, setEveningDev] = useState<{ force: boolean | null; stakes: TonightStakes | null }>({
     force: null,
     stakes: null,
@@ -99,19 +106,7 @@ export function BattleScene({
   });
   const charging = evening.line !== null;
 
-  // Heals (potions, perfect days; party_log over Realtime): a green +N over
-  // the party while the HP bar refills.
-  const [healPop, setHealPop] = useState<{ key: number; amount: number } | null>(null);
-  useBattleEvents((event) => {
-    if (event.type === "heal") setHealPop((h) => ({ key: (h?.key ?? 0) + 1, amount: event.amount }));
-  });
-  useEffect(() => {
-    if (!healPop) return;
-    const t = setTimeout(() => setHealPop(null), 1600);
-    return () => clearTimeout(t);
-  }, [healPop]);
-
-  // Development only: evening mode and heals on demand (see CLAUDE.md).
+  // Development only: evening mode on demand (see CLAUDE.md).
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
     return registerDevTools({
@@ -126,13 +121,16 @@ export function BattleScene({
           stakes: stakes
             ? {
                 today: "", timezone: timeZone, boss_active: true, boss_name: boss?.name ?? "The boss",
-                my_open_quests: 2, open_quests: 2, open_minutes: 45, damage: 45, party_hp: party?.current_hp ?? 100,
+                boss_hp: boss?.current_hp ?? 60, boss_max_hp: boss?.max_hp ?? 60,
+                my_open_quests: 2, open_quests: 2, open_minutes: 45,
+                raid_damage: Math.max(1, Math.ceil(((boss?.max_hp ?? 60) * 5) / 100)),
+                rescue_open: false,
                 ...stakes,
               }
             : null,
         }),
     });
-  }, [timeZone, boss?.name, party?.current_hp]);
+  }, [timeZone, boss?.name, boss?.current_hp, boss?.max_hp]);
 
   // LEVEL UP: announced when the live level rises (not on first load). The
   // celebration overlay queues it until any hit sequence has finished.
@@ -160,9 +158,9 @@ export function BattleScene({
   const shown = stage.shown;
 
   // The hero, from the event stream (lib/rpg/hero-stage.ts): an attack on
-  // damage, a flinch on a missed quest, knocked out when the party hits 0 HP
-  // (and back up when it refills), a victory pose when a boss falls.
-  const { hero, partyRef } = useHero(party?.current_hp ?? null, shown?.id ?? null);
+  // damage and a victory pose when a boss falls. (His flinch and knock-out
+  // are dormant since …16: nothing sends a "miss" or "party" event.)
+  const { hero, partyRef } = useHero(shown?.id ?? null);
   const arenaRef = useArenaShake(shown?.id ?? null);
   useDevicePixelStep();
   // The day/night sky (and the party's night tint), in the family's timezone.
@@ -182,9 +180,8 @@ export function BattleScene({
       >
         <ArenaBackdrop />
 
-        {/* The party: Rogue just behind the hero, both facing right. A
-            missed quest flashes them red and shoves them back as the boss's
-            blow lands. */}
+        {/* The party: Rogue just behind the hero, both facing right. (The
+            red flash + shove on a boss's blow is dormant since …16.) */}
         <div
           ref={partyRef}
           className="arena-party absolute inset-x-0 bottom-(--ground) top-0 z-10"
@@ -196,15 +193,6 @@ export function BattleScene({
           {/* Rogue reacts with the hero: same pose machine, same key. */}
           <RogueSprite pose={roguePoseFor(hero.state.pose)} playKey={hero.state.key} />
           <FeetSpot x={FEET_X.hero}>
-            {healPop && (
-              <p
-                key={healPop.key}
-                aria-hidden
-                className="heal-pop absolute bottom-[calc(var(--arena)*0.66)] left-0 z-20 w-max -translate-x-1/2 font-body text-3xl font-black leading-none sm:text-4xl"
-              >
-                +{healPop.amount}
-              </p>
-            )}
             <AnchoredSprite
               key={hero.state.key}
               animation={hero.animation}
@@ -255,8 +243,9 @@ export function BattleScene({
         <SoundToggle className="absolute left-2 top-2 z-30" />
       </div>
 
-      {/* HUD: the party (left, under the hero) and the boss (right) as
-          equals — a header and an HP bar each — then the stats full width. */}
+      {/* HUD: the party (left, under the hero — a header only: party HP is
+          gone since …16) and the boss (right, header + HP bar), then the
+          stats full width. */}
       <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:mt-3 sm:gap-x-4">
         <div className="min-w-0">
           <div className="mb-1.5 flex items-center justify-between gap-2">
@@ -267,16 +256,6 @@ export function BattleScene({
               Party
             </span>
           </div>
-          {party && (
-            <HudBar
-              label="Party HP"
-              icon={<HeartIcon className="h-4 w-4 shrink-0" />}
-              current={party.current_hp}
-              max={party.max_hp}
-              segments={PARTY_SEGMENTS}
-              tone="party"
-            />
-          )}
         </div>
         <div className="min-w-0">
           {shown ? (
@@ -310,6 +289,7 @@ export function BattleScene({
             withinReach={shopProgress(rewards, stats.gold).affordable}
             questsLeftToday={questsLeftToday}
             eveningLine={evening.line}
+            rescueOpen={rescueOpen}
           />
         </div>
       </div>
@@ -325,8 +305,8 @@ const heroAnims = SPRITES.hero.animations;
  * party's box). Also registers the development console hooks for his
  * reactions.
  */
-function useHero(partyHp: number | null, shownBossId: string | null) {
-  const [state, dispatch] = useReducer(heroReducer, partyHp, initialHero);
+function useHero(shownBossId: string | null) {
+  const [state, dispatch] = useReducer(heroReducer, null, initialHero);
   // His attacks: random, never the same one twice running.
   const [pickVariant] = useState(() => createNoRepeatPicker(STRIKE_VARIANTS.length));
   // The party's red flash + shove (.hero-hit), restarted by re-adding the
@@ -342,7 +322,7 @@ function useHero(partyHp: number | null, shownBossId: string | null) {
 
   useBattleEvents((event) => {
     dispatch({ type: "event", event, variant: event.type === "damage" ? pickVariant() : undefined });
-    if (event.type === "miss") flashParty();
+    if (event.type === "miss") flashParty(); // dormant: only the dev hurt() preview
   });
 
   // The victory pose holds until the next boss takes the stage.
@@ -354,6 +334,7 @@ function useHero(partyHp: number | null, shownBossId: string | null) {
   }, [shownBossId]);
 
   // Knocked out and the party's refilled: lie there a moment, then get up.
+  // (Dormant since …16: nothing knocks him out.)
   const riseDue = state.pose === "down" && state.pendingRise;
   useEffect(() => {
     if (!riseDue) return;
@@ -363,39 +344,27 @@ function useHero(partyHp: number | null, shownBossId: string | null) {
 
   // Development only: his reactions on demand (see CLAUDE.md), through the
   // same events the database sends.
-  const { party, boss, emit } = useBattleContext();
-  const latest = useRef({ party, boss });
+  const { boss, emit } = useBattleContext();
+  const latest = useRef({ boss });
   useEffect(() => {
-    latest.current = { party, boss };
-  }, [party, boss]);
+    latest.current = { boss };
+  }, [boss]);
   useEffect(() => {
     if (process.env.NODE_ENV !== "development") return;
-    type Tools = { setParty: (p: NonNullable<typeof party>) => void };
-    const tools = () => (window as unknown as { __fqBattle: Tools }).__fqBattle;
-    const setHp = (hp: (current: number, max: number) => number) => {
-      const p = latest.current.party;
-      if (p) tools().setParty({ ...p, current_hp: Math.max(0, Math.min(p.max_hp, hp(p.current_hp, p.max_hp))) });
-    };
     let victoryTimer: ReturnType<typeof setTimeout> | undefined;
     const cleanup = registerDevTools({
-      // A missed quest: the boss attacks, he flinches, the party loses HP
-      // (reaching 0 knocks him out).
+      // Preview of the DORMANT boss attack (kept for later seasons): the
+      // boss lunges, he flinches, the red flash. Nothing else changes.
       hurt: (amount = 10) => {
         const b = latest.current.boss;
         if (b) emit({ type: "miss", bossId: b.id, amount, childId: null, slotId: null, at: new Date().toISOString() });
-        setHp((hp) => hp - amount);
       },
-      // A heal (as a potion's party_log row sends it), without spending gold:
-      // the green +N and the HP bar refilling, capped at max HP.
-      heal: (amount = 20) => {
-        const p = latest.current.party;
-        const healed = p ? Math.min(amount, p.max_hp - p.current_hp) : amount;
-        setHp((hp) => hp + healed);
-        emit({ type: "heal", amount: healed, source: "potion", childId: null });
+      // Rogue's Night Raid landing on the boss, as the nightly reset's
+      // boss_log row sends it (no database write: the HP bar doesn't move).
+      raid: (amount = 3) => {
+        const b = latest.current.boss;
+        if (b) emit({ type: "raid", bossId: b.id, amount, childId: null, at: new Date().toISOString() });
       },
-      // Party HP to 0 / back to full, as the nightly reset sends them.
-      knockOut: () => setHp(() => 0),
-      standUp: () => setHp((_, max) => max),
       // His victory pose alone (finalBlow() plays the whole overlay), held
       // `holdMs` — the next boss would end it in the real game.
       victory: (holdMs = 3000) => {
@@ -531,20 +500,28 @@ function StatsStrip({
   withinReach,
   questsLeftToday,
   eveningLine,
+  rescueOpen,
 }: {
   stats: PlayerStats;
   withinReach: number;
   questsLeftToday: number | null;
-  /** The evening warning (it includes the streak, so it replaces the nudge). */
+  /** The evening nudge (it includes the streak, so it replaces the streak nudge). */
   eveningLine: string | null;
+  /** A frozen streak: no streak nudge. */
+  rescueOpen: boolean;
 }) {
   const cell =
     "flex min-w-0 flex-col items-center rounded-[3px] border-2 border-stone-edge bg-well px-1 py-1.5 shadow-[inset_2px_2px_0_rgb(0_0_0/0.5)]";
   const label = "mt-1 font-display text-sm font-semibold uppercase leading-none text-stone-text";
   const value = "text-lg font-black leading-none tabular-nums";
   const xp = levelProgress(stats.xp);
-  const nudge = stats.streak > 0 && questsLeftToday !== null && questsLeftToday > 0;
-  const nudgeLine = eveningLine ?? (nudge ? `Keep your ${stats.streak}-day streak: ${questsLeftToday} quest${questsLeftToday === 1 ? "" : "s"} left today` : null);
+  const nudge = stats.streak > 0 && !rescueOpen && questsLeftToday !== null && questsLeftToday > 0;
+  // PLACEHOLDER COPY (the streak nudge): what a perfect day wins, not what a miss costs.
+  const nudgeLine =
+    eveningLine ??
+    (nudge
+      ? `${questsLeftToday} quest${questsLeftToday === 1 ? "" : "s"} left today — a perfect day makes your streak ${stats.streak + 1}!`
+      : null);
 
   return (
     <div>
@@ -620,13 +597,18 @@ function StatsStrip({
           </div>
         </li>
       </ul>
-      {nudgeLine && (
-        // One nudge under the row: the evening warning (tonight's stakes,
-        // streak included) or, before evening, the streak nudge.
-        <p className="mt-1.5 flex items-center justify-end gap-1.5 text-right text-sm font-bold text-gold text-shadow-pixel">
-          {eveningLine ? <HeartIcon className="h-4 w-4 shrink-0" /> : <FlameIcon className="h-4 w-4 shrink-0" />}
-          {nudgeLine}
-        </p>
+      {/* One nudge under the row: the evening nudge (tonight's Night Raid,
+          streak included) as a ribbon banner or, before evening, the streak
+          nudge. */}
+      {eveningLine ? (
+        <RaidBanner text={eveningLine} />
+      ) : (
+        nudgeLine && (
+          <p className="mt-1.5 flex items-center justify-end gap-1.5 text-right text-sm font-bold text-gold text-shadow-pixel">
+            <FlameIcon className="h-4 w-4 shrink-0" />
+            {nudgeLine}
+          </p>
+        )
       )}
     </div>
   );

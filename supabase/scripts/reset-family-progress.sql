@@ -4,8 +4,8 @@
 --
 -- ⚠️  THIS IS YOUR ONLY FAMILY. It holds BOTH children — "Test" and REUBEN —
 --     so this wipes Reuben's real progress too (gold, XP, level, streaks,
---     quest history, reward requests). Bosses and party HP are family-wide:
---     they can't be reset for one child only.
+--     quest history, reward requests). Bosses are family-wide: they can't
+--     be reset for one child only.
 --
 -- Family: 19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94 ("Hepburn/Nurse",
 -- Europe/London). Found 2026-09-25 with a read-only service-role query of
@@ -39,8 +39,8 @@ end $$;
 delete from public.reset_recaps
 where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94';
 
--- 2. The boss roster. boss_log (damage, defeats, escapes, gold awards,
---    activations) goes with it: boss_log.boss_id is ON DELETE CASCADE.
+-- 2. The boss roster. boss_log (damage, Night Raids, defeats, gold awards,
+--    activations — and any dormant escape / miss-penalty rows) goes with it: boss_log.boss_id is ON DELETE CASCADE.
 delete from public.bosses
 where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94';
 
@@ -78,10 +78,25 @@ where p.id = s.pool_id
 delete from public.reward_redemptions
 where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94';
 
--- 4b. Party healing log (potions bought, perfect-day heals). Parent HQ's
---     "Party healing" list would otherwise show old entries.
+-- 4b. Party healing log (potions bought, perfect-day heals). DORMANT since
+--     migration …16 (party HP and potions are retired; nothing reads or
+--     writes it) — cleared anyway so the dormant table stays tidy.
 delete from public.party_log
 where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94';
+
+-- 4c. Streak rescues (streaks on hold, open or resolved). An open one would
+--     otherwise keep showing its "streak cracked" card after the reset, and
+--     the next nightly reset could restore its frozen streak over the 0
+--     set in step 5. The rescue job pool (rescue_jobs) is KEPT, like the
+--     reward catalogue. Skipped until migration 20260928000014 (streak
+--     recovery) is applied, so the script runs before and after it.
+do $$
+begin
+  if to_regclass('public.streak_rescues') is not null then
+    delete from public.streak_rescues
+    where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94';
+  end if;
+end $$;
 
 -- 5. Player stats back to their starting values (the column defaults), for
 --    BOTH children. streak_through null = the next nightly reset evaluates
@@ -100,14 +115,17 @@ where child_id in (
   where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94' and role = 'child'
 );
 -- 5-ALT (instead of 5): reset only the "Test" child's stats and leave
--- Reuben's gold/XP/streaks alone (bosses, party HP and quest history above
--- are still family-wide).
+-- Reuben's gold/XP/streaks alone (bosses and quest history above are
+-- still family-wide). Step 4c is family-wide too: with 5-ALT, change
+-- its where clause to child_id = 'f1b872bd-…' (below) so Reuben keeps an
+-- open rescue that matches his kept streak.
 -- update public.player_stats
 -- set gold = 0, xp = 0, level = 1, current_streak = 0, best_streak = 0,
 --     streak_through = null, pending_damage = 0, updated_at = now()
 -- where child_id = 'f1b872bd-1c69-4bc0-bb23-2249b45b0c17';  -- "Test"
 
--- 6. Party HP back to full.
+-- 6. Party HP back to full. DORMANT since …16 (nothing reads it); kept so
+--    the dormant row stays at full.
 update public.party_health
 set current_hp = max_hp,
     updated_at = now()
@@ -127,7 +145,8 @@ select public.activate_next_boss(
 
 -- 9. Check before committing: expect 12 bosses (1 active: Trash-Bag Slime),
 --    0 slots / redemptions / recaps / party log, stats at 0 / level 1,
---    party at max. (The SQL editor shows the last result set.)
+--    party at max. (Streak rescues aren't counted here: the table only
+--    exists once migration …14 is applied.) (The SQL editor shows the last result set.)
 select
   (select count(*) from public.bosses
      where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94')                    as bosses,

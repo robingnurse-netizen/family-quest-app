@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { Boss, PartyHealth } from "@/lib/supabase/types";
+import type { Boss, StreakRescue } from "@/lib/supabase/types";
 import { summarizeRecaps, type RecapBoss, type RecapSummary } from "@/lib/rpg/recap";
 import { addDays } from "@/lib/calendar/dates";
 import { buildTrophyCase, type Trophy, type TrophyLogRow } from "@/lib/rpg/trophies";
@@ -8,22 +8,18 @@ import { buildTrophyCase, type Trophy, type TrophyLogRow } from "@/lib/rpg/troph
 export type BattleData = {
   familyId: string;
   boss: Boss | null;
-  party: PartyHealth | null;
 };
 
-/** The family's active boss and party health, for the first render. */
+/** The family's active boss, for the first render. */
 export async function loadBattle(familyId: string): Promise<BattleData> {
   const supabase = await createClient();
-  const [{ data: boss }, { data: party }] = await Promise.all([
-    supabase
-      .from("bosses")
-      .select("*")
-      .eq("family_id", familyId)
-      .eq("status", "active")
-      .maybeSingle(),
-    supabase.from("party_health").select("*").eq("family_id", familyId).maybeSingle(),
-  ]);
-  return { familyId, boss, party };
+  const { data: boss } = await supabase
+    .from("bosses")
+    .select("*")
+    .eq("family_id", familyId)
+    .eq("status", "active")
+    .maybeSingle();
+  return { familyId, boss };
 }
 
 /**
@@ -41,7 +37,7 @@ export async function loadRecap(childId: string, today: string): Promise<RecapSu
     .order("created_at");
   if (!rows?.length) return null;
 
-  const ids = [...new Set(rows.flatMap((r) => [r.boss_id, r.escaped_boss_id, r.next_boss_id]).filter((id) => id !== null))];
+  const ids = [...new Set(rows.map((r) => r.boss_id).filter((id) => id !== null))];
   const { data: bosses } = ids.length
     ? await supabase.from("bosses").select("id, name, sprite_key, tier").in("id", ids)
     : { data: [] as RecapBoss[] };
@@ -80,7 +76,8 @@ export async function loadTrophyCase(familyId: string, childId: string): Promise
       .from("boss_log")
       .select("boss_id, event_type, amount, created_at")
       .in("boss_id", ids)
-      .in("event_type", ["damage", "defeated"])
+      // Quest hits and Night Raids both count as the family's damage.
+      .in("event_type", ["damage", "night_raid", "defeated"])
       .order("id")
       .range(from, from + PAGE - 1);
     logs.push(...(data ?? []));
@@ -92,4 +89,16 @@ export async function loadTrophyCase(familyId: string, childId: string): Promise
     bestStreak: stats?.best_streak ?? 0,
     timeZone: family?.timezone ?? "Europe/London",
   };
+}
+
+/** His open streak rescue (a streak on hold), or null. */
+export async function loadOpenRescue(childId: string): Promise<StreakRescue | null> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("streak_rescues")
+    .select("*")
+    .eq("child_id", childId)
+    .eq("status", "open")
+    .maybeSingle();
+  return data;
 }

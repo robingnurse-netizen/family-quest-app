@@ -14,14 +14,15 @@ import { BOSS_ATTACK_IMPACT_MS } from "@/lib/rpg/hero-stage";
  * Own hits sound on the hit overlay's beats (the attack on "impact", the
  * fanfare on "ko") so they land with the picture; hits and defeats the
  * overlay doesn't show (someone else's, the nightly reset, a refetch) sound
- * when the event arrives. A missed quest's party damage sounds on the
- * boss's blow (BOSS_ATTACK_IMPACT_MS after the miss, as the hero's flinch
- * peaks); its minGapMs still applies, checked when it plays.
+ * when the event arrives. A Night Raid sounds as an attack (live, or on
+ * the recap's raid beat). The boss's blow on the party ("miss") is DORMANT
+ * since …16 (only the dev hurt() preview): its sound lands BOSS_ATTACK_IMPACT_MS
+ * after, as the hero's flinch peaks.
  */
 export function BattleSounds({ childId }: { childId: string }) {
   useEffect(() => armSounds(), []);
 
-  // Delayed sounds (party damage on the blow), cancelled on unmount.
+  // Delayed sounds (the dormant blow's party-damage sound), cancelled on unmount.
   const timers = useRef(new Set<ReturnType<typeof setTimeout>>());
   useEffect(() => {
     const pending = timers.current;
@@ -43,6 +44,9 @@ export function BattleSounds({ childId }: { childId: string }) {
         if (hitAt === undefined || Date.now() - hitAt > OVERLAY_TIMING.recent) playSound("bossDefeated");
         return;
       }
+      case "raid":
+        playSound("attack");
+        return;
       case "miss": {
         const t = setTimeout(() => {
           timers.current.delete(t);
@@ -69,12 +73,11 @@ export function BattleSounds({ childId }: { childId: string }) {
             playSound(event.kind === "level_up" ? "levelUp" : "streakMilestone");
             return;
           case "purchase":
-          case "potion":
             playSound("itemPurchased");
             return;
-          // The recap stages its own blow and emits this as it lands.
-          case "party_hit":
-            playSound("partyDamage");
+          // The recap stages Rogue's raid and emits this as it lands.
+          case "night_raid":
+            playSound("attack");
             return;
         }
     }

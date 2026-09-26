@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import type { Boss, DailyResetResult, PartyHealth } from "@/lib/supabase/types";
+import type { Boss, DailyResetResult } from "@/lib/supabase/types";
 import { BattleProvider, useBattleContext } from "@/components/rpg/battle/battle-provider";
 import { BossSprite } from "./boss-sprite";
 
 // Parent HQ's boss battle panel: the active boss's sprite reacting live to
-// game events (hurt on damage, attacking on missed quests, death or escape,
-// then the next boss), its HP bar and the party's. Name, sprite and boss HP
+// game events (hurt on a quest hit or a Night Raid, death, then the next
+// boss) and its HP bar. Name, sprite and boss HP
 // follow the boss *on stage*, which briefly lags the database while a
 // finished boss plays out. (Reuben's dashboard has the battle scene instead:
 // components/rpg/battle/.)
@@ -28,7 +28,6 @@ const s = {
   hpLabel: "mb-1 text-xs",
   hpBar: "h-3",
   bossFill: "bg-gradient-to-r from-rose-600 to-orange-500",
-  partyFill: "bg-gradient-to-r from-emerald-500 to-lime-400",
   spriteHeight: 120,
 };
 
@@ -37,24 +36,22 @@ type RunReset = () => Promise<{ ok: true; data: DailyResetResult } | { ok: false
 export function BossStatus({
   familyId,
   initialBoss,
-  initialParty,
   runReset,
 }: {
   familyId: string;
   initialBoss: Boss | null;
-  initialParty: PartyHealth | null;
   /** Testing aid: runs the daily reset for this family now. */
   runReset?: RunReset;
 }) {
   return (
-    <BattleProvider familyId={familyId} initialBoss={initialBoss} initialParty={initialParty}>
+    <BattleProvider familyId={familyId} initialBoss={initialBoss}>
       <BossPanel runReset={runReset} />
     </BattleProvider>
   );
 }
 
 function BossPanel({ runReset }: { runReset?: RunReset }) {
-  const { party, stage, onBossAnimationEnd, onBossFinished, refetch } = useBattleContext();
+  const { stage, onBossAnimationEnd, onBossFinished, refetch } = useBattleContext();
   const shown = stage.shown;
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -115,8 +112,6 @@ function BossPanel({ runReset }: { runReset?: RunReset }) {
           <p className={`text-sm ${s.muted}`}>No boss right now — all quests conquered!</p>
         )}
 
-        {party && <HpBar label="Party HP" current={party.current_hp} max={party.max_hp} fill={s.partyFill} />}
-
         {runReset && (
           <div className="mt-4 space-y-2">
             <div className="flex flex-wrap items-center gap-2">
@@ -167,23 +162,18 @@ function HpBar({ label, current, max, fill }: { label: string; current: number; 
 }
 
 function summarize(r: DailyResetResult, bossName: string) {
-  // Completed quests damage the boss instantly; the nightly run only
-  // handles misses, escapes and anything left over.
+  // Completed quests damage the boss instantly; the nightly run marks
+  // misses (they only feed the streak), sends Rogue's Night Raids for
+  // perfect days and beats a boss left at 0 HP.
   const parts: string[] = [];
-  if (r.missed_minutes) {
-    parts.push(
-      r.party_damage
-        ? `${r.missed_minutes} missed minutes (party −${r.party_damage})`
-        : `${r.missed_minutes} missed minutes`,
-    );
-  } else {
-    parts.push("No missed quests");
+  parts.push(r.missed_minutes ? `${r.missed_minutes} missed minutes` : "No missed quests");
+  if (r.raid_damage) {
+    parts.push(`Rogue raided ${r.raids.length === 1 ? "once" : `${r.raids.length} times`} for ${r.raid_damage} damage`);
   }
   if (r.defeated) {
     const gold = r.gold_awarded.reduce((sum, g) => sum + g.gold, 0);
     parts.push(`${bossName} defeated! +${gold} gold`);
   }
-  if (r.escaped) parts.push(`${bossName} escaped — party healed`);
   if (r.activated) parts.push("a new boss appears");
   return `${parts.join(" · ")}.`;
 }

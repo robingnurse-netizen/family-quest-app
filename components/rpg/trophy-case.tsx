@@ -11,7 +11,7 @@ import { TrophyCaseSounds, TrophyStatue } from "./trophy-statue";
 //
 // Beaten bosses are lit — real colours and a gold trophy glow, with the
 // defeat date and the damage dealt on a brass plaque. The rest — not reached
-// yet, being fought now, or escaped — are black silhouettes with only a
+// yet, or being fought now — are black silhouettes with only a
 // faint glow and a scratched-out nameplate (the name isn't even sent until
 // the boss is beaten); only the line under it says which.
 //
@@ -133,5 +133,5 @@ function TrophySlot({ trophy: t, date }: { trophy: Trophy; date: Intl.DateTimeFo
 
 /** The status line of an unbeaten boss (its identity stays hidden). */
 function statusText(t: Trophy) {
-  return t.state === "escaped" ? "Escaped" : t.state === "fighting" ? "Now fighting" : "Not yet faced";
+  return t.state === "fighting" ? "Now fighting" : "Not yet faced";
 }

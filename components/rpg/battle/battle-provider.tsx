@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from "react";
-import type { Boss, PartyHealth } from "@/lib/supabase/types";
+import type { Boss } from "@/lib/supabase/types";
 import { createClient } from "@/lib/supabase/client";
 import { useBattle } from "@/lib/hooks/use-battle";
 import { initialStage, stageReducer, type StageState } from "@/lib/rpg/boss-stage";
@@ -10,11 +10,10 @@ import { createBattleEmitter, type BattleEvent, type BattleListener } from "@/li
 type BattleContextValue = {
   /** The database's active boss (the stage's `shown` boss can lag it). */
   boss: Boss | null;
-  party: PartyHealth | null;
   stage: StageState;
   /** The boss's one-shot hurt / attack finished. */
   onBossAnimationEnd: () => void;
-  /** The finished boss's defeat / escape has played out. */
+  /** The finished boss's defeat has played out. */
   onBossFinished: () => void;
   subscribe: (listener: BattleListener) => () => void;
   /** Emit into the stream (the overlay's "moment" events). */
@@ -40,7 +39,7 @@ type BattleContextValue = {
 const BattleContext = createContext<BattleContextValue | null>(null);
 
 /**
- * One family's battle: live boss + party (Realtime), the typed event stream
+ * One family's battle: the live boss (Realtime), the typed event stream
  * and the boss stage machine, shared by everything inside — the battle
  * scene, its pinned strip, the parent's panel, and future listeners like the
  * hit overlay or sound effects (via useBattleEvents).
@@ -48,22 +47,19 @@ const BattleContext = createContext<BattleContextValue | null>(null);
 export function BattleProvider({
   familyId,
   initialBoss,
-  initialParty,
   recapPending = false,
   children,
 }: {
   familyId: string;
   initialBoss: Boss | null;
-  initialParty: PartyHealth | null;
   /** A recap will play on load: hold everything else back from the start. */
   recapPending?: boolean;
   children: React.ReactNode;
 }) {
   const [emitter] = useState(createBattleEmitter);
-  const live = useBattle({ familyId, initialBoss, initialParty, onEvent: emitter.emit });
-  const [dev, setDev] = useState<{ boss?: Boss | null; party?: PartyHealth }>({});
+  const live = useBattle({ familyId, initialBoss, onEvent: emitter.emit });
+  const [dev, setDev] = useState<{ boss?: Boss | null }>({});
   const boss = dev.boss !== undefined ? dev.boss : live.boss;
-  const party = dev.party ?? live.party;
 
   const [stage, dispatch] = useReducer(stageReducer, initialBoss, initialStage);
   const [overlayActive, setOverlayActive] = useState(false);
@@ -84,10 +80,6 @@ export function BattleProvider({
     const tools = {
       emit: (event: BattleEvent) => emitter.emit(event),
       setBoss: (next: Boss | null) => setDev((d) => ({ ...d, boss: next })),
-      setParty: (next: PartyHealth) => {
-        setDev((d) => ({ ...d, party: next }));
-        emitter.emit({ type: "party", hp: next.current_hp, max: next.max_hp });
-      },
       /** Log / hook every event (e.g. to prototype sounds); returns an unsubscribe. */
       listen: (fn: BattleListener) => emitter.subscribe(fn),
       /**
@@ -128,7 +120,6 @@ export function BattleProvider({
   const value = useMemo<BattleContextValue>(
     () => ({
       boss,
-      party,
       stage,
       onBossAnimationEnd,
       onBossFinished,
@@ -142,7 +133,7 @@ export function BattleProvider({
       setQuestsLeftToday,
       refetch: live.refetch,
     }),
-    [boss, party, stage, onBossAnimationEnd, onBossFinished, emitter, overlayActive, recapActive, questsLeftToday, live.refetch],
+    [boss, stage, onBossAnimationEnd, onBossFinished, emitter, overlayActive, recapActive, questsLeftToday, live.refetch],
   );
 
   return <BattleContext.Provider value={value}>{children}</BattleContext.Provider>;
@@ -160,7 +151,7 @@ export function useOptionalBattleContext() {
 }
 
 /**
- * Subscribe to battle events (damage, miss, defeated, escaped, activated).
+ * Subscribe to battle events (damage, raid, defeated, activated, moments…).
  * The listener can change between renders; the subscription doesn't.
  */
 export function useBattleEvents(listener: BattleListener) {

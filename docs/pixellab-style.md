@@ -151,31 +151,13 @@ await __fqBattle.jumpToBoss("alarm_clock_swarm"); // any sprite_key, or a 1-base
 | Animation | Command |
 |-----------|---------|
 | idle   | plays on its own once the boss is on stage |
-| attack | `__fqBattle.hurt(10)` (a missed quest: the boss hits the party) |
-| hurt   | `__fqBattle.hit(15)` (a quest strikes it; also the hit overlay) |
+| attack | `__fqBattle.hurt(10)` (a preview: the boss's attack is dormant in the game since the Night Raid rewind, kept for later seasons) |
+| hurt   | `__fqBattle.hit(15)` (a quest strikes it; also the hit overlay), or `__fqBattle.raid(3)` (Rogue's Night Raid) |
 | death  | `__fqBattle.finalBlow()` |
-| move (escape) | the snippet below |
 
-The escape needs the real boss row: `escaped` events for any other `id`
-than the boss on stage are ignored, and `bosses()` only prints a table (it
-returns nothing). `jumpToBoss` emits an `activated` event carrying exactly
-the boss it put on stage, so catch it with `listen()` (which returns its
-unsubscribe function):
-
-```js
-// Swap in any boss's sprite_key.
-let boss;
-const stop = __fqBattle.listen((e) => { if (e.type === "activated") boss = e.boss; });
-await __fqBattle.jumpToBoss("alarm_clock_swarm");
-stop();
-__fqBattle.emit({ type: "escaped", boss: { ...boss, status: "escaped" } });
-```
-
-The boss plays `move`, slides off to the right (mirrored to face the way it
-flees), the banner says "<Boss> escaped!", then the tab's active boss (the
-same dev boss) re-enters. `__fqBattle.jumpToBoss(null)` goes back to the
-database's boss. (`knockOut()` only empties the party; the escape itself
-happens in the nightly reset.)
+`move` is still sheeted and sliced for every boss but isn't played: it was
+the escape, and bosses no longer escape (migration …16). Keep generating it —
+later seasons may use it.
 
 ## Pilot record: Trash-Bag Slime
 

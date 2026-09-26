@@ -3,9 +3,8 @@
 import { requireRole } from "@/lib/supabase/profile";
 import { createClient } from "@/lib/supabase/server";
 import { friendlyRewardError } from "@/lib/rewards/errors";
-import { friendlyPotionError } from "@/lib/potions/errors";
 import type { ActionResult } from "@/lib/backlog/types";
-import type { PotionPurchase, RewardRedemption } from "@/lib/supabase/types";
+import type { RewardRedemption } from "@/lib/supabase/types";
 
 /**
  * Request a reward. The database checks and deducts the gold in the same
@@ -52,25 +51,4 @@ export async function redeemReward(
     .eq("child_id", profile.id)
     .maybeSingle();
   return { ok: true, data: { redemption, gold: stats?.gold ?? 0 } };
-}
-
-/**
- * Buy a potion and drink it at once (no inventory, no grown-up). The
- * database prices it from the potions table, takes his own gold and heals
- * the party in one step (buy_potion()), so double taps can't overspend.
- * `expectedCost` is the price he saw: if it's changed, nothing is spent.
- */
-export async function buyPotion(potionId: string, expectedCost: number): Promise<ActionResult<PotionPurchase>> {
-  await requireRole("child");
-  const supabase = await createClient();
-
-  const { data: potion } = await supabase.from("potions").select("gold_cost, active").eq("id", potionId).maybeSingle();
-  if (!potion || !potion.active) return { ok: false, error: "That potion isn't on sale any more." };
-  if (potion.gold_cost !== expectedCost) {
-    return { ok: false, error: `The price just changed to ${potion.gold_cost} gold — take another look.` };
-  }
-
-  const { data, error } = await supabase.rpc("buy_potion", { p_potion_id: potionId });
-  if (error || !data) return { ok: false, error: friendlyPotionError(error?.message, "Couldn't buy that potion.") };
-  return { ok: true, data };
 }

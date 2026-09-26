@@ -9,11 +9,9 @@ export type BossPose = SpriteAnimation;
 export type BossAnimations = {
   idle: BossPose;
   hurt: BossPose;
-  /** Played once when a missed quest lets the boss hit the party. */
+  /** The boss's attack, played once (DORMANT since …16: kept for later seasons). */
   attack: BossPose;
   death: BossPose;
-  /** Played (looping, while sliding off) when the boss escapes. */
-  escape: BossPose;
 };
 
 const cache = new Map<string, BossAnimations | null>();
@@ -50,6 +48,5 @@ function buildBossAnimations(spriteKey: string): BossAnimations | null {
     // Timed to the blow when the art marks a contact frame.
     attack: a.attack ? bossAttackAnimation(a.attack) : pose(idle, false),
     death: pose(death, false),
-    escape: pose(a.move ?? idle, true),
   };
 }

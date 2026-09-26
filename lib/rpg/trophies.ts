@@ -4,18 +4,19 @@
 // tested directly (tests/trophies.test.mjs); the page loads the rows.
 //
 // Read-only: built from existing data — bosses (status) and boss_log
-// (a "damage" row per hit, a "defeated" row when it falls).
+// (a "damage" row per hit, a "night_raid" row per Night Raid, a "defeated"
+// row when it falls).
 
 import type { Boss, BossTier } from "@/lib/supabase/types";
 
 /**
  * - defeated: beaten — real art and name, trophy glow, date and damage.
  * - fighting: the active boss — a nameless silhouette, "Now fighting".
- * - escaped:  got away — a nameless silhouette, "Escaped".
- * - locked:   not reached yet — a nameless silhouette.
+ * - locked:   not reached yet — a nameless silhouette. (A legacy 'escaped'
+ *             boss — dormant since …16 — shows as locked too.)
  * Only a defeat reveals the name; the rest stay a mystery.
  */
-export type TrophyState = "defeated" | "fighting" | "escaped" | "locked";
+export type TrophyState = "defeated" | "fighting" | "locked";
 
 export type Trophy = {
   id: string;
@@ -26,7 +27,7 @@ export type Trophy = {
   state: TrophyState;
   /** When it was defeated (the "defeated" boss_log row), else null. */
   defeatedAt: string | null;
-  /** Total damage the family dealt it (every "damage" row), once defeated; else null. */
+  /** Total damage the family dealt it (every "damage" and "night_raid" row), once defeated; else null. */
   damage: number | null;
 };
 
@@ -46,7 +47,7 @@ export function buildTrophyCase(bosses: TrophyBoss[], logs: TrophyLogRow[]): Tro
   const damage = new Map<string, number>();
   const defeatedAt = new Map<string, string>();
   for (const row of logs) {
-    if (row.event_type === "damage") damage.set(row.boss_id, (damage.get(row.boss_id) ?? 0) + row.amount);
+    if (row.event_type === "damage" || row.event_type === "night_raid") damage.set(row.boss_id, (damage.get(row.boss_id) ?? 0) + row.amount);
     if (row.event_type === "defeated") defeatedAt.set(row.boss_id, row.created_at);
   }
 
@@ -59,7 +60,7 @@ export function buildTrophyCase(bosses: TrophyBoss[], logs: TrophyLogRow[]): Tro
     )
     .map((b) => {
       const state: TrophyState =
-        b.status === "defeated" ? "defeated" : b.status === "active" ? "fighting" : b.status === "escaped" ? "escaped" : "locked";
+        b.status === "defeated" ? "defeated" : b.status === "active" ? "fighting" : "locked";
       return {
         id: b.id,
         name: state === "defeated" ? b.name : null,

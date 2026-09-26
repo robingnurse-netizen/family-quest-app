@@ -107,7 +107,6 @@ export default async function ParentDashboard() {
         <BossStatus
           familyId={battle.familyId}
           initialBoss={battle.boss}
-          initialParty={battle.party}
           runReset={runDailyResetNow}
         />
       </section>
@@ -115,12 +114,20 @@ export default async function ParentDashboard() {
       <section className="mt-8">
         <div className="mb-3 flex items-baseline justify-between gap-2">
           <h2 className="text-lg font-black text-slate-900">This week&apos;s quests</h2>
-          <Link
-            href="/parent/pools"
-            className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
-          >
-            Manage weekly quests →
-          </Link>
+          <div className="flex flex-wrap justify-end gap-x-4">
+            <Link
+              href="/parent/rescue-jobs"
+              className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+            >
+              Rescue quests →
+            </Link>
+            <Link
+              href="/parent/pools"
+              className="text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+            >
+              Manage weekly quests →
+            </Link>
+          </div>
         </div>
         {/* Read-only and live: completions on the player's board show up here. */}
         <PoolManager

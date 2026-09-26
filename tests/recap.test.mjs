@@ -1,11 +1,14 @@
 // The recap's story (lib/rpg/recap.ts): several nights combined into one
-// recap, one damage number, and its kid-friendly lines.
+// recap — Rogue's Night Raid as the good-news beat, streak events framed
+// around what can be won back, nothing for misses alone — and its timeline.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { fileURLToPath } from "node:url";
 import { importTs } from "./helpers/load-ts.mjs";
 
-const { summarizeRecaps } = await importTs(fileURLToPath(new URL("../lib/rpg/recap.ts", import.meta.url)));
+const { summarizeRecaps, recapSchedule, recapFinalState, rescueLine, RECAP_TIMING } = await importTs(
+  fileURLToPath(new URL("../lib/rpg/recap.ts", import.meta.url)),
+);
 
 const YESTERDAY = "2032-03-09";
 const bosses = {
@@ -17,191 +20,164 @@ const row = (over = {}) => ({
   created_at: `2032-03-10T00:05:${String(clock++).padStart(2, "0")}Z`,
   day_from: YESTERDAY,
   day_to: YESTERDAY,
-  missed_quests: 0,
-  missed_minutes: 0,
-  party_damage: 0,
   boss_id: "slime",
   perfect_days: 0,
-  healed: 0,
   streak_before: 0,
   streak_after: 0,
-  knocked_out: false,
-  escaped_boss_id: null,
-  next_boss_id: null,
-  hp_before: 100,
-  hp_after: 100,
-  max_hp: 100,
+  rescue_events: [],
+  raid_damage: 0,
+  raids: 0,
   ...over,
 });
+const ev = (event, over = {}) => ({
+  event, rescue_id: "r1", missed_day: "2032-03-06", due_on: "2032-03-10", // a Wednesday
+  streak_at_crack: 6, streak_after: 6, fallback: false, ...over,
+});
+const kinds = (beats) => beats.map((b) => b.kind);
+const at = (beats, kind) => beats.find((b) => b.kind === kind)?.at;
+
+// --- The story ----------------------------------------------------------------------------
 
 test("nothing unseen: no recap", () => {
   assert.equal(summarizeRecaps([], bosses, YESTERDAY), null);
 });
 
-test("one night of misses: 'Yesterday', one damage number, the blow", () => {
+test("one raid night: 'Last night', the raid on its boss, one damage number", () => {
+  const s = summarizeRecaps([row({ perfect_days: 1, raids: 1, raid_damage: 3 })], bosses, YESTERDAY);
+  assert.equal(s.kind, "raid");
+  assert.equal(s.when, "Last night");
+  assert.equal(s.raidDamage, 3);
+  assert.equal(s.raidBoss.name, "Trash-Bag Slime");
+  assert.deepEqual(s.lines, ["Last night, Rogue went on a Night Raid! Trash-Bag Slime took 3 damage."]);
+  assert.deepEqual(s.cues, ["raid"]);
+  assert.equal(s.closing, "Another perfect day, another raid!");
+});
+
+test("several nights combine: raids and damage add up, the latest raid's boss", () => {
   const s = summarizeRecaps(
-    [row({ missed_quests: 2, missed_minutes: 45, party_damage: 45, hp_after: 55 })],
+    [
+      row({ day_from: "2032-03-08", day_to: "2032-03-08", perfect_days: 1, raids: 1, raid_damage: 3 }),
+      row({ perfect_days: 1, raids: 1, raid_damage: 4, boss_id: "swarm" }),
+    ],
     bosses,
     YESTERDAY,
   );
-  assert.equal(s.kind, "blow");
-  assert.equal(s.damage, 45);
-  assert.equal(s.attacker.name, "Trash-Bag Slime");
-  assert.deepEqual(s.lines, ["Yesterday: 2 quests missed (45 min). The party took 45 damage."]);
-  assert.equal(s.closing, "New day — let's get him back!");
+  assert.equal(s.when, "While you were away");
+  assert.deepEqual([s.raids, s.raidDamage, s.raidBoss.name], [2, 7, "Alarm Clock Swarm"]);
+  assert.equal(s.lines[0], "While you were away, Rogue went on 2 Night Raids! Alarm Clock Swarm took 7 damage.");
 });
 
-test("several nights combine into one recap with one combined damage number", () => {
-  const rows = [
-    row({ day_from: "2032-03-07", day_to: "2032-03-07", missed_quests: 1, missed_minutes: 15, party_damage: 15, hp_before: 100, hp_after: 85 }),
-    row({ day_from: "2032-03-08", day_to: "2032-03-08", missed_quests: 2, missed_minutes: 30, party_damage: 30, hp_before: 85, hp_after: 55 }),
-    row({ perfect_days: 1, healed: 10, hp_before: 55, hp_after: 65 }),
-  ];
-  const s = summarizeRecaps([rows[2], rows[0], rows[1]], bosses, YESTERDAY); // any order
-  assert.equal(s.nights, 3);
-  assert.equal(s.when, "Since you were last here");
-  assert.equal(s.damage, 45);
-  assert.deepEqual([s.hpBefore, s.hpAfter], [100, 65]);
-  assert.equal(s.through, rows[2].created_at, "acknowledge up to the newest");
-  assert.deepEqual(s.lines, [
-    "Since you were last here: 3 quests missed (45 min). The party took 45 damage.",
-    "Perfect day! Party healed 10 HP.",
-  ]);
+test("a single night covering several days (catch-up) isn't 'Last night'", () => {
+  const s = summarizeRecaps([row({ day_from: "2032-03-07", raids: 1, raid_damage: 3, perfect_days: 1 })], bosses, YESTERDAY);
+  assert.equal(s.when, "While you were away");
 });
 
-test("a single night covering several days (catch-up) isn't 'Yesterday'", () => {
-  const s = summarizeRecaps([row({ day_from: "2032-03-06", missed_quests: 1, missed_minutes: 10, party_damage: 10 })], bosses, YESTERDAY);
-  assert.equal(s.when, "Since you were last here");
+test("misses alone: a quiet recap — nothing shown (acknowledged silently)", () => {
+  const s = summarizeRecaps([row({}), row({ boss_id: null })], bosses, YESTERDAY);
+  assert.equal(s.kind, "quiet");
+  assert.deepEqual(s.lines, []);
+  assert.ok(s.through, "still acknowledged up to the newest row");
 });
 
-test("streak lost is mentioned when the misses broke a streak above 0", () => {
-  const lost = summarizeRecaps([row({ missed_quests: 1, missed_minutes: 20, party_damage: 20, streak_before: 3, streak_after: 0 })], bosses, YESTERDAY);
-  assert.ok(lost.streakLost);
-  assert.ok(lost.lines.includes("Streak lost."));
-  const none = summarizeRecaps([row({ missed_quests: 1, missed_minutes: 20, party_damage: 20 })], bosses, YESTERDAY);
-  assert.equal(none.streakLost, false, "no streak to lose");
-});
-
-test("knocked out: the escape and the next boss, in order", () => {
-  const s = summarizeRecaps(
-    [row({ missed_quests: 3, missed_minutes: 60, party_damage: 60, knocked_out: true, escaped_boss_id: "slime", next_boss_id: "swarm", hp_before: 40 })],
-    bosses,
-    YESTERDAY,
-  );
-  assert.equal(s.knockedOut, true);
-  assert.equal(s.escaped.name, "Trash-Bag Slime");
-  assert.equal(s.next.name, "Alarm Clock Swarm");
-  assert.deepEqual(s.lines.slice(1), [
-    "The party was knocked out — Trash-Bag Slime got away!",
-    "A new foe appears: Alarm Clock Swarm!",
-  ]);
-  assert.equal(s.closing, "New day — new foe. Let's go!");
-});
-
-test("misses with no boss: text only, no damage line", () => {
-  const s = summarizeRecaps([row({ missed_quests: 1, missed_minutes: 20, boss_id: null })], bosses, YESTERDAY);
+test("a perfect day with nothing to raid (boss at 1 HP / none): a short text recap", () => {
+  const s = summarizeRecaps([row({ perfect_days: 1 })], bosses, YESTERDAY);
   assert.equal(s.kind, "text");
-  assert.equal(s.attacker, null);
-  assert.deepEqual(s.lines, ["Yesterday: 1 quest missed (20 min)."]);
+  assert.deepEqual(s.lines, ["Perfect day!"]);
   assert.equal(s.closing, "New day — let's go!");
 });
 
-test("a perfect day with no misses: a brief, positive recap", () => {
-  const s = summarizeRecaps([row({ perfect_days: 1, healed: 10, hp_before: 80, hp_after: 90 })], bosses, YESTERDAY);
-  assert.equal(s.kind, "perfect");
-  assert.deepEqual(s.lines, ["Perfect day! Party healed 10 HP."]);
-  assert.equal(s.closing, "Keep it up!");
-  const full = summarizeRecaps([row({ perfect_days: 2 })], bosses, YESTERDAY);
-  assert.deepEqual(full.lines, ["2 perfect days!"], "nothing to heal at full HP");
-});
+// --- Streak recovery lines (PLACEHOLDER COPY) --------------------------------------------------
 
-test("a brother's or sister's misses still show the party's damage", () => {
-  const s = summarizeRecaps([row({ party_damage: 25, hp_after: 75 })], bosses, YESTERDAY);
-  assert.equal(s.kind, "blow");
-  assert.deepEqual(s.lines, ["Yesterday: the party took 25 damage."]);
-});
-
-// --- Staging --------------------------------------------------------------------------
-
-const { recapSchedule, recapFinalState, RECAP_TIMING } = await importTs(fileURLToPath(new URL("../lib/rpg/recap.ts", import.meta.url)));
-const kinds = (beats) => beats.map((b) => b.kind);
-const at = (beats, kind) => beats.find((b) => b.kind === kind)?.at;
-
-test("a blow: attack, then the blow on the boss's impact, one of each", () => {
-  const s = summarizeRecaps([row({ missed_quests: 2, missed_minutes: 45, party_damage: 45 })], bosses, YESTERDAY);
-  const beats = recapSchedule(s);
-  assert.equal(kinds(beats).filter((k) => k === "blow").length, 1, "one combined blow");
-  assert.equal(at(beats, "blow") - at(beats, "attack"), RECAP_TIMING.impact);
-  assert.ok(!kinds(beats).includes("ko"));
-  assert.equal(kinds(beats).at(-1), "closing", "the animation ends on the complete summary card");
-});
-
-test("knocked out: fall, the boss leaves, the next arrives, then he stands as the party refills", () => {
+test("a streak on hold says how to win it back, and by when", () => {
   const s = summarizeRecaps(
-    [row({ missed_quests: 3, missed_minutes: 60, party_damage: 60, knocked_out: true, escaped_boss_id: "slime", next_boss_id: "swarm", hp_before: 40 })],
+    [row({ streak_before: 6, streak_after: 6, rescue_events: [ev("cracked", { offered_count: 5 })] })],
     bosses,
     YESTERDAY,
   );
-  const beats = recapSchedule(s);
-  const order = ["blow", "ko", "escape", "enter", "refill", "rise", "stand", "closing"];
-  const times = order.map((k) => at(beats, k));
-  assert.deepEqual(times, [...times].sort((a, b) => a - b), `in order: ${order.join(" → ")}`);
-  assert.equal(at(beats, "refill"), at(beats, "rise"), "he gets up as the party refills");
-  // The text keeps pace with the picture.
-  const lineTimes = beats.filter((b) => b.kind === "line").map((b) => b.at);
-  assert.ok(lineTimes[1] >= at(beats, "escape"), "'got away' once the boss is leaving");
-  assert.ok(lineTimes[2] >= at(beats, "enter"), "'a new foe' once it arrives");
+  assert.equal(s.kind, "text");
+  assert.deepEqual(s.lines, ["Your 6‑day streak is on hold! Do a rescue quest by the end of Wednesday to win it back."]);
+  assert.equal(
+    rescueLine(ev("cracked", { fallback: true, due_on: "2032-03-09" })),
+    "Your 6‑day streak is on hold! Finish any quest by the end of Tuesday to win it back.",
+  );
 });
 
-test("no boss: no blow, just the lines", () => {
-  const s = summarizeRecaps([row({ missed_quests: 1, missed_minutes: 20, boss_id: null })], bosses, YESTERDAY);
+test("won back and halved lines, in night order, after the raid", () => {
+  const s = summarizeRecaps(
+    [
+      row({ created_at: "2032-03-08T00:05:00Z", rescue_events: [ev("rescued")] }),
+      row({ created_at: "2032-03-12T00:05:00Z", perfect_days: 1, raids: 1, raid_damage: 3, rescue_events: [ev("halved", { streak_at_crack: 7, streak_after: 4 })] }),
+    ],
+    bosses,
+    YESTERDAY,
+  );
+  assert.deepEqual(s.lines, [
+    "While you were away, Rogue went on a Night Raid! Trash-Bag Slime took 3 damage.",
+    "Streak won back! You're on 6 days.",
+    "Your streak is on 4 days — every perfect day adds one!",
+  ]);
+  assert.equal(rescueLine(ev("rescued", { streak_after: 1 })), "Streak won back! You're on 1 day.");
+});
+
+test("NO LOSS FRAMING: no line or closing line ever talks about losing", () => {
+  const nights = [
+    [row({ perfect_days: 1, raids: 1, raid_damage: 3 })],
+    [row({ perfect_days: 2, raids: 2, raid_damage: 6 })],
+    [row({ perfect_days: 1 })],
+    [row({ rescue_events: [ev("cracked")] })],
+    [row({ rescue_events: [ev("cracked", { fallback: true })] })],
+    [row({ rescue_events: [ev("rescued")] })],
+    [row({ rescue_events: [ev("halved", { streak_after: 1 })] })],
+    [row({})],
+  ];
+  for (const rows of nights) {
+    const s = summarizeRecaps(rows, bosses, YESTERDAY);
+    for (const line of [...s.lines, s.closing]) {
+      assert.doesNotMatch(line, /\b(lost|lose|losing|crack|cracked|broke|broken|missed|miss|knocked|escaped|party|wasn't|failed|halved)\b/i, line);
+    }
+  }
+});
+
+// --- The timeline ---------------------------------------------------------------------------
+
+test("a raid: the raid lands after the lead, then the cheer; its line with the raid", () => {
+  const s = summarizeRecaps([row({ perfect_days: 1, raids: 1, raid_damage: 3, rescue_events: [ev("rescued")] })], bosses, YESTERDAY);
   const beats = recapSchedule(s);
-  for (const k of ["attack", "blow", "ko", "escape"]) assert.ok(!kinds(beats).includes(k), k);
+  assert.deepEqual(kinds(beats).filter((k) => k === "raid" || k === "cheer"), ["raid", "cheer"]);
+  assert.equal(at(beats, "raid"), RECAP_TIMING.lead);
+  assert.equal(at(beats, "cheer"), RECAP_TIMING.lead + RECAP_TIMING.cheerAfter);
+  const lines = beats.filter((b) => b.kind === "line");
+  assert.equal(lines[0].at, at(beats, "raid"), "the raid line as it lands");
+  assert.ok(lines[1].at >= lines[0].at + RECAP_TIMING.lineGap);
+  assert.equal(kinds(beats).at(-1), "closing");
+});
+
+test("a text recap: no raid, just the lines", () => {
+  const s = summarizeRecaps([row({ rescue_events: [ev("cracked")] })], bosses, YESTERDAY);
+  const beats = recapSchedule(s);
+  assert.ok(!kinds(beats).includes("raid"));
+  assert.ok(!kinds(beats).includes("cheer"));
   assert.deepEqual(kinds(beats), ["line", "closing"]);
 });
 
-test("a perfect day: a heal and a short recap", () => {
-  const s = summarizeRecaps([row({ perfect_days: 1, healed: 10, hp_before: 80, hp_after: 90 })], bosses, YESTERDAY);
-  const beats = recapSchedule(s);
-  assert.deepEqual(kinds(beats), ["heal", "line", "closing"]);
-  assert.equal(at(beats, "line"), at(beats, "heal"), "the heal line appears with the heal");
-  assert.ok(at(beats, "closing") <= 2000, "brief");
-});
-
-test("the animated part is a few seconds long", () => {
-  const long = summarizeRecaps(
-    [row({ missed_quests: 3, missed_minutes: 60, party_damage: 60, knocked_out: true, escaped_boss_id: "slime", next_boss_id: "swarm", streak_before: 4, perfect_days: 1 })],
+test("the animated part stays short", () => {
+  const s = summarizeRecaps(
+    [row({ perfect_days: 2, raids: 2, raid_damage: 6, rescue_events: [ev("rescued"), ev("cracked")] })],
     bosses,
     YESTERDAY,
   );
-  assert.ok(at(recapSchedule(long), "closing") <= 8000, `${at(recapSchedule(long), "closing")}ms`);
+  assert.ok(at(recapSchedule(s), "closing") <= 5000, `${at(recapSchedule(s), "closing")}ms`);
 });
 
 test("nothing in the timeline closes the recap: only Continue does", () => {
-  const s = summarizeRecaps([row({ missed_quests: 1, missed_minutes: 20, party_damage: 20 })], bosses, YESTERDAY);
-  const beats = recapSchedule(s);
-  assert.ok(!kinds(beats).includes("end"));
+  const s = summarizeRecaps([row({ perfect_days: 1, raids: 1, raid_damage: 3 })], bosses, YESTERDAY);
+  assert.ok(!kinds(recapSchedule(s)).includes("end"));
   assert.ok(!("read" in RECAP_TIMING), "no reading timer");
 });
 
-test("skipping lands on the summary card: final HP, every line, the right boss", () => {
-  const ko = summarizeRecaps(
-    [row({ missed_quests: 3, missed_minutes: 60, party_damage: 60, knocked_out: true, escaped_boss_id: "slime", next_boss_id: "swarm", hp_before: 40 })],
-    bosses,
-    YESTERDAY,
-  );
-  assert.deepEqual(recapFinalState(ko), { hp: 100, lines: ko.lines.length, boss: bosses.swarm });
-
-  const blow = summarizeRecaps([row({ missed_quests: 2, missed_minutes: 45, party_damage: 45, hp_after: 55, streak_before: 2 })], bosses, YESTERDAY);
-  assert.deepEqual(recapFinalState(blow), { hp: 55, lines: 2, boss: bosses.slime });
-
-  const lastBoss = summarizeRecaps(
-    [row({ missed_quests: 1, missed_minutes: 60, party_damage: 60, knocked_out: true, escaped_boss_id: "slime", next_boss_id: null, hp_before: 30 })],
-    bosses,
-    YESTERDAY,
-  );
-  assert.equal(recapFinalState(lastBoss).boss, null, "escaped with no one to follow");
-
-  const text = summarizeRecaps([row({ missed_quests: 1, missed_minutes: 20, boss_id: null })], bosses, YESTERDAY);
-  assert.equal(recapFinalState(text).boss, null);
+test("skipping lands on the summary card: every line, the raided boss (none for text)", () => {
+  const raid = summarizeRecaps([row({ perfect_days: 1, raids: 1, raid_damage: 3, rescue_events: [ev("rescued")] })], bosses, YESTERDAY);
+  assert.deepEqual(recapFinalState(raid), { lines: 2, boss: bosses.slime });
+  const text = summarizeRecaps([row({ rescue_events: [ev("cracked")] })], bosses, YESTERDAY);
+  assert.deepEqual(recapFinalState(text), { lines: 1, boss: null });
 });

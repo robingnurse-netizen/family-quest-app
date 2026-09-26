@@ -3,8 +3,8 @@
 // The active boss (from the database) and the boss on stage can differ for a
 // moment: when a boss is defeated, the same transaction also activates the
 // next one, and all those Realtime events arrive together. The stage keeps
-// showing the finished boss until its death / escape animation and hold are
-// over, then swaps in whoever is active by then.
+// showing the finished boss until its death animation and hold are over,
+// then swaps in whoever is active by then. A boss never escapes (…16).
 //
 // Pure (no React) so the event sequences can be tested directly.
 
@@ -12,10 +12,11 @@ import type { Boss } from "@/lib/supabase/types";
 import type { BattleEvent } from "./battle-events";
 
 /**
- * What the boss on stage is doing: hurt (a quest struck it), attack (a missed
- * quest — the boss hits the party), or playing out its defeat / escape.
+ * What the boss on stage is doing: hurt (a quest or a Night Raid struck it),
+ * attack (DORMANT since …16 — only the dev hurt() preview sends a "miss"),
+ * or playing out its defeat.
  */
-export type StageMode = "idle" | "hurt" | "attack" | "defeated" | "escaped";
+export type StageMode = "idle" | "hurt" | "attack" | "defeated";
 
 export type StageState = {
   /** The boss drawn on stage (drives sprite, name and HP bar). */
@@ -37,7 +38,7 @@ export type StageAction =
   | { type: "event"; event: BattleEvent }
   /** The boss's one-shot hurt / attack animation finished. */
   | { type: "animation-end" }
-  /** The finished boss's defeat / escape has played out. */
+  /** The finished boss's defeat has played out. */
   | { type: "swap" };
 
 export function initialStage(active: Boss | null): StageState {
@@ -51,15 +52,15 @@ export function initialStage(active: Boss | null): StageState {
   };
 }
 
-const finishing = (mode: StageMode) => mode === "defeated" || mode === "escaped";
+const finishing = (mode: StageMode) => mode === "defeated";
 
-function finish(state: StageState, outcome: "defeated" | "escaped"): StageState {
+function finish(state: StageState): StageState {
   const name = state.shown?.name ?? "The boss";
   return {
     ...state,
-    mode: outcome,
+    mode: "defeated",
     playKey: state.playKey + 1,
-    caption: outcome === "defeated" ? `${name} is defeated!` : `${name} escaped!`,
+    caption: `${name} is defeated!`,
   };
 }
 
@@ -77,47 +78,41 @@ export function stageReducer(state: StageState, action: StageAction): StageState
       if (boss && boss.id === state.shown.id) {
         return { ...next, shown: boss };
       }
-      // A different boss (or none) is active: the one on stage is finished.
-      // Its own status update normally arrived first; if it didn't, assume
-      // defeated (by far the common case).
-      if (!finishing(state.mode)) {
-        const status = rows[state.shown.id]?.status;
-        return finish(next, status === "escaped" ? "escaped" : "defeated");
-      }
-      return next;
+      // A different boss (or none) is active: the one on stage is beaten
+      // (its own status update normally arrived first).
+      return finishing(state.mode) ? next : finish(next);
     }
 
     case "event": {
       const { event } = action;
-      if (event.type === "defeated" || event.type === "escaped") {
+      if (event.type === "defeated") {
         const row = event.boss;
         const next = { ...state, rows: { ...state.rows, [row.id]: row } };
         if (!state.shown || row.id !== state.shown.id) return next;
         const withRow = { ...next, shown: row };
-        return finishing(state.mode) ? withRow : finish(withRow, event.type);
+        return finishing(state.mode) ? withRow : finish(withRow);
       }
-      if (event.type === "damage" || event.type === "miss") {
+      if (event.type === "damage" || event.type === "raid" || event.type === "miss") {
         if (!state.shown || event.bossId !== state.shown.id || finishing(state.mode)) return state;
-        return event.type === "damage"
-          ? {
-              ...state,
-              mode: "hurt",
-              playKey: state.playKey + 1,
-              caption: `${state.shown.name} takes ${event.amount} damage!`,
-            }
-          : {
-              ...state,
-              mode: "attack",
-              playKey: state.playKey + 1,
-              caption: `A missed quest — ${state.shown.name} hits the party for ${event.amount}!`,
-            };
+        const name = state.shown.name;
+        if (event.type === "miss") {
+          // DORMANT (…16): kept for later seasons; only the dev preview sends it.
+          return { ...state, mode: "attack", playKey: state.playKey + 1, caption: `${name} attacks!` };
+        }
+        return {
+          ...state,
+          mode: "hurt",
+          playKey: state.playKey + 1,
+          // PLACEHOLDER COPY (the raid line).
+          caption: event.type === "raid" ? `Rogue's Night Raid! ${name} takes ${event.amount} damage!` : `${name} takes ${event.amount} damage!`,
+        };
       }
       // "activated" arrives with the matching "active" action, which does the work.
       return state;
     }
 
     case "animation-end":
-      // Hurt / attack return to idle; defeat/escape wait for "swap" (after a hold).
+      // Hurt / attack return to idle; a defeat waits for "swap" (after a hold).
       return state.mode === "hurt" || state.mode === "attack"
         ? { ...state, mode: "idle", playKey: state.playKey + 1 }
         : state;

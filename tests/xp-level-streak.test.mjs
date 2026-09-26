@@ -164,15 +164,17 @@ test("rest days neither add nor break the streak", async () => {
   assert.equal((await stats(db, kid)).current_streak, 2);
 });
 
-test("any missed quest resets the streak to 0 (best stays)", async () => {
+test("a missed quest cracks the streak instead of resetting it (…14: frozen, rescue opens)", async () => {
   const { familyId, kid, day } = await streakFamily();
   await day(0, { done: 1 });
   await day(1, { done: 1, open: 1 }); // the open one becomes missed
   await reset(familyId, addDays(D, 1));
   await reset(familyId, addDays(D, 2));
   const st = await stats(db, kid);
-  assert.equal(st.current_streak, 0);
+  assert.equal(st.current_streak, 1, "frozen at 1, not reset (tests/streak-rescue.test.mjs has the rest)");
   assert.equal(st.best_streak, 1);
+  const { rows: rescues } = await db.query("select status, streak_at_crack from public.streak_rescues where child_id = $1", [kid]);
+  assert.deepEqual(rescues, [{ status: "open", streak_at_crack: 1 }]);
   const { rows } = await db.query(
     "select count(*)::int as n from public.task_slots s join public.weekly_pools p on p.id = s.pool_id where p.child_id = $1 and s.status = 'missed'",
     [kid],
@@ -183,14 +185,14 @@ test("any missed quest resets the streak to 0 (best stays)", async () => {
 test("catches up over several missed nights, evaluating days in order", async () => {
   const { familyId, kid, day } = await streakFamily();
   await day(0, { done: 1 }); // +1
-  await day(1, { open: 1 }); // missed → 0
-  await day(2, { done: 2 }); // +1
+  await day(1, { open: 1 }); // missed → cracks at 1 (frozen; due D+3)
+  await day(2, { done: 2 }); // frozen: no +1
   // D+3: rest
-  await day(4, { done: 1 }); // +1
+  await day(4, { done: 1 }); // the rescue lapsed first: ceil(1 / 2) = 1, then +1
   // One reset after five nights without one.
   await reset(familyId, addDays(D, 5));
   const st = await stats(db, kid);
-  assert.equal(st.current_streak, 2, "in order: 1 → 0 → 1 → (rest) → 2");
+  assert.equal(st.current_streak, 2, "in order: 1 → crack (1, frozen) → frozen → (rest) → lapsed 1 → 2");
   assert.equal(st.best_streak, 2);
   assert.equal(st.streak_through, addDays(D, 4));
 });

@@ -19,17 +19,17 @@ test("orders low → mid → epic, queue order within a tier", () => {
   assert.deepEqual(out.map((t) => t.id), ["l1", "l2", "m1", "m2", "e1"]);
 });
 
-test("states: defeated / fighting / escaped / locked; only a defeat reveals the name", () => {
+test("states: defeated / fighting / locked (a legacy escaped boss is locked); only a defeat reveals the name", () => {
   const out = buildTrophyCase(
     [boss("a", "low", 1, "defeated", "Slime"), boss("b", "low", 2, "escaped", "Swarm"), boss("c", "low", 3, "active", "Goblin"), boss("d", "low", 4, "inactive", "Spider")],
     [],
   );
   assert.deepEqual(out.map((t) => [t.state, t.name]), [
-    ["defeated", "Slime"], ["escaped", null], ["fighting", null], ["locked", null],
+    ["defeated", "Slime"], ["locked", null], ["fighting", null], ["locked", null],
   ]);
 });
 
-test("a defeated boss: the defeat date and the family's total damage (every damage row)", () => {
+test("a defeated boss: the defeat date and the family's total damage (every damage and Night Raid row)", () => {
   const [t] = buildTrophyCase(
     [boss("a", "low", 1, "defeated")],
     [
@@ -37,13 +37,14 @@ test("a defeated boss: the defeat date and the family's total damage (every dama
       { boss_id: "a", event_type: "damage", amount: 30, created_at: "2026-09-20T09:00:00Z" },
       { boss_id: "a", event_type: "damage", amount: 15, created_at: "2026-09-21T09:00:00Z" },
       { boss_id: "a", event_type: "damage", amount: 15, created_at: "2026-09-21T10:00:00Z" },
+      { boss_id: "a", event_type: "night_raid", amount: 3, created_at: "2026-09-21T00:05:00Z" },
       { boss_id: "a", event_type: "defeated", amount: 25, created_at: "2026-09-21T10:00:01Z" }, // amount = gold
       { boss_id: "a", event_type: "gold_awarded", amount: 25, created_at: "2026-09-21T10:00:01Z" },
       { boss_id: "other", event_type: "damage", amount: 99, created_at: "2026-09-21T10:00:00Z" },
     ],
   );
   assert.equal(t.defeatedAt, "2026-09-21T10:00:01Z");
-  assert.equal(t.damage, 60); // not the gold on the defeated row, not other bosses' hits
+  assert.equal(t.damage, 63); // hits + the raid; not the gold on the defeated row, not other bosses' hits
 });
 
 test("undefeated bosses reveal no date or damage (even with hits logged)", () => {

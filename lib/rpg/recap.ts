@@ -2,8 +2,17 @@
 // recap (reset_recaps rows), combined into one short story and its lines.
 // Pure (no React) — components/rpg/battle/recap.tsx stages it and
 // tests/recap.test.mjs checks it.
+//
+// PROGRESS NEVER GOES BACKWARDS (…16): nothing is taken away overnight, so
+// the recap only tells good news and what can be won back — Rogue's Night
+// Raid (the good-news beat), a streak on hold and how to win it back, a
+// streak won back. Missed quests on their own get no recap at all (the rows
+// are still acknowledged, silently). No loss framing anywhere.
+//
+// PLACEHOLDER COPY: every line in this file is temporary wording, to be
+// replaced in a copy pass.
 
-import type { BossTier, ResetRecap } from "@/lib/supabase/types";
+import type { BossTier, RescueEvent, ResetRecap } from "@/lib/supabase/types";
 
 export type RecapBoss = { id: string; name: string; sprite_key: string; tier: BossTier };
 
@@ -12,67 +21,53 @@ export type RecapRow = Pick<
   | "created_at"
   | "day_from"
   | "day_to"
-  | "missed_quests"
-  | "missed_minutes"
-  | "party_damage"
   | "boss_id"
   | "perfect_days"
-  | "healed"
   | "streak_before"
   | "streak_after"
-  | "knocked_out"
-  | "escaped_boss_id"
-  | "next_boss_id"
-  | "hp_before"
-  | "hp_after"
-  | "max_hp"
+  | "rescue_events"
+  | "raid_damage"
+  | "raids"
 >;
 
 /**
- * How the recap plays: "blow" (the boss hits the party: lunge, flinch, one
- * damage number), "text" (misses with no boss around: no blow), "perfect"
- * (no misses: a brief, positive card).
+ * How the recap plays: "raid" (Rogue's Night Raid lands on the boss — the
+ * animated good-news beat), "text" (no raid, but something worth saying:
+ * a streak on hold / won back, a perfect day), "quiet" (nothing to say —
+ * acknowledged without showing anything).
  */
-export type RecapKind = "blow" | "text" | "perfect";
+export type RecapKind = "raid" | "text" | "quiet";
 
 export type RecapSummary = {
   kind: RecapKind;
   /** Newest row's created_at: acknowledge up to here. */
   through: string;
   nights: number;
-  /** "Yesterday" (one night, yesterday) or "Since you were last here". */
+  /** "Last night" (one night, yesterday) or "While you were away". */
   when: string;
-  missedQuests: number;
-  missedMinutes: number;
-  /** Party damage, all nights together (one number on screen). */
-  damage: number;
-  /** The boss that dealt it (the first damaging night's). */
-  attacker: RecapBoss | null;
-  knockedOut: boolean;
-  escaped: RecapBoss | null;
-  /** Who arrived after the escape (null: none left, or no escape). */
-  next: RecapBoss | null;
-  streakLost: boolean;
+  /** His Night Raids, all nights together (one number on screen). */
+  raidDamage: number;
+  raids: number;
+  /** The boss his (latest) raid hit. */
+  raidBoss: RecapBoss | null;
   perfectDays: number;
-  healed: number;
-  hpBefore: number;
-  hpAfter: number;
-  maxHp: number;
+  /**
+   * Streak-recovery events, all nights in order: a streak put on hold (with
+   * its rescue quest's deadline), won back, or halved.
+   */
+  rescue: RescueEvent[];
   /** The story, in order, then the closing line. */
   lines: string[];
-  /** When each line appears: with the blow / start, the boss leaving, the
-   *  next boss arriving, or the heal (so the text never runs ahead). */
+  /** When each line appears: at the start, or as the raid lands. */
   cues: RecapCue[];
   closing: string;
 };
 
-export type RecapCue = "start" | "escape" | "enter" | "heal";
-
-const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+export type RecapCue = "start" | "raid";
 
 /**
- * Combine unseen recap rows (any order) into one summary, or null if there's
- * nothing to show. `yesterday` is the family's yesterday (YYYY-MM-DD).
+ * Combine unseen recap rows (any order) into one summary, or null if there
+ * are none. `yesterday` is the family's yesterday (YYYY-MM-DD).
  */
 export function summarizeRecaps(
   rows: RecapRow[],
@@ -83,45 +78,33 @@ export function summarizeRecaps(
   const nights = [...rows].sort((a, b) => a.created_at.localeCompare(b.created_at));
   const first = nights[0];
   const last = nights[nights.length - 1];
-  const sum = (key: "missed_quests" | "missed_minutes" | "party_damage" | "perfect_days" | "healed") =>
-    nights.reduce((n, r) => n + r[key], 0);
-  const boss = (id: string | null) => (id ? (bosses[id] ?? null) : null);
+  const sum = (key: "raid_damage" | "raids" | "perfect_days") => nights.reduce((n, r) => n + (r[key] ?? 0), 0);
 
-  const missedQuests = sum("missed_quests");
-  const missedMinutes = sum("missed_minutes");
-  const damage = sum("party_damage");
+  const raidDamage = sum("raid_damage");
+  const raids = sum("raids");
   const perfectDays = sum("perfect_days");
-  const healed = sum("healed");
-  const ko = [...nights].reverse().find((r) => r.knocked_out);
-  const attackerId = nights.find((r) => r.party_damage > 0)?.boss_id ?? null;
+  const raidBossId = [...nights].reverse().find((r) => (r.raid_damage ?? 0) > 0)?.boss_id ?? null;
+  const rescue = nights.flatMap((r) => r.rescue_events ?? []);
 
   const oneNight = nights.length === 1 && first.day_from === yesterday && first.day_to === yesterday;
-  const when = oneNight ? "Yesterday" : "Since you were last here";
+  const when = oneNight ? "Last night" : "While you were away";
 
-  const kind: RecapKind = damage > 0 ? "blow" : missedQuests > 0 ? "text" : "perfect";
+  const kind: RecapKind = raidDamage > 0 ? "raid" : rescue.length > 0 || perfectDays > 0 ? "text" : "quiet";
   const summary: Omit<RecapSummary, "lines" | "cues" | "closing"> = {
     kind,
     through: last.created_at,
     nights: nights.length,
     when,
-    missedQuests,
-    missedMinutes,
-    damage,
-    attacker: boss(attackerId),
-    knockedOut: Boolean(ko),
-    escaped: boss(ko?.escaped_boss_id ?? null),
-    next: boss(ko?.next_boss_id ?? null),
-    streakLost: nights.some((r) => r.streak_before > 0 && r.streak_after === 0),
+    raidDamage,
+    raids,
+    raidBoss: raidBossId ? (bosses[raidBossId] ?? null) : null,
     perfectDays,
-    healed,
-    hpBefore: first.hp_before,
-    hpAfter: last.hp_after,
-    maxHp: last.max_hp,
+    rescue,
   };
   return { ...summary, ...recapText(summary) };
 }
 
-/** The recap's lines: short, kid-friendly, in the order things happened. */
+/** The recap's lines: short, kid-friendly, all good news. PLACEHOLDER COPY. */
 export function recapText(s: Omit<RecapSummary, "lines" | "cues" | "closing">): {
   lines: string[];
   cues: RecapCue[];
@@ -133,60 +116,63 @@ export function recapText(s: Omit<RecapSummary, "lines" | "cues" | "closing">): 
     lines.push(line);
     cues.push(cue);
   };
-  if (s.missedQuests > 0) {
-    const took = s.damage > 0 ? ` The party took ${s.damage} damage.` : "";
-    say(`${s.when}: ${plural(s.missedQuests, "quest")} missed (${s.missedMinutes} min).${took}`, "start");
-  } else if (s.damage > 0) {
-    // Someone else's misses (a brother or sister) still hurt the party.
-    say(`${s.when}: the party took ${s.damage} damage.`, "start");
+  if (s.raidDamage > 0) {
+    const boss = s.raidBoss?.name ?? "the boss";
+    say(
+      s.raids > 1
+        ? `${s.when}, Rogue went on ${s.raids} Night Raids! ${boss} took ${s.raidDamage} damage.`
+        : `${s.when}, Rogue went on a Night Raid! ${boss} took ${s.raidDamage} damage.`,
+      "raid",
+    );
+  } else if (s.perfectDays > 0) {
+    // A perfect day with nothing to raid (no boss, or one left at 1 HP).
+    say(s.perfectDays > 1 ? `${s.perfectDays} perfect days!` : "Perfect day!", "start");
   }
-  if (s.streakLost) say("Streak lost.", "start");
-  if (s.knockedOut) {
-    say(`The party was knocked out${s.escaped ? ` — ${s.escaped.name} got away!` : "!"}`, "escape");
-    if (s.next) say(`A new foe appears: ${s.next.name}!`, "enter");
-  }
-  if (s.perfectDays > 0) {
-    const days = s.perfectDays === 1 ? "Perfect day!" : `${s.perfectDays} perfect days!`;
-    say(s.healed > 0 ? `${days} Party healed ${s.healed} HP.` : days, s.healed > 0 ? "heal" : "start");
-  }
+  for (const e of s.rescue) say(rescueLine(e), "start");
 
-  const closing =
-    s.kind === "perfect"
-      ? "Keep it up!"
-      : s.knockedOut && s.next
-        ? "New day — new foe. Let's go!"
-        : s.damage > 0
-          ? "New day — let's get him back!"
-          : "New day — let's go!";
+  const closing = s.raidDamage > 0 ? "Another perfect day, another raid!" : "New day — let's go!";
   return { lines, cues, closing };
+}
+
+/** The day a rescue is due, as a weekday ("Wednesday"). */
+const weekday = (day: string) =>
+  new Date(`${day}T12:00:00Z`).toLocaleDateString("en-GB", { weekday: "long", timeZone: "UTC" });
+
+/**
+ * One streak-recovery line, framed around what can be won back: a streak on
+ * hold comes with its fix and deadline, a rescue celebrates, a halving
+ * points at the next perfect day. Non-breaking hyphens keep "6-day"
+ * together. PLACEHOLDER COPY.
+ */
+export function rescueLine(e: RescueEvent): string {
+  const days = (n: number) => `${n}‑day`;
+  const dayCount = (n: number) => `${n} ${n === 1 ? "day" : "days"}`;
+  switch (e.event) {
+    case "cracked":
+      return e.fallback
+        ? `Your ${days(e.streak_at_crack)} streak is on hold! Finish any quest by the end of ${weekday(e.due_on)} to win it back.`
+        : `Your ${days(e.streak_at_crack)} streak is on hold! Do a rescue quest by the end of ${weekday(e.due_on)} to win it back.`;
+    case "rescued":
+      return `Streak won back! You're on ${dayCount(e.streak_after)}.`;
+    case "halved":
+      return `Your streak is on ${dayCount(e.streak_after)} — every perfect day adds one!`;
+  }
 }
 
 // --- Staging ------------------------------------------------------------------
 
 /** Every duration in the recap, in ms — tune here. */
 export const RECAP_TIMING = {
-  /** Card up, the party and the boss standing, before the boss attacks. */
+  /** Card up, everyone standing, before the raid lands on the boss. */
   lead: 900,
-  /** Boss attack → its blow lands (the lunge's peak; BOSS_ATTACK_IMPACT_MS). */
-  impact: 210,
-  /** After the blow: he falls (knocked out)… */
-  koAfter: 800,
-  /** …the K.O. animation (9 frames at 10fps). */
-  koMs: 900,
-  /** The boss sliding off (.boss-fx-escaped). */
-  escapeMs: 1400,
-  /** The next boss arriving (.boss-enter) before the party refills. */
-  enterMs: 700,
-  /** Getting up: the K.O. in reverse. */
-  riseMs: 900,
-  /** After the blow, the heal (a perfect day) lands. */
-  healAfter: 1100,
+  /** The raid → the hero cheers and Rogue barks. */
+  cheerAfter: 700,
   /** Between lines of text. */
   lineGap: 650,
 } as const;
 
 export type RecapBeat =
-  | { at: number; kind: "attack" | "blow" | "boss_idle" | "ko" | "down" | "escape" | "enter" | "refill" | "rise" | "stand" | "heal" }
+  | { at: number; kind: "raid" | "cheer" }
   | { at: number; kind: "line"; index: number }
   | { at: number; kind: "closing" };
 
@@ -195,10 +181,8 @@ export type RecapBeat =
  * order, ending with "closing" — the summary card is then complete (every
  * line and the closing line) and stays up until he taps Continue; nothing
  * closes by itself. A tap before that skips straight to the summary
- * (recapFinalState). A blow: attack → blow (sound, one damage number) →
- * [knocked out: fall, the boss leaves, the next one arrives, refill, he
- * gets up] → heal. No blow ("text" / "perfect"): just the lines, and a
- * heal for perfect days.
+ * (recapFinalState). A raid: the boss takes it (hurt, one damage number, a
+ * sound) → the hero cheers and Rogue barks. "text": just the lines.
  */
 export function recapSchedule(s: RecapSummary): RecapBeat[] {
   const T = RECAP_TIMING;
@@ -207,34 +191,14 @@ export function recapSchedule(s: RecapSummary): RecapBeat[] {
   let textFrom: number;
   const lineAt: number[] = [];
 
-  if (s.kind === "blow") {
+  if (s.kind === "raid") {
     t = T.lead;
-    beats.push({ at: t, kind: "attack" });
-    t += T.impact;
-    beats.push({ at: t, kind: "blow" });
-    beats.push({ at: t + 500, kind: "boss_idle" });
+    beats.push({ at: t, kind: "raid" });
     textFrom = t;
-    if (s.knockedOut) {
-      t += T.koAfter;
-      beats.push({ at: t, kind: "ko" });
-      t += T.koMs;
-      beats.push({ at: t, kind: "down" });
-      beats.push({ at: t, kind: "escape" });
-      t += T.escapeMs;
-      beats.push({ at: t, kind: "enter" });
-      t += T.enterMs;
-      beats.push({ at: t, kind: "refill" });
-      beats.push({ at: t, kind: "rise" });
-      t += T.riseMs;
-      beats.push({ at: t, kind: "stand" });
-    }
-    if (s.healed > 0) {
-      t = Math.max(t, textFrom + T.healAfter);
-      beats.push({ at: t, kind: "heal" });
-    }
+    t += T.cheerAfter;
+    beats.push({ at: t, kind: "cheer" });
   } else {
     textFrom = 400;
-    if (s.healed > 0) beats.push({ at: textFrom + 300, kind: "heal" });
   }
 
   // Each line on its cue (never before the one above it, a gap apart).
@@ -253,14 +217,9 @@ export function recapSchedule(s: RecapSummary): RecapBeat[] {
 
 /**
  * Where the animated part ends — the summary card's state, for a skip (or
- * reduced motion): final party HP, every line, and whoever stands on stage
- * (the next boss after a knock-out, or none if it escaped with no one to
- * follow; otherwise the boss that struck).
+ * reduced motion): every line, and the raided boss on stage (none for a
+ * text recap).
  */
-export function recapFinalState(s: RecapSummary): { hp: number; lines: number; boss: RecapBoss | null } {
-  return {
-    hp: s.hpAfter,
-    lines: s.lines.length,
-    boss: s.knockedOut ? s.next : s.kind === "blow" ? s.attacker : null,
-  };
+export function recapFinalState(s: RecapSummary): { lines: number; boss: RecapBoss | null } {
+  return { lines: s.lines.length, boss: s.kind === "raid" ? s.raidBoss : null };
 }

@@ -1,7 +1,9 @@
-// The evening warning: from EVENING_WARNING_FROM (the family's timezone),
-// while today still has open quests and a boss is active, the boss charges
-// up and a line states tonight's stakes (tonight_stakes(): what the nightly
-// reset would actually deal). Pure — tested in tests/evening.test.mjs.
+// The evening nudge: from EVENING_WARNING_FROM (the family's timezone),
+// while he still has open quests today and a boss can be raided, the boss
+// charges up and a line offers tonight's opportunity — finish them (a
+// perfect day) and Rogue goes on a Night Raid (tonight_stakes().raid_damage,
+// …16). No loss framing: nothing is taken away overnight any more. Pure —
+// tested in tests/evening.test.mjs.
 
 import type { TonightStakes } from "@/lib/supabase/types";
 
@@ -31,20 +33,21 @@ export function isEvening(now: Date, timeZone: string, from: string = EVENING_WA
 }
 
 /**
- * The warning line, or null when there's nothing to warn about: not
- * evening, no boss, none of his quests left, or no damage at stake. Folds
- * in the streak (the scene's streak nudge steps aside while this shows).
+ * The nudge line, or null when there's nothing on offer: not evening, no
+ * boss, none of his quests left, or no raid possible (a boss at 1 HP). Folds
+ * in the streak (the scene's streak nudge steps aside while this shows): a
+ * perfect day also grows it — unless a rescue is open (a streak on hold
+ * doesn't grow). PLACEHOLDER COPY.
  */
-export function eveningWarning(
+export function eveningNudge(
   evening: boolean,
   stakes: TonightStakes | null,
   streak: number,
 ): string | null {
-  if (!evening || !stakes || !stakes.boss_active || stakes.my_open_quests <= 0 || stakes.damage <= 0) return null;
+  if (!evening || !stakes || !stakes.boss_active || stakes.my_open_quests <= 0 || stakes.raid_damage <= 0) return null;
   const n = stakes.my_open_quests;
-  const boss = stakes.boss_name ?? "The boss";
-  const ko = stakes.damage >= stakes.party_hp ? " and gets knocked out" : "";
-  // Non-breaking hyphen: "3-day" never splits across lines.
-  const streakPart = streak > 0 ? ` — and your ${streak}\u2011day streak ends` : "";
-  return `${boss} is powering up! ${n} quest${n === 1 ? "" : "s"} left before midnight, or the party takes ${stakes.damage} damage${ko}${streakPart}.`;
+  // Non-breaking space: "4 days" never splits across lines.
+  const next = streak + 1;
+  const streakPart = !stakes.rescue_open ? ` Your streak grows to ${next}\u00a0${next === 1 ? "day" : "days"} too!` : "";
+  return `${n} quest${n === 1 ? "" : "s"} left — finish ${n === 1 ? "it" : "them"} and Rogue goes on a Night Raid tonight!${streakPart}`;
 }

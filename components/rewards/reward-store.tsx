@@ -15,9 +15,6 @@ import { GameHeading } from "@/components/ui/game-heading";
 import { WaxSeal } from "@/components/ui/wax-seal";
 import { RewardIcon } from "./reward-icon";
 import { GoldBar } from "./gold-bar";
-import { PotionShelf } from "./potion-shelf";
-import type { Potion } from "@/lib/supabase/types";
-import type { BuyPotionAction } from "@/lib/potions/types";
 
 const LEDGER_LIMIT = 10;
 
@@ -25,8 +22,7 @@ type Flight = { id: number; from: DOMRect; to: DOMRect };
 
 /**
  * The item shop, live via Realtime: the coin purse (spendable gold), rewards
- * as items on wooden shelves with parchment price tags (potions, which heal
- * the party at once, on their own stone shelf above), requests waiting on
+ * as items on wooden shelves with parchment price tags, requests waiting on
  * a grown-up as sealed parcels, and a ledger of what happened to earlier
  * requests. Buying goes through the same redeem action and database checks
  * as before; on success coins fly from the purse to the item and a
@@ -38,16 +34,12 @@ export function RewardStore({
   timeZone,
   initial,
   redeem,
-  potions,
-  buyPotion,
 }: {
   familyId: string;
   childId: string;
   timeZone: string;
   initial: StoreData;
   redeem: RedeemAction;
-  potions: Potion[];
-  buyPotion: BuyPotionAction;
 }) {
   const store = useRewardStore({ familyId, childId, initial });
   const { emit } = useBattleContext();
@@ -92,8 +84,6 @@ export function RewardStore({
           {notice}
         </p>
       )}
-
-      <PotionShelf potions={potions} gold={gold} buy={buyPotion} onBought={store.setGold} />
 
       {pending.length > 0 && (
         <section>
