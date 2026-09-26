@@ -688,8 +688,9 @@ PROJECT STATUS:
   plaques are light brass (dark text ≥7.4:1); the frame has an inner
   shadow (.trophy-recess).
 
-- Streak recovery (carrot-style): BUILT, NOT YET APPLIED to Supabase or
-  committed. Migration 20260928000014_streak_recovery.sql (design signed
+- Streak recovery (carrot-style): COMPLETE — APPLIED to Supabase (SQL
+  editor, live order …13 → …15 → …14 → …16; verified, all checks true)
+  and committed (65b9e1f). Migration 20260928000014_streak_recovery.sql (design signed
   off 25 Sep 2026; REWRITTEN 26 Sep 2026 for the rewind: its nightly reset
   no longer touches party HP — see "Progress never goes backwards"; the
   rules are in its header). A missed day no longer resets the streak:
@@ -738,7 +739,9 @@ PROJECT STATUS:
     streak_rescues (step 4c, skipped until …14 exists); rescue_jobs kept.
 
 - PROGRESS NEVER GOES BACKWARDS — Rogue's Night Raid (the 26 Sep 2026
-  rewind): BUILT, NOT YET APPLIED (…14 rewritten, …16 new) or committed.
+  rewind): COMPLETE — …14 (rewritten) and …16 APPLIED to Supabase (SQL
+  editor, in the order …13 → …15 → …14 → …16) and verified (all checks
+  true) before being committed (65b9e1f, with …15 as history in 11a1bd9).
   Boss HP only ever goes down; streak recovery is the ONLY thing a missed
   quest sets off; a perfect day earns Rogue's Night Raid.
   * MIGRATION HISTORY (live ≠ file order): 20260929000015_boss_retreat.sql
