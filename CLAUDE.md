@@ -474,7 +474,8 @@ PROJECT STATUS:
     all seven columns.
   * Dashboard order: battle scene → quest board → slimmer shop stall.
     HUD: party and boss halves side by side (name + bar each), stats row
-    full width; the Gold stat links to the shop with an "N within reach"
+    full width (SUPERSEDED by 1.2's single-row header — see "Battle HUD
+    header" below); the Gold stat links to the shop with an "N within reach"
     badge. Sign out lives in a gear menu (components/layout/player-menu.tsx).
   * "See whole month" is a stone button (gold = money/rewards only).
     "+ Quests" divider only under FIXED items; the empty-day placeholder
@@ -528,7 +529,7 @@ PROJECT STATUS:
     default grants, so asUser()/tryAsUser() run as `authenticated` and
     RLS applies; as()/tryAs() stay superuser and only set auth.uid()).
     Files: xp-level-streak, slot-guard, boss-engine, rewards-store,
-    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-stakes, recap, evening, sun-times, meadow-key, trophies, streak-rescue, rescue, night-raid, migration-order (.test.mjs). tests/helpers/load-ts.mjs imports
+    sound, random, strike, hero-stage, rogue, grounding, sprite-urls, frame-cache, recap-stakes, recap, evening, sun-times, meadow-key, trophies, streak-rescue, rescue, night-raid, migration-order, lifetime-totals (.test.mjs). tests/helpers/load-ts.mjs imports
     app TypeScript and follows its "./" and "@/" imports (keep tested
     modules free of React / browser imports). This is the permanent suite — add new engine rules'
     tests here.
@@ -789,7 +790,8 @@ PROJECT STATUS:
       escaped / retreated or any escaped / comeback_bonus row exists.
   * UI:
     - No party HP anywhere (scene HUD, recap, Parent HQ panel); useBattle /
-      BattleProvider carry no party. The hero's flinch / K.O. / rise and the
+      BattleProvider carry no party. (The empty party half of the scene HUD
+      was then collapsed — see "Battle HUD header (1.2)".) The hero's flinch / K.O. / rise and the
       boss's attack are DORMANT code paths (art kept for later seasons).
     - Escape removed: stage mode, BossSprite mode, boss-animations `escape`
       pose, .boss-fx-escaped CSS, the recap's escape beat, the Trophy Case
@@ -819,6 +821,46 @@ PROJECT STATUS:
     mixed nights no boss HP ever rises, no escape, no party writes),
     migration-order, recap-stakes (was recap-healing), boss-engine /
     streak-rescue / trophies / recap / evening updated; retreat deleted.
+
+- Battle HUD header (1.2, quick fix): DONE and committed (6884d53). With
+  party HP gone, the scene's HUD (components/rpg/battle/battle-scene.tsx)
+  is one header row — the hero's name + Party badge on the left, the
+  boss's name + tier crest on the right (either truncates) — with the boss
+  HP bar full width beneath, then the stats row. No boss: "Every boss
+  conquered!" on the right, no bar. Layout only; the long-term redesign of
+  this space is DEFERRED (don't attempt it without asking).
+
+- Lifetime stat counters (1.1): COMPLETE. Migration
+  20261001000017_lifetime_totals.sql APPLIED to Supabase (SQL editor) and
+  verified; committed (19c77f4). Per child, on player_stats, incremented
+  once at the real event, never decremented, no backfill (all started
+  at 0):
+  * total_damage_dealt: += each hit in strike_active_boss() (quest ticks
+    and rescue jobs; the logged amount, overkill included — as boss_log /
+    the Trophy Case) and each Night Raid in run_daily_reset().
+  * total_quests_completed: +1 in strike_boss_on_completion()'s
+    xp_awarded branch (once per slot, boss or no boss) and +1 in
+    complete_rescue(). A fallback (no-jobs) rescue adds nothing: the quest
+    that satisfied it already counted at tick time.
+  * total_bosses_defeated: +1 in finish_boss() for every child with a
+    'damage' or 'night_raid' row in the current fight (since
+    active_since) — not only gold recipients.
+  * ENGINE-ONLY WRITES (the pattern to reuse for any engine-owned column):
+    public.bump_player_totals(child, damage, quests, bosses) is the one
+    writer — it sets the transaction-local setting app.engine_stats_write
+    = 'on', upserts, sets it back to 'off'; SECURITY DEFINER, revoked from
+    API roles. Trigger player_stats_guard_totals (BEFORE INSERT OR UPDATE)
+    rejects any change to the three columns without that flag — the child,
+    a parent through the API (parents can still write player_stats' other
+    columns), even plain SQL / the Supabase dashboard — and rejects
+    decreases even from the engine. 'reset' is the one escape, used only by
+    supabase/scripts/reset-family-progress.sql (step 5b) for its own
+    transaction. DELETE on player_stats is revoked from anon /
+    authenticated (it would wipe the totals); family / profile deletes
+    still cascade.
+  * Not shown in the UI yet (the dashboard doesn't display them).
+  * Tests: tests/lifetime-totals.test.mjs (every increment point, both
+    rescue paths, the defeat rule, the protections).
 
 TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
 - Connected as the `pixellab` MCP server (~94 tools: characters, objects,
@@ -961,8 +1003,9 @@ PARKED — future items, NOT to be built until asked:
   split, no escape, nightly reset, API access) and the rewards store (ledger
   triggers + RLS), recaps (scope, show-once, acknowledgement security),
   evening stakes, Night Raids (+ the never-backwards regression), streak
-  recovery (crack, frozen window, rescue / halving, fallback, access), and
-  the live-vs-fresh migration order. Still to add before
+  recovery (crack, frozen window, rescue / halving, fallback, access),
+  the live-vs-fresh migration order, and the lifetime totals (increments +
+  engine-only writes). Still to add before
   production use: pool integrity
   (allocation / week bounds). Not testable in PGlite: true concurrency
   (row-lock serialization of redemptions / strikes / potion buys).
@@ -989,7 +1032,9 @@ DATABASE SCHEMA (Supabase/Postgres):
 - party_health: id, family_id (unique), current_hp, max_hp, updated_at
   (DORMANT since …16)
 - player_stats: id, child_id→profiles (unique), gold, xp, level,
-  current_streak, pending_damage, updated_at
+  current_streak, best_streak, streak_through, pending_damage, updated_at,
+  total_damage_dealt, total_quests_completed, total_bosses_defeated
+  (lifetime totals, engine-only writes — …17)
 - companions: id, child_id→profiles, name, sprite_key, unlocked, level
 - rewards: id, family_id, title, description, gold_cost, icon, active,
   created_by
