@@ -51,5 +51,5 @@ export function eveningNudge(
   // Non-breaking space: "4 days" never splits across lines.
   const next = streak + 1;
   const streakPart = !stakes.rescue_open ? ` Your streak grows to ${next}\u00a0${next === 1 ? "day" : "days"} too!` : "";
-  return `${n} quest${n === 1 ? "" : "s"} left — finish ${n === 1 ? "it" : "them"} and Rogue goes on a Night Raid tonight!${streakPart}`;
+  return `${n} quest${n === 1 ? "" : "s"} to go — then Rogue's off on a Night Raid!${streakPart}`;
 }

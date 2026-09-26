@@ -2,12 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { FlameIcon, StarIcon } from "@/components/ui/icons";
+import { createNoRepeatPicker } from "@/lib/random";
 import { useBattleContext, useBattleEvents } from "./battle-provider";
 
 /** How long each celebration card stays up (ms). */
 const CARD_MS = 2600;
 
-type Celebration = { id: number; kind: "level_up"; level: number } | { id: number; kind: "streak"; days: number };
+/** The streak card's body: one per showing, never the same twice running. */
+const STREAK_BODIES = [
+  "Every quest, every day — brilliant.",
+  "That's how heroes are made.",
+  "Rogue's so proud of you.",
+  "Keep that fire burning.",
+];
+
+type Celebration =
+  | { id: number; kind: "level_up"; level: number }
+  | { id: number; kind: "streak"; days: number; body: string };
+
+/** "7‑day streak!" (a non-breaking hyphen keeps "7‑day" together). */
+const streakHeadline = (days: number) => `${days}\u2011day streak!`;
 
 /**
  * LEVEL UP! and streak-milestone cards. Listens for the "level_up" and
@@ -20,11 +34,12 @@ export function Celebrations() {
   const { overlayActive, recapActive, emit } = useBattleContext();
   const [queue, setQueue] = useState<Celebration[]>([]);
   const [showing, setShowing] = useState<Celebration | null>(null);
+  const [pickBody] = useState(() => createNoRepeatPicker(STREAK_BODIES.length));
 
   useBattleEvents((event) => {
     if (event.type !== "moment") return;
     if (event.name === "level_up") setQueue((q) => [...q, { id: Date.now(), kind: "level_up", level: event.level }]);
-    if (event.name === "streak_milestone") setQueue((q) => [...q, { id: Date.now() + 1, kind: "streak", days: event.days }]);
+    if (event.name === "streak_milestone") setQueue((q) => [...q, { id: Date.now() + 1, kind: "streak", days: event.days, body: STREAK_BODIES[pickBody()] }]);
   });
 
   // Next card once the stage is clear.
@@ -44,7 +59,7 @@ export function Celebrations() {
     ? ""
     : showing.kind === "level_up"
       ? `Level up! You're now level ${showing.level}.`
-      : `${showing.days}-day streak! Keep it going.`;
+      : `${streakHeadline(showing.days)} ${showing.body}`;
 
   return (
     <>
@@ -71,9 +86,9 @@ export function Celebrations() {
                 <p className="flex items-center justify-center gap-2 text-4xl font-black text-gold text-shadow-pixel">
                   <FlameIcon className="h-10 w-10" />
                   {showing.days}
-                  <span className="font-display text-3xl font-semibold">day streak!</span>
+                  <span className="-ml-2 font-display text-3xl font-semibold">{"\u2011"}day streak!</span>
                 </p>
-                <p className="mt-2 font-bold text-parchment">Every quest done, day after day. Keep it going!</p>
+                <p className="mt-2 font-bold text-parchment">{showing.body}</p>
               </>
             )}
           </div>

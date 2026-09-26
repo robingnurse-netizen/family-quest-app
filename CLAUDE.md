@@ -610,8 +610,8 @@ PROJECT STATUS:
     (tonight_stakes() raid_damage > 0 — not at 1 HP), the boss charges up
     (.boss-charging glow + .boss-aura-charging, gentle; static under
     reduced motion) and the stats row shows the RaidBanner:
-    eveningNudge() — "N quests left — finish them and Rogue goes on a
-    Night Raid tonight![ Your streak grows to S+1 days too!]" (S = his
+    eveningNudge() — "N quests to go — then Rogue's off on a Night
+    Raid![ Your streak grows to S+1 days too!]" (S = his
     current streak; the streak clause only while no rescue is open:
     tonight_stakes() rescue_open — a streak on hold doesn't grow; see
     Streak recovery). It replaces the streak nudge (never both). ONE
@@ -703,11 +703,13 @@ PROJECT STATUS:
     nights. TODO in the SQL: once rest days exist, due_on should skip them.
   * Recap: each night's cracked / rescued / halved events go in
     reset_recaps.rescue_events; lib/rpg/recap.ts rescueLine() tells him,
-    framed around what can be won back (PLACEHOLDER COPY: "Your 6-day
-    streak is on hold! Do a rescue quest by the end of Wednesday to win it
-    back." / "Streak won back! You're on 6 days." / "Your streak is on 4
-    days — every perfect day adds one!"). No "cracked" / "lost" in any
-    copy the player sees (the data keeps the event names). Dev previews:
+    framed around what can be won back (copy pass 1.3: "Your 6-day
+    streak has a crack. Do a rescue quest by the end of Wednesday to patch
+    it up." (fallback: "Finish any quest by the end of …") / "Rescue
+    complete — your 6-day streak is whole again!" / "Your streak is on 4
+    days — every perfect day adds one!"). "Crack" is allowed (a repair
+    metaphor); no "lost" / "cracked" etc. in any copy the player sees (the
+    data keeps the event names). Dev previews:
     __fqBattle.recap("cracked" | "rescued" | "halved").
   * Player: RescueQuest (components/rpg/rescue-quest.tsx) on /player under
     the battle scene while a rescue is open (loadOpenRescue; not live —
@@ -791,14 +793,15 @@ PROJECT STATUS:
       barks), "text" (streak events / a perfect day with nothing to raid),
       "quiet" (misses only: nothing shown, acknowledged silently; the
       dashboard doesn't hold celebrations back for it). Dev:
-      __fqBattle.recap("raid" | "nights" | "text" | "quiet" | "cracked" |
-      "rescued" | "halved").
-    - Evening: eveningNudge() — "N quests left — finish them and Rogue goes
-      on a Night Raid tonight! Your streak grows to N days too!" (no streak
+      __fqBattle.recap("raid" | "nights" | "text" | "noBoss" | "quiet" |
+      "cracked" | "rescued" | "halved").
+    - Evening: eveningNudge() — "N quests to go — then Rogue's off on a
+      Night Raid! Your streak grows to N days too!" (no streak
       clause while a rescue is open; none when nothing can be raided). The
       boss still "charges up" visually (.boss-charging) — revisit.
-    - Streak nudge: "N quests left today — a perfect day makes your streak
-      N+1!". Rescue card / errors: "on hold … win it back".
+    - Streak nudge: "N quests to go — a perfect day makes it N+1 days!".
+      Rescue card / errors: "on hold … win it back" (not yet rewritten —
+      copy pass 1.3 group 4).
     - ALL new player-facing copy is PLACEHOLDER COPY (marked in the code).
       tests/recap.test.mjs and tests/evening.test.mjs fail on loss words.
     - Dev console: __fqBattle.raid(3), hurt(10) (dormant attack preview).
@@ -847,6 +850,27 @@ PROJECT STATUS:
   * Not shown in the UI yet (the dashboard doesn't display them).
   * Tests: tests/lifetime-totals.test.mjs (every increment point, both
     rescue paths, the defeat rule, the protections).
+
+- Copy rewrite 1.3, Pass 1 (groups 1–3, 5–8): DONE. British spelling,
+  plurals always grammatical (never "day(s)"). Group 4 (rescue card +
+  errors) is a separate pass, NOT done yet.
+  * Recap (lib/rpg/recap.ts): title "Night Raid!" (raid) / "While you
+    slept…" (text); "${when}, Rogue snuck out on a Night Raid — ${boss}
+    took N damage!" (N Night Raids when several); closing lines: raid →
+    "Another perfect day, another raid!"; a perfect day LAST NIGHT, no
+    raid, and the newest night's boss still active at exactly 1 HP (live
+    status / current_hp, loaded by loadRecap) → "Full clear yesterday —
+    ${boss} is one hit from K.O.!"; anything else (no boss, boss since hit
+    or beaten, several nights) → "New day — let's go!". RecapSummary.boss
+    = the newest row's boss_id.
+  * Boss stage captions: "${name} has fallen!", "${name} has entered the
+    arena!", "Every boss in the realm has fallen!".
+  * Hit overlay: "${boss} was no match for you!" (victory card, the
+    reduced-motion K.O. card and the screen-reader K.O. line); "You beat
+    every boss!" (teaser, reduced card, screen reader).
+  * Streak celebration: "N‑day streak!" + one body per showing from
+    STREAK_BODIES (celebrations.tsx; createNoRepeatPicker, never the same
+    twice running); the screen-reader line is the same headline + body.
 
 TOOLING — PixelLab MCP (pixel-art generation, for the future sprite redo):
 - Connected as the `pixellab` MCP server (~94 tools: characters, objects,

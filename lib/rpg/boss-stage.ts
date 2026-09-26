@@ -60,7 +60,7 @@ function finish(state: StageState): StageState {
     ...state,
     mode: "defeated",
     playKey: state.playKey + 1,
-    caption: `${name} is defeated!`,
+    caption: `${name} has fallen!`,
   };
 }
 
@@ -125,7 +125,7 @@ export function stageReducer(state: StageState, action: StageAction): StageState
         shown: incoming,
         mode: "idle",
         playKey: state.playKey + 1,
-        caption: incoming ? `A new foe appears: ${incoming.name}!` : "Every boss has been conquered!",
+        caption: incoming ? `${incoming.name} has entered the arena!` : "Every boss in the realm has fallen!",
       };
     }
   }

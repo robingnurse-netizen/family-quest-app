@@ -55,18 +55,18 @@ const stakes = (over = {}) => ({
 test("the nudge: his quests left and the Night Raid on offer, with the streak it grows", () => {
   assert.equal(
     evening.eveningNudge(true, stakes(), 2, 3),
-    "2 quests left — finish them and Rogue goes on a Night Raid tonight! Your streak grows to 4\u00a0days too!",
+    "2 quests to go — then Rogue's off on a Night Raid! Your streak grows to 4\u00a0days too!",
   );
   assert.equal(
     evening.eveningNudge(true, stakes(), 1, 0),
-    "1 quest left — finish it and Rogue goes on a Night Raid tonight! Your streak grows to 1\u00a0day too!",
+    "1 quest to go — then Rogue's off on a Night Raid! Your streak grows to 1\u00a0day too!",
   );
 });
 
 test("a streak on hold (open rescue) doesn't grow: no streak clause", () => {
   assert.equal(
     evening.eveningNudge(true, stakes({ rescue_open: true }), 2, 5),
-    "2 quests left — finish them and Rogue goes on a Night Raid tonight!",
+    "2 quests to go — then Rogue's off on a Night Raid!",
   );
 });
 
@@ -85,7 +85,7 @@ test("the quest count is the one passed in (the streak nudge's), not the databas
   // …and a stale 0 there doesn't hide it when he has.
   assert.equal(
     evening.eveningNudge(true, stakes({ my_open_quests: 0 }), 1, 0),
-    "1 quest left — finish it and Rogue goes on a Night Raid tonight! Your streak grows to 1\u00a0day too!",
+    "1 quest to go — then Rogue's off on a Night Raid! Your streak grows to 1\u00a0day too!",
   );
 });
 

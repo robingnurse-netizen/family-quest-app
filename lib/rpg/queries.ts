@@ -39,7 +39,7 @@ export async function loadRecap(childId: string, today: string): Promise<RecapSu
 
   const ids = [...new Set(rows.map((r) => r.boss_id).filter((id) => id !== null))];
   const { data: bosses } = ids.length
-    ? await supabase.from("bosses").select("id, name, sprite_key, tier").in("id", ids)
+    ? await supabase.from("bosses").select("id, name, sprite_key, tier, status, current_hp").in("id", ids)
     : { data: [] as RecapBoss[] };
   const byId = Object.fromEntries((bosses ?? []).map((b) => [b.id, b]));
   return summarizeRecaps(rows, byId, addDays(today, -1));

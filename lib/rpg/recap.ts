@@ -12,9 +12,17 @@
 // PLACEHOLDER COPY: every line in this file is temporary wording, to be
 // replaced in a copy pass.
 
-import type { BossTier, RescueEvent, ResetRecap } from "@/lib/supabase/types";
+import type { BossStatus, BossTier, RescueEvent, ResetRecap } from "@/lib/supabase/types";
 
-export type RecapBoss = { id: string; name: string; sprite_key: string; tier: BossTier };
+export type RecapBoss = {
+  id: string;
+  name: string;
+  sprite_key: string;
+  tier: BossTier;
+  /** Live state, as the recap loads (the "one hit from K.O." closing line). */
+  status?: BossStatus;
+  current_hp?: number;
+};
 
 export type RecapRow = Pick<
   ResetRecap,
@@ -50,6 +58,8 @@ export type RecapSummary = {
   raids: number;
   /** The boss his (latest) raid hit. */
   raidBoss: RecapBoss | null;
+  /** The newest night's active boss (after its run), if any. */
+  boss: RecapBoss | null;
   perfectDays: number;
   /**
    * Streak-recovery events, all nights in order: a streak put on hold (with
@@ -84,6 +94,7 @@ export function summarizeRecaps(
   const raids = sum("raids");
   const perfectDays = sum("perfect_days");
   const raidBossId = [...nights].reverse().find((r) => (r.raid_damage ?? 0) > 0)?.boss_id ?? null;
+  const bossId = last.boss_id;
   const rescue = nights.flatMap((r) => r.rescue_events ?? []);
 
   const oneNight = nights.length === 1 && first.day_from === yesterday && first.day_to === yesterday;
@@ -98,6 +109,7 @@ export function summarizeRecaps(
     raidDamage,
     raids,
     raidBoss: raidBossId ? (bosses[raidBossId] ?? null) : null,
+    boss: bossId ? (bosses[bossId] ?? null) : null,
     perfectDays,
     rescue,
   };
@@ -120,8 +132,8 @@ export function recapText(s: Omit<RecapSummary, "lines" | "cues" | "closing">): 
     const boss = s.raidBoss?.name ?? "the boss";
     say(
       s.raids > 1
-        ? `${s.when}, Rogue went on ${s.raids} Night Raids! ${boss} took ${s.raidDamage} damage.`
-        : `${s.when}, Rogue went on a Night Raid! ${boss} took ${s.raidDamage} damage.`,
+        ? `${s.when}, Rogue snuck out on ${s.raids} Night Raids — ${boss} took ${s.raidDamage} damage!`
+        : `${s.when}, Rogue snuck out on a Night Raid — ${boss} took ${s.raidDamage} damage!`,
       "raid",
     );
   } else if (s.perfectDays > 0) {
@@ -130,7 +142,21 @@ export function recapText(s: Omit<RecapSummary, "lines" | "cues" | "closing">): 
   }
   for (const e of s.rescue) say(rescueLine(e), "start");
 
-  const closing = s.raidDamage > 0 ? "Another perfect day, another raid!" : "New day — let's go!";
+  // A perfect day last night with nothing to raid because the boss (still
+  // active, still at 1 HP) is one hit from K.O. No boss, or it's since been
+  // hit or beaten: the plain line.
+  const oneHit =
+    s.raidDamage === 0 &&
+    s.perfectDays > 0 &&
+    s.when === "Last night" &&
+    s.boss?.status === "active" &&
+    s.boss.current_hp === 1;
+  const closing =
+    s.raidDamage > 0
+      ? "Another perfect day, another raid!"
+      : oneHit && s.boss
+        ? `Full clear yesterday — ${s.boss.name} is one hit from K.O.!`
+        : "New day — let's go!";
   return { lines, cues, closing };
 }
 
@@ -150,10 +176,10 @@ export function rescueLine(e: RescueEvent): string {
   switch (e.event) {
     case "cracked":
       return e.fallback
-        ? `Your ${days(e.streak_at_crack)} streak is on hold! Finish any quest by the end of ${weekday(e.due_on)} to win it back.`
-        : `Your ${days(e.streak_at_crack)} streak is on hold! Do a rescue quest by the end of ${weekday(e.due_on)} to win it back.`;
+        ? `Your ${days(e.streak_at_crack)} streak has a crack. Finish any quest by the end of ${weekday(e.due_on)} to patch it up.`
+        : `Your ${days(e.streak_at_crack)} streak has a crack. Do a rescue quest by the end of ${weekday(e.due_on)} to patch it up.`;
     case "rescued":
-      return `Streak won back! You're on ${dayCount(e.streak_after)}.`;
+      return `Rescue complete — your ${days(e.streak_after)} streak is whole again!`;
     case "halved":
       return `Your streak is on ${dayCount(e.streak_after)} — every perfect day adds one!`;
   }

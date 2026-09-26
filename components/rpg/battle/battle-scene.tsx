@@ -545,10 +545,11 @@ function StatsStrip({
   const xp = levelProgress(stats.xp);
   const nudge = stats.streak > 0 && !rescueOpen && questsLeftToday !== null && questsLeftToday > 0;
   // PLACEHOLDER COPY (the streak nudge): what a perfect day wins, not what a miss costs.
+  const next = stats.streak + 1;
   const nudgeLine =
     eveningLine ??
     (nudge
-      ? `${questsLeftToday} quest${questsLeftToday === 1 ? "" : "s"} left today — a perfect day makes your streak ${stats.streak + 1}!`
+      ? `${questsLeftToday} quest${questsLeftToday === 1 ? "" : "s"} to go — a perfect day makes it ${next} ${next === 1 ? "day" : "days"}!`
       : null);
 
   return (

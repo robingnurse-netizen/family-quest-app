@@ -180,7 +180,7 @@ function Recap({
   };
 
   // PLACEHOLDER COPY (the title).
-  const title = s.kind === "raid" ? "Night Raid!" : "While you were away…";
+  const title = s.kind === "raid" ? "Night Raid!" : "While you slept…";
   const showArena = s.kind === "raid" && !reduced && final.boss !== null;
 
   return (
@@ -299,8 +299,8 @@ function usePrefersReducedMotion() {
 // --- Development only: fake recaps for __fqBattle.recap(kind) ---------------------
 
 const DEV_BOSSES: Record<string, RecapBoss> = {
-  slime: { id: "dev-slime", name: "Trash-Bag Slime", sprite_key: "trash_bag_slime", tier: "low" },
-  swarm: { id: "dev-swarm", name: "Alarm Clock Swarm", sprite_key: "alarm_clock_swarm", tier: "low" },
+  slime: { id: "dev-slime", name: "Trash-Bag Slime", sprite_key: "trash_bag_slime", tier: "low", status: "active", current_hp: 1 },
+  swarm: { id: "dev-swarm", name: "Alarm Clock Swarm", sprite_key: "alarm_clock_swarm", tier: "low", status: "active", current_hp: 40 },
 };
 const devRow = (over: Partial<RecapRow>): RecapRow => ({
   created_at: new Date().toISOString(),
@@ -323,6 +323,8 @@ const DEV_RECAPS = {
   ],
   // A perfect day with nothing to raid (the boss already at 1 HP).
   text: [devRow({ perfect_days: 1 })],
+  // A perfect day with no boss at all.
+  noBoss: [devRow({ perfect_days: 1, boss_id: null })],
   // Misses only: nothing to say.
   quiet: [devRow({})],
   // Streak recovery (…14): the night it goes on hold, then won back or halved.

@@ -360,9 +360,9 @@ export function HitOverlay({ childId }: { childId: string }) {
     : show.phase === "teaser" || show.phase === "out"
       ? show.next
         ? `A new foe approaches: ${show.next.name}!`
-        : "Every boss conquered!"
+        : "You beat every boss!"
       : show.phase === "ko" || show.phase === "victory"
-      ? `K.O.! ${show.boss.name} is defeated!${show.gold !== null ? ` You earned ${show.gold} gold.` : ""}`
+      ? `K.O.! ${show.boss.name} was no match for you!${show.gold !== null ? ` You earned ${show.gold} gold.` : ""}`
       : show.hits > 1
         ? `Combo x${show.hits}! ${show.total} damage.`
         : `Hit! ${show.total} damage.`;
@@ -668,7 +668,7 @@ function VictoryCard({ show }: { show: Show }) {
   return (
     <div className="victory-pop panel panel-stone mx-auto w-fit max-w-[92%] px-6 py-5 text-center">
       <p className="font-display text-4xl font-semibold text-gold text-shadow-pixel sm:text-5xl">Victory!</p>
-      <p className="mt-1 font-bold text-parchment">{show.boss.name} is defeated!</p>
+      <p className="mt-1 font-bold text-parchment">{show.boss.name} was no match for you!</p>
       {show.gold !== null && (
         <p className="mt-3 flex items-center justify-center gap-2 text-4xl font-black text-gold text-shadow-pixel">
           <CoinIcon className="h-10 w-10" />+{show.gold}
@@ -701,7 +701,7 @@ function Teaser({ next }: { next: Boss | null | undefined }) {
           </p>
         </>
       ) : (
-        <p className="font-display text-xl font-semibold text-gold text-shadow-pixel">Every boss conquered!</p>
+        <p className="font-display text-xl font-semibold text-gold text-shadow-pixel">You beat every boss!</p>
       )}
     </div>
   );
@@ -743,11 +743,12 @@ function ReducedCard({ show }: { show: Show }) {
     >
       {show.phase === "teaser" || show.phase === "out" ? (
         <p className="font-display text-xl font-semibold text-parchment">
-          {show.next ? "A new foe approaches…" : "Every boss conquered!"}
+          {show.next ? "A new foe approaches…" : "You beat every boss!"}
         </p>
       ) : ko ? (
         <>
           <p className="font-display text-4xl font-semibold text-gold text-shadow-pixel">K.O.! Victory!</p>
+          <p className="mt-1 font-bold text-parchment">{show.boss.name} was no match for you!</p>
           {show.gold !== null && (
             <p className="mt-2 flex items-center justify-center gap-2 text-3xl font-black text-gold">
               <CoinIcon className="h-8 w-8" />+{show.gold}

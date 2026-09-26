@@ -12,8 +12,12 @@ const { summarizeRecaps, recapSchedule, recapFinalState, rescueLine, RECAP_TIMIN
 
 const YESTERDAY = "2032-03-09";
 const bosses = {
-  slime: { id: "slime", name: "Trash-Bag Slime", sprite_key: "trash_bag_slime", tier: "low" },
-  swarm: { id: "swarm", name: "Alarm Clock Swarm", sprite_key: "alarm_clock_swarm", tier: "low" },
+  slime: { id: "slime", name: "Trash-Bag Slime", sprite_key: "trash_bag_slime", tier: "low", status: "active", current_hp: 40 },
+  swarm: { id: "swarm", name: "Alarm Clock Swarm", sprite_key: "alarm_clock_swarm", tier: "low", status: "active", current_hp: 40 },
+  // Left at 1 HP (nothing to raid), still active.
+  worn: { id: "worn", name: "Laundry Goblin", sprite_key: "laundry_goblin", tier: "low", status: "active", current_hp: 1 },
+  // Was at 1 HP after the reset, finished off before the recap loaded.
+  beaten: { id: "beaten", name: "Cable Spider", sprite_key: "cable_spider", tier: "low", status: "defeated", current_hp: 0 },
 };
 let clock = 0;
 const row = (over = {}) => ({
@@ -48,7 +52,7 @@ test("one raid night: 'Last night', the raid on its boss, one damage number", ()
   assert.equal(s.when, "Last night");
   assert.equal(s.raidDamage, 3);
   assert.equal(s.raidBoss.name, "Trash-Bag Slime");
-  assert.deepEqual(s.lines, ["Last night, Rogue went on a Night Raid! Trash-Bag Slime took 3 damage."]);
+  assert.deepEqual(s.lines, ["Last night, Rogue snuck out on a Night Raid — Trash-Bag Slime took 3 damage!"]);
   assert.deepEqual(s.cues, ["raid"]);
   assert.equal(s.closing, "Another perfect day, another raid!");
 });
@@ -64,7 +68,7 @@ test("several nights combine: raids and damage add up, the latest raid's boss", 
   );
   assert.equal(s.when, "While you were away");
   assert.deepEqual([s.raids, s.raidDamage, s.raidBoss.name], [2, 7, "Alarm Clock Swarm"]);
-  assert.equal(s.lines[0], "While you were away, Rogue went on 2 Night Raids! Alarm Clock Swarm took 7 damage.");
+  assert.equal(s.lines[0], "While you were away, Rogue snuck out on 2 Night Raids — Alarm Clock Swarm took 7 damage!");
 });
 
 test("a single night covering several days (catch-up) isn't 'Last night'", () => {
@@ -79,11 +83,42 @@ test("misses alone: a quiet recap — nothing shown (acknowledged silently)", ()
   assert.ok(s.through, "still acknowledged up to the newest row");
 });
 
-test("a perfect day with nothing to raid (boss at 1 HP / none): a short text recap", () => {
-  const s = summarizeRecaps([row({ perfect_days: 1 })], bosses, YESTERDAY);
+test("a perfect day with no boss: a short text recap, the plain closing line", () => {
+  const s = summarizeRecaps([row({ perfect_days: 1, boss_id: null })], bosses, YESTERDAY);
   assert.equal(s.kind, "text");
+  assert.equal(s.boss, null);
   assert.deepEqual(s.lines, ["Perfect day!"]);
   assert.equal(s.closing, "New day — let's go!");
+});
+
+test("a perfect day, no raid, the boss at 1 HP: it's one hit from K.O.", () => {
+  const s = summarizeRecaps([row({ perfect_days: 1, boss_id: "worn" })], bosses, YESTERDAY);
+  assert.equal(s.kind, "text");
+  assert.deepEqual(s.lines, ["Perfect day!"]);
+  assert.equal(s.closing, "Full clear yesterday — Laundry Goblin is one hit from K.O.!");
+});
+
+test("the one-hit line needs a perfect day last night and the boss still active at 1 HP", () => {
+  const closing = (rows) => summarizeRecaps(rows, bosses, YESTERDAY).closing;
+  const plain = "New day — let's go!";
+  // No boss at all.
+  assert.equal(closing([row({ perfect_days: 1, boss_id: null })]), plain);
+  // A boss the recap can't name (not loaded).
+  assert.equal(closing([row({ perfect_days: 1, boss_id: "unknown" })]), plain);
+  // Not at 1 HP (the raid just didn't apply, e.g. a frozen-streak edge).
+  assert.equal(closing([row({ perfect_days: 1, boss_id: "slime" })]), plain);
+  // Finished off since the reset.
+  assert.equal(closing([row({ perfect_days: 1, boss_id: "beaten" })]), plain);
+  // Streak news only, no perfect day.
+  assert.equal(closing([row({ boss_id: "worn", rescue_events: [ev("rescued")] })]), plain);
+  // Not "yesterday": several nights, or one night covering several days.
+  assert.equal(
+    closing([row({ day_from: "2032-03-08", day_to: "2032-03-08", boss_id: "worn" }), row({ perfect_days: 1, boss_id: "worn" })]),
+    plain,
+  );
+  assert.equal(closing([row({ day_from: "2032-03-07", perfect_days: 1, boss_id: "worn" })]), plain);
+  // A raid wins.
+  assert.equal(closing([row({ perfect_days: 1, raids: 1, raid_damage: 3, boss_id: "worn" })]), "Another perfect day, another raid!");
 });
 
 // --- Streak recovery lines (PLACEHOLDER COPY) --------------------------------------------------
@@ -95,10 +130,10 @@ test("a streak on hold says how to win it back, and by when", () => {
     YESTERDAY,
   );
   assert.equal(s.kind, "text");
-  assert.deepEqual(s.lines, ["Your 6‑day streak is on hold! Do a rescue quest by the end of Wednesday to win it back."]);
+  assert.deepEqual(s.lines, ["Your 6‑day streak has a crack. Do a rescue quest by the end of Wednesday to patch it up."]);
   assert.equal(
     rescueLine(ev("cracked", { fallback: true, due_on: "2032-03-09" })),
-    "Your 6‑day streak is on hold! Finish any quest by the end of Tuesday to win it back.",
+    "Your 6‑day streak has a crack. Finish any quest by the end of Tuesday to patch it up.",
   );
 });
 
@@ -112,18 +147,22 @@ test("won back and halved lines, in night order, after the raid", () => {
     YESTERDAY,
   );
   assert.deepEqual(s.lines, [
-    "While you were away, Rogue went on a Night Raid! Trash-Bag Slime took 3 damage.",
-    "Streak won back! You're on 6 days.",
+    "While you were away, Rogue snuck out on a Night Raid — Trash-Bag Slime took 3 damage!",
+    "Rescue complete — your 6‑day streak is whole again!",
     "Your streak is on 4 days — every perfect day adds one!",
   ]);
-  assert.equal(rescueLine(ev("rescued", { streak_after: 1 })), "Streak won back! You're on 1 day.");
+  assert.equal(rescueLine(ev("rescued", { streak_after: 1 })), "Rescue complete — your 1‑day streak is whole again!");
+  assert.equal(rescueLine(ev("halved", { streak_after: 1 })), "Your streak is on 1 day — every perfect day adds one!");
 });
 
+// "Crack" is allowed: the streak "has a crack" and gets patched up (a repair,
+// not a loss).
 test("NO LOSS FRAMING: no line or closing line ever talks about losing", () => {
   const nights = [
     [row({ perfect_days: 1, raids: 1, raid_damage: 3 })],
     [row({ perfect_days: 2, raids: 2, raid_damage: 6 })],
     [row({ perfect_days: 1 })],
+    [row({ perfect_days: 1, boss_id: "worn" })],
     [row({ rescue_events: [ev("cracked")] })],
     [row({ rescue_events: [ev("cracked", { fallback: true })] })],
     [row({ rescue_events: [ev("rescued")] })],
@@ -133,7 +172,7 @@ test("NO LOSS FRAMING: no line or closing line ever talks about losing", () => {
   for (const rows of nights) {
     const s = summarizeRecaps(rows, bosses, YESTERDAY);
     for (const line of [...s.lines, s.closing]) {
-      assert.doesNotMatch(line, /\b(lost|lose|losing|crack|cracked|broke|broken|missed|miss|knocked|escaped|party|wasn't|failed|halved)\b/i, line);
+      assert.doesNotMatch(line, /\b(lost|lose|losing|broke|broken|missed|miss|knocked|escaped|party|wasn't|failed|halved)\b/i, line);
     }
   }
 });
