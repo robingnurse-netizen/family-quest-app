@@ -123,6 +123,13 @@ export type PlayerStats = {
   streak_through: string | null;
   pending_damage: number;
   updated_at: string;
+  /**
+   * Lifetime totals (…17): written only by the game engine
+   * (bump_player_totals), never decremented; read-only for everyone else.
+   */
+  total_damage_dealt: number;
+  total_quests_completed: number;
+  total_bosses_defeated: number;
 };
 
 export type Companion = {
@@ -355,6 +362,9 @@ export type Database = {
         | "streak_through"
         | "pending_damage"
         | "updated_at"
+        | "total_damage_dealt"
+        | "total_quests_completed"
+        | "total_bosses_defeated"
       >;
       companions: Table<Companion, "id" | "unlocked" | "level" | "created_at">;
       rewards: Table<

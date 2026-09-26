@@ -114,6 +114,27 @@ where child_id in (
   select id from public.profiles
   where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94' and role = 'child'
 );
+
+-- 5b. Lifetime totals back to 0 (damage dealt, quests completed, bosses
+--     defeated). Only the engine may write them (…17's guard); 'reset' is
+--     the one escape, for THIS transaction only. Skipped until migration
+--     20261001000017_lifetime_totals.sql is applied, so the script runs
+--     before and after it.
+do $$
+begin
+  if exists (select 1 from information_schema.columns
+              where table_schema = 'public' and table_name = 'player_stats'
+                and column_name = 'total_damage_dealt') then
+    perform set_config('app.engine_stats_write', 'reset', true);
+    update public.player_stats
+    set total_damage_dealt = 0, total_quests_completed = 0, total_bosses_defeated = 0
+    where child_id in (
+      select id from public.profiles
+      where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94' and role = 'child'
+    );
+    perform set_config('app.engine_stats_write', 'off', true);
+  end if;
+end $$;
 -- 5-ALT (instead of 5): reset only the "Test" child's stats and leave
 -- Reuben's gold/XP/streaks alone (bosses and quest history above are
 -- still family-wide). Step 4c is family-wide too: with 5-ALT, change
@@ -123,6 +144,8 @@ where child_id in (
 -- set gold = 0, xp = 0, level = 1, current_streak = 0, best_streak = 0,
 --     streak_through = null, pending_damage = 0, updated_at = now()
 -- where child_id = 'f1b872bd-1c69-4bc0-bb23-2249b45b0c17';  -- "Test"
+-- (With 5-ALT, change step 5b's where clause the same way, so Reuben keeps
+-- his lifetime totals.)
 
 -- 6. Party HP back to full. DORMANT since …16 (nothing reads it); kept so
 --    the dormant row stays at full.
@@ -145,7 +168,7 @@ select public.activate_next_boss(
 
 -- 9. Check before committing: expect 12 bosses (1 active: Trash-Bag Slime),
 --    0 slots / redemptions / recaps / party log, stats at 0 / level 1,
---    party at max. (Streak rescues aren't counted here: the table only
+--    lifetime totals 0/0/0 ("-" before …17), party at max. (Streak rescues aren't counted here: the table only
 --    exists once migration …14 is applied.) (The SQL editor shows the last result set.)
 select
   (select count(*) from public.bosses
@@ -161,7 +184,10 @@ select
   (select count(*) from public.party_log
      where family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94')                    as party_log,
   (select string_agg(pr.display_name || ': ' || ps.gold || 'g ' || ps.xp || 'xp L' || ps.level
-                     || ' streak ' || ps.current_streak, '; ')
+                     || ' streak ' || ps.current_streak
+                     || ' totals ' || coalesce(to_jsonb(ps) ->> 'total_damage_dealt', '-')
+                     || '/' || coalesce(to_jsonb(ps) ->> 'total_quests_completed', '-')
+                     || '/' || coalesce(to_jsonb(ps) ->> 'total_bosses_defeated', '-'), '; ')
      from public.player_stats ps join public.profiles pr on pr.id = ps.child_id
      where pr.family_id = '19b7bb5a-92ea-4b44-9f9f-c0937c2b5d94')                 as stats,
   (select current_hp || '/' || max_hp from public.party_health
