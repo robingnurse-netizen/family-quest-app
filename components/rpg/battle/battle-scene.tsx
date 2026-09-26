@@ -243,12 +243,13 @@ export function BattleScene({
         <SoundToggle className="absolute left-2 top-2 z-30" />
       </div>
 
-      {/* HUD: the party (left, under the hero — a header only: party HP is
-          gone since …16) and the boss (right, header + HP bar), then the
-          stats full width. */}
-      <div className="mt-2 grid grid-cols-2 gap-x-3 gap-y-2 sm:mt-3 sm:gap-x-4">
-        <div className="min-w-0">
-          <div className="mb-1.5 flex items-center justify-between gap-2">
+      {/* HUD: one header row — the party (left, under the hero; a name only,
+          party HP is gone since …16) and the boss (right) — then the boss HP
+          bar full width, then the stats. (Quick fix: the long-term redesign
+          of this space is deferred.) */}
+      <div className="mt-2 sm:mt-3">
+        <div className="mb-1.5 flex items-center justify-between gap-3 sm:gap-4">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
             <h2 className="min-w-0 truncate font-display text-lg font-semibold text-parchment text-shadow-pixel sm:text-xl">
               {heroName}
             </h2>
@@ -256,34 +257,33 @@ export function BattleScene({
               Party
             </span>
           </div>
-        </div>
-        <div className="min-w-0">
           {shown ? (
-            <>
-              <div className="mb-1.5 flex items-center justify-between gap-2">
-                <h2 className="min-w-0 truncate font-display text-lg font-semibold text-gold text-shadow-pixel sm:text-xl">
-                  {shown.name}
-                </h2>
-                <span className="hidden sm:inline">
-                  <TierCrest tier={shown.tier} />
-                </span>
-              </div>
-              <HudBar
-                label="Boss HP"
-                icon={<SkullIcon className="h-4 w-4 shrink-0" />}
-                current={shown.current_hp}
-                max={shown.max_hp}
-                segments={BOSS_SEGMENTS[shown.tier]}
-                tone="boss"
-              />
-            </>
+            <div className="flex min-w-0 flex-1 items-center justify-end gap-2">
+              <h2 className="min-w-0 truncate font-display text-lg font-semibold text-gold text-shadow-pixel sm:text-xl">
+                {shown.name}
+              </h2>
+              <span className="hidden shrink-0 sm:inline">
+                <TierCrest tier={shown.tier} />
+              </span>
+            </div>
           ) : (
-            <p className="font-display text-base font-semibold text-gold text-shadow-pixel">
+            <p className="min-w-0 flex-1 text-right font-display text-base font-semibold text-gold text-shadow-pixel">
               Every boss conquered!
             </p>
           )}
         </div>
-        <div className="col-span-2 mt-2">
+        {shown && (
+          <HudBar
+            label="Boss HP"
+            icon={<SkullIcon className="h-4 w-4 shrink-0" />}
+            current={shown.current_hp}
+            max={shown.max_hp}
+            segments={BOSS_SEGMENTS[shown.tier]}
+            tone="boss"
+          />
+        )}
+        {/* (The old grid's 8px row gap + 8px margin.) */}
+        <div className="mt-4">
           <StatsStrip
             stats={stats}
             withinReach={shopProgress(rewards, stats.gold).affordable}
