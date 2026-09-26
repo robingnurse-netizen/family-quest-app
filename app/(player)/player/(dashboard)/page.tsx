@@ -4,6 +4,7 @@ import { PlayerMenu } from "@/components/layout/player-menu";
 import { loadCalendar } from "@/lib/calendar/queries";
 import { monthKeyOf } from "@/lib/calendar/dates";
 import { loadWeekBoard } from "@/lib/backlog/queries";
+import { countQuestsLeft } from "@/lib/backlog/quests-left";
 import { WeekBoard } from "@/components/kanban/week-board";
 import { acknowledgeRecaps, completeRescue, createSlot, moveSlot, pickRescueJob, removeSlot, setSlotStatus } from "./actions";
 import { loadBattle, loadOpenRescue, loadRecap } from "@/lib/rpg/queries";
@@ -23,16 +24,24 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
   const supabase = await createClient();
   const { week } = await props.searchParams;
 
-  const [{ data: stats }, [board, calendar], battle, store, rescue] = await Promise.all([
+  const [{ data: stats }, [board, calendar, questsLeftToday], battle, store, rescue] = await Promise.all([
     supabase
       .from("player_stats")
       .select("gold, xp, level, current_streak, best_streak, streak_through")
       .eq("child_id", profile.id)
       .maybeSingle(),
     // The board's day notices come from the calendar for its week's month
-    // (that month's grid always covers the whole week).
+    // (that month's grid always covers the whole week). His quests left
+    // today (both HUD nudges) don't depend on the week shown.
     loadWeekBoard(profile, week).then(
-      async (b) => [b, await loadCalendar(profile.family_id, monthKeyOf(b.week))] as const,
+      async (b) =>
+        [
+          b,
+          ...(await Promise.all([
+            loadCalendar(profile.family_id, monthKeyOf(b.week)),
+            countQuestsLeft(supabase, profile.family_id, profile.id, b.today),
+          ])),
+        ] as const,
     ),
     loadBattle(profile.family_id),
     loadRewardStore(profile),
@@ -76,7 +85,10 @@ export default async function PlayerDashboard(props: PageProps<"/player">) {
               stats. Fixed at the top in normal flow; it never moves. */}
           <BattleScene
             heroName={profile.display_name}
+            familyId={profile.family_id}
             childId={profile.id}
+            today={board.today}
+            questsLeftToday={questsLeftToday}
             stats={playerStats}
             rewards={store.rewards}
             timeZone={calendar.timeZone}

@@ -14,6 +14,7 @@ import { RaidBanner } from "./raid-banner";
 import { usePlayerStats, type LiveStats } from "@/lib/hooks/use-player-stats";
 import { levelProgress } from "@/lib/rpg/levels";
 import { useEveningWarning } from "@/lib/hooks/use-evening-warning";
+import { useQuestsLeftToday } from "@/lib/hooks/use-quests-left-today";
 import type { TonightStakes } from "@/lib/supabase/types";
 import { shopProgress } from "@/lib/rewards/progress";
 import type { Reward } from "@/lib/supabase/types";
@@ -65,14 +66,22 @@ const tierLabel = (tier: Boss["tier"]) => (tier === "epic" ? "Epic boss" : tier 
 
 export function BattleScene({
   heroName,
+  familyId,
   childId,
+  today,
+  questsLeftToday: initialQuestsLeftToday,
   stats: initialStats,
   rewards,
   timeZone,
   rescueOpen = false,
 }: {
   heroName: string;
+  familyId: string;
   childId: string;
+  /** Today in the family's timezone (server-rendered; the hook follows the clock). */
+  today: string;
+  /** Server-rendered count of his quests left today (null: unknown); kept live. */
+  questsLeftToday: number | null;
   /** Server-rendered stats; kept live from player_stats (Realtime). */
   stats: PlayerStats;
   /** The shop's rewards, for the Gold stat's "N within reach" badge. */
@@ -86,16 +95,31 @@ export function BattleScene({
    */
   rescueOpen?: boolean;
 }) {
-  const { boss, stage, onBossAnimationEnd, onBossFinished, emit, questsLeftToday } = useBattleContext();
+  const { boss, stage, onBossAnimationEnd, onBossFinished, emit } = useBattleContext();
   const stats = usePlayerStats(childId, initialStats);
+  // His quests left today: the one count behind both nudges (the streak
+  // nudge and the evening Night Raid banner), whatever week the board shows.
+  const liveQuestsLeft = useQuestsLeftToday({
+    familyId,
+    childId,
+    timeZone,
+    initialToday: today,
+    initial: initialQuestsLeftToday,
+  });
 
   // Evening nudge (lib/rpg/evening.ts): from 18:00 family time, while he
   // still has quests today and a boss can be raided, the boss charges up and
   // a line offers tonight's Night Raid.
-  const [eveningDev, setEveningDev] = useState<{ force: boolean | null; stakes: TonightStakes | null }>({
+  const [eveningDev, setEveningDev] = useState<{
+    force: boolean | null;
+    stakes: TonightStakes | null;
+    quests: number | null;
+  }>({
     force: null,
     stakes: null,
+    quests: null,
   });
+  const questsLeftToday = eveningDev.quests ?? liveQuestsLeft;
   const evening = useEveningWarning({
     timeZone,
     bossId: boss?.id ?? null,
@@ -114,15 +138,19 @@ export function BattleScene({
       sky: previewSky,
       /** Play today's sky from midnight to midnight in `seconds`, then follow the clock. */
       skyCycle: (seconds = 60) => previewSkyCycle(seconds, timeZone),
-      /** Force evening on / off (null: follow the clock). Pass `stakes` to preview without the database. */
-      evening: (on: boolean | null = true, stakes?: Partial<TonightStakes>) =>
+      /**
+       * Force evening on / off (null: follow the clock). Pass `stakes` to
+       * preview without the database (and 2 quests left, unless `quests`).
+       */
+      evening: (on: boolean | null = true, stakes?: Partial<TonightStakes>, quests?: number) =>
         setEveningDev({
           force: on,
+          quests: quests ?? (stakes ? 2 : null),
           stakes: stakes
             ? {
                 today: "", timezone: timeZone, boss_active: true, boss_name: boss?.name ?? "The boss",
                 boss_hp: boss?.current_hp ?? 60, boss_max_hp: boss?.max_hp ?? 60,
-                my_open_quests: 2, open_quests: 2, open_minutes: 45,
+                my_open_quests: 2,
                 raid_damage: Math.max(1, Math.ceil(((boss?.max_hp ?? 60) * 5) / 100)),
                 rescue_open: false,
                 ...stakes,

@@ -262,7 +262,7 @@ test("recaps are read-only through the API and private to the child and parents"
 
 // --- Evening stakes (the Night Raid nudge) ------------------------------------------------------
 
-test("tonight's stakes: his open quests up to today (family time), and the raid a perfect day would earn", async () => {
+test("tonight's stakes: his quests left today (family time), and the raid a perfect day would earn", async () => {
   const f = await makeFamily(db);
   const kid = f.childIds[0];
   const today = await londonToday(db);
@@ -273,13 +273,17 @@ test("tonight's stakes: his open quests up to today (family time), and the raid 
   const done = await makeSlot(db, { poolId: pool, day: today, minutes: 60 });
   await db.query("update public.task_slots set status = 'completed' where id = $1", [done]);
   await makeSlot(db, { poolId: pool, day: addDays(today, 1), minutes: 60 }); // tomorrow: not tonight
+  // Yesterday's, still open (the reset hasn't run): not tonight's offer either (…18).
+  const earlier = await makePool(db, { familyId: f.familyId, childId: kid, day: addDays(today, -1), minutes: 3000 });
+  await makeSlot(db, { poolId: earlier, day: addDays(today, -1), minutes: 20 });
 
   const stakes = async () => (await asUser(db, kid, "select public.tonight_stakes() as s")).rows[0].s;
   let s = await stakes();
   assert.equal(s.today, today);
   assert.equal(s.boss_active, true);
   assert.equal(s.my_open_quests, 2);
-  assert.equal(s.open_minutes, 45);
+  assert.equal("open_quests" in s, false, "…18: the miss penalty's totals are gone");
+  assert.equal("open_minutes" in s, false);
   assert.equal(s.raid_damage, 10, "200 × 5%");
 
   // What the reset actually deals once he finishes them: run it for tomorrow.

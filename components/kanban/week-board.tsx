@@ -115,16 +115,7 @@ export function WeekBoard({
   // Past days of a week that includes today (none for past or future weeks).
   const earlierDays = days.includes(today) ? days.filter((d) => d < today) : [];
 
-  // Tell the HUD how many of today's quests are still to do (the streak
-  // nudge) — only while this board is showing the current week.
   const battle = useOptionalBattleContext();
-  const setQuestsLeftToday = battle?.setQuestsLeftToday;
-  const leftToday = days.includes(today)
-    ? board.slots.filter((s) => s.scheduled_date === today && s.status === "scheduled").length
-    : null;
-  useEffect(() => {
-    if (leftToday !== null) setQuestsLeftToday?.(leftToday);
-  }, [leftToday, setQuestsLeftToday]);
   // Fixed notices per day: recurring events expanded like the calendar does.
   const noticesByDay = useMemo(
     () => occurrencesByDay(calendar.events, days[0], days[6], timeZone, today),

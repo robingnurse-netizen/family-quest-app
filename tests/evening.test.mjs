@@ -47,8 +47,6 @@ const stakes = (over = {}) => ({
   boss_hp: 300,
   boss_max_hp: 400,
   my_open_quests: 2,
-  open_quests: 2,
-  open_minutes: 45,
   raid_damage: 20,
   rescue_open: false,
   ...over,
@@ -56,33 +54,44 @@ const stakes = (over = {}) => ({
 
 test("the nudge: his quests left and the Night Raid on offer, with the streak it grows", () => {
   assert.equal(
-    evening.eveningNudge(true, stakes(), 3),
+    evening.eveningNudge(true, stakes(), 2, 3),
     "2 quests left — finish them and Rogue goes on a Night Raid tonight! Your streak grows to 4\u00a0days too!",
   );
   assert.equal(
-    evening.eveningNudge(true, stakes({ my_open_quests: 1 }), 0),
+    evening.eveningNudge(true, stakes(), 1, 0),
     "1 quest left — finish it and Rogue goes on a Night Raid tonight! Your streak grows to 1\u00a0day too!",
   );
 });
 
 test("a streak on hold (open rescue) doesn't grow: no streak clause", () => {
   assert.equal(
-    evening.eveningNudge(true, stakes({ rescue_open: true }), 5),
+    evening.eveningNudge(true, stakes({ rescue_open: true }), 2, 5),
     "2 quests left — finish them and Rogue goes on a Night Raid tonight!",
   );
 });
 
 test("no nudge before evening, without a boss, with nothing left to do, or with nothing to raid", () => {
-  assert.equal(evening.eveningNudge(false, stakes(), 0), null);
-  assert.equal(evening.eveningNudge(true, null, 0), null);
-  assert.equal(evening.eveningNudge(true, stakes({ boss_active: false, raid_damage: 0 }), 0), null);
-  assert.equal(evening.eveningNudge(true, stakes({ my_open_quests: 0 }), 0), null);
-  assert.equal(evening.eveningNudge(true, stakes({ boss_hp: 1, raid_damage: 0 }), 0), null, "a boss at 1 HP");
+  assert.equal(evening.eveningNudge(false, stakes(), 2, 0), null);
+  assert.equal(evening.eveningNudge(true, null, 2, 0), null);
+  assert.equal(evening.eveningNudge(true, stakes({ boss_active: false, raid_damage: 0 }), 2, 0), null);
+  assert.equal(evening.eveningNudge(true, stakes(), 0, 0), null);
+  assert.equal(evening.eveningNudge(true, stakes(), null, 0), null, "his count not known yet");
+  assert.equal(evening.eveningNudge(true, stakes({ boss_hp: 1, raid_damage: 0 }), 2, 0), null, "a boss at 1 HP");
+});
+
+test("the quest count is the one passed in (the streak nudge's), not the database's", () => {
+  // Stakes still reporting quests (e.g. stale) don't make a line when he has none left today…
+  assert.equal(evening.eveningNudge(true, stakes({ my_open_quests: 3 }), 0, 1), null);
+  // …and a stale 0 there doesn't hide it when he has.
+  assert.equal(
+    evening.eveningNudge(true, stakes({ my_open_quests: 0 }), 1, 0),
+    "1 quest left — finish it and Rogue goes on a Night Raid tonight! Your streak grows to 1\u00a0day too!",
+  );
 });
 
 test("no loss framing in the nudge", () => {
-  for (const [s, streak] of [[stakes(), 0], [stakes(), 9], [stakes({ rescue_open: true }), 4], [stakes({ my_open_quests: 1 }), 1]]) {
-    const line = evening.eveningNudge(true, s, streak);
+  for (const [s, n, streak] of [[stakes(), 2, 0], [stakes(), 2, 9], [stakes({ rescue_open: true }), 2, 4], [stakes(), 1, 1]]) {
+    const line = evening.eveningNudge(true, s, n, streak);
     assert.doesNotMatch(line, /damage|lose|lost|crack|knock|escape|or the|miss/i, line);
   }
 });

@@ -34,18 +34,20 @@ export function isEvening(now: Date, timeZone: string, from: string = EVENING_WA
 
 /**
  * The nudge line, or null when there's nothing on offer: not evening, no
- * boss, none of his quests left, or no raid possible (a boss at 1 HP). Folds
- * in the streak (the scene's streak nudge steps aside while this shows): a
- * perfect day also grows it — unless a rescue is open (a streak on hold
- * doesn't grow). PLACEHOLDER COPY.
+ * boss, none of his quests left today (`questsLeft`: the same count as the
+ * streak nudge's; null = not known yet), or no raid possible (a boss at
+ * 1 HP). Folds in the streak (the scene's streak nudge steps aside while
+ * this shows): a perfect day also grows it — unless a rescue is open (a
+ * streak on hold doesn't grow). PLACEHOLDER COPY.
  */
 export function eveningNudge(
   evening: boolean,
   stakes: TonightStakes | null,
+  questsLeft: number | null,
   streak: number,
 ): string | null {
-  if (!evening || !stakes || !stakes.boss_active || stakes.my_open_quests <= 0 || stakes.raid_damage <= 0) return null;
-  const n = stakes.my_open_quests;
+  if (!evening || !stakes || !stakes.boss_active || questsLeft === null || questsLeft <= 0 || stakes.raid_damage <= 0) return null;
+  const n = questsLeft;
   // Non-breaking space: "4 days" never splits across lines.
   const next = streak + 1;
   const streakPart = !stakes.rescue_open ? ` Your streak grows to ${next}\u00a0${next === 1 ? "day" : "days"} too!` : "";

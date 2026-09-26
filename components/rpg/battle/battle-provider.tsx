@@ -30,9 +30,6 @@ type BattleContextValue = {
    */
   recapActive: boolean;
   setRecapActive: (active: boolean) => void;
-  /** Quests still to do today (set by the quest board; null = unknown). */
-  questsLeftToday: number | null;
-  setQuestsLeftToday: (n: number | null) => void;
   refetch: () => Promise<void>;
 };
 
@@ -64,7 +61,6 @@ export function BattleProvider({
   const [stage, dispatch] = useReducer(stageReducer, initialBoss, initialStage);
   const [overlayActive, setOverlayActive] = useState(false);
   const [recapActive, setRecapActive] = useState(recapPending);
-  const [questsLeftToday, setQuestsLeftToday] = useState<number | null>(null);
   // The stage machine is just another listener.
   useEffect(() => emitter.subscribe((event) => dispatch({ type: "event", event })), [emitter]);
   // The database's active boss (also covers refetches, not just events).
@@ -129,11 +125,9 @@ export function BattleProvider({
       setOverlayActive,
       recapActive,
       setRecapActive,
-      questsLeftToday,
-      setQuestsLeftToday,
       refetch: live.refetch,
     }),
-    [boss, stage, onBossAnimationEnd, onBossFinished, emitter, overlayActive, recapActive, questsLeftToday, live.refetch],
+    [boss, stage, onBossAnimationEnd, onBossFinished, emitter, overlayActive, recapActive, live.refetch],
   );
 
   return <BattleContext.Provider value={value}>{children}</BattleContext.Provider>;

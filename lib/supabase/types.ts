@@ -251,7 +251,7 @@ export type StreakRescue = {
   created_at: string;
 };
 
-/** Tonight's opportunity, right now (tonight_stakes(), …16). */
+/** Tonight's opportunity, right now (tonight_stakes(), …16; …18). */
 export type TonightStakes = {
   today: string;
   timezone: string;
@@ -259,10 +259,11 @@ export type TonightStakes = {
   boss_name: string | null;
   boss_hp: number | null;
   boss_max_hp: number | null;
-  /** The caller's own open quests up to today. */
+  /**
+   * The caller's own quests left today (…18: today only, not overdue). The
+   * app's nudges count these client-side instead (useQuestsLeftToday).
+   */
   my_open_quests: number;
-  open_quests: number;
-  open_minutes: number;
   /**
    * What his Night Raid would deal tonight if he finishes them all (a perfect
    * day): 0 with no boss, or a boss already at 1 HP.
